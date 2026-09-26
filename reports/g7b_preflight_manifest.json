@@ -1,0 +1,336 @@
+{
+  "timestamp_utc": "2026-09-26T17:15:00Z",
+  "phase": "Phase G7-B Preflight Verification",
+  "gate25_root_sha256": "7a99c659affda277fa63fd612a3564d08a8d2e3cf7d033fe892d778871c186b0",
+  "control_1_zero_step_parity": {
+    "status": "PASS",
+    "max_q_diff": 0.0,
+    "mean_q_diff": 0.0,
+    "action_match_pct": 100.0
+  },
+  "control_2_parameter_manifest": {
+    "initialization_seed": 42,
+    "rank": 8,
+    "inherited_params_count": 30,
+    "newly_initialized_params_count": 6,
+    "total_params_count": 36,
+    "inherited_params": [
+      "input_norm.weight",
+      "input_norm.bias",
+      "lstm.weight_ih_l0",
+      "lstm.weight_hh_l0",
+      "lstm.bias_ih_l0",
+      "lstm.bias_hh_l0",
+      "lstm.weight_ih_l1",
+      "lstm.weight_hh_l1",
+      "lstm.bias_ih_l1",
+      "lstm.bias_hh_l1",
+      "value_stream.0.weight",
+      "value_stream.0.bias",
+      "value_stream.2.weight",
+      "value_stream.2.bias",
+      "band_encoder.0.weight",
+      "band_encoder.0.bias",
+      "ctx_proj.0.weight",
+      "ctx_proj.0.bias",
+      "intercept_prob_head.0.weight",
+      "intercept_prob_head.0.bias",
+      "intercept_prob_head.2.weight",
+      "intercept_prob_head.2.bias",
+      "intercept_time_head.0.weight",
+      "intercept_time_head.0.bias",
+      "intercept_time_head.2.weight",
+      "intercept_time_head.2.bias",
+      "band_head.0.weight",
+      "band_head.0.bias",
+      "band_head.2.weight",
+      "band_head.2.bias"
+    ],
+    "newly_initialized_params": [
+      "mode_head.0.weight",
+      "mode_head.0.bias",
+      "mode_head.2.weight",
+      "mode_head.2.bias",
+      "interaction_proj.weight",
+      "interaction_mode.weight"
+    ],
+    "mapping_records": [
+      {
+        "dest_name": "input_norm.weight",
+        "src_name": "input_norm.weight",
+        "shape": [
+          360
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "abccc921a8a08c61a6180222b8eae99972de45b06178f0003381543fb61384f6"
+      },
+      {
+        "dest_name": "input_norm.bias",
+        "src_name": "input_norm.bias",
+        "shape": [
+          360
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "31d8fedf8a0edc451891a87caa3a05026f77d99bdc9153edf569edd4cb21009d"
+      },
+      {
+        "dest_name": "lstm.weight_ih_l0",
+        "src_name": "lstm.weight_ih_l0",
+        "shape": [
+          1024,
+          360
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "db0c22a61bd5bbe1e9823cc48b5a883d009df10a236a04b5861bafb5b53fa167"
+      },
+      {
+        "dest_name": "lstm.weight_hh_l0",
+        "src_name": "lstm.weight_hh_l0",
+        "shape": [
+          1024,
+          256
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "47980468ba4932f222327bbe54c185759728d73fbf1dc7711955e63e894ef510"
+      },
+      {
+        "dest_name": "lstm.bias_ih_l0",
+        "src_name": "lstm.bias_ih_l0",
+        "shape": [
+          1024
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "40fa910d1ad28285aaf717d422cac60a0bd15228082d170fd62bbea780be08d6"
+      },
+      {
+        "dest_name": "lstm.bias_hh_l0",
+        "src_name": "lstm.bias_hh_l0",
+        "shape": [
+          1024
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "bf2a28392170633c902ec9d92b66dd86348ea34551bf1d5fb55c8cc8bd1e3d09"
+      },
+      {
+        "dest_name": "lstm.weight_ih_l1",
+        "src_name": "lstm.weight_ih_l1",
+        "shape": [
+          1024,
+          256
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "0759bab34db6bfcc1bc557b39966be245f4216f3e1645f46636096ea50aa4398"
+      },
+      {
+        "dest_name": "lstm.weight_hh_l1",
+        "src_name": "lstm.weight_hh_l1",
+        "shape": [
+          1024,
+          256
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "1d56ba315a440277474854d27eae2d22d8c537521e6747d6af58ecd3e611f78e"
+      },
+      {
+        "dest_name": "lstm.bias_ih_l1",
+        "src_name": "lstm.bias_ih_l1",
+        "shape": [
+          1024
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "816883f181f471268b7efdaa760f5b40bb9cefc3e3945dee973f29014b5b3a26"
+      },
+      {
+        "dest_name": "lstm.bias_hh_l1",
+        "src_name": "lstm.bias_hh_l1",
+        "shape": [
+          1024
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "74834ab96a47770f979d095f217d4cc41a2d6214dc29aa4c29164c682752724f"
+      },
+      {
+        "dest_name": "value_stream.0.weight",
+        "src_name": "value_stream.0.weight",
+        "shape": [
+          128,
+          256
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "0e43cbcc1a66705e2e598e34ba2a6df305ae74e36be3af4a91b071a1125ada78"
+      },
+      {
+        "dest_name": "value_stream.0.bias",
+        "src_name": "value_stream.0.bias",
+        "shape": [
+          128
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "8687f5369a953159da01356ed8696258bca31a8963ae63137744ab84cd1223b0"
+      },
+      {
+        "dest_name": "value_stream.2.weight",
+        "src_name": "value_stream.2.weight",
+        "shape": [
+          1,
+          128
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "9e0c6e6453651b4fa64d54bedf7177d41e66f30f56b550b0dc42112436868bed"
+      },
+      {
+        "dest_name": "value_stream.2.bias",
+        "src_name": "value_stream.2.bias",
+        "shape": [
+          1
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "cfcf4601669288da38e8dc8cd6cd0230f429bcf79e5db47b5541ae011e958079"
+      },
+      {
+        "dest_name": "band_encoder.0.weight",
+        "src_name": "band_encoder.0.weight",
+        "shape": [
+          32,
+          10
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "c5c4425d220f014ccbe4a94f035e67eb745281812a14908d591634475bf0b0c2"
+      },
+      {
+        "dest_name": "band_encoder.0.bias",
+        "src_name": "band_encoder.0.bias",
+        "shape": [
+          32
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "8ea29026306ed155c74073d5ceee00f7da3bc6bfaa748fc93b9153e7633ba134"
+      },
+      {
+        "dest_name": "ctx_proj.0.weight",
+        "src_name": "ctx_proj.0.weight",
+        "shape": [
+          32,
+          256
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "c35020473aed1b4642cd726cad727b63fff2824ad68cedd7ffb73c7cbd890479"
+      },
+      {
+        "dest_name": "ctx_proj.0.bias",
+        "src_name": "ctx_proj.0.bias",
+        "shape": [
+          32
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "38723a2e5e8a17aa7950dc008209944e898f69a7bd10a23c839d341e935fd5ca"
+      },
+      {
+        "dest_name": "intercept_prob_head.0.weight",
+        "src_name": "intercept_prob_head.0.weight",
+        "shape": [
+          128,
+          256
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "b8b783305b7c5c71cff1d9267903fd8967a84d80a633511283955601957b7c33"
+      },
+      {
+        "dest_name": "intercept_prob_head.0.bias",
+        "src_name": "intercept_prob_head.0.bias",
+        "shape": [
+          128
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "3cab412320a6f55b993359006009fa13ef5f5d19b0aeab59184edf3e508978ca"
+      },
+      {
+        "dest_name": "intercept_prob_head.2.weight",
+        "src_name": "intercept_prob_head.2.weight",
+        "shape": [
+          180,
+          128
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "fc85b74ff93e2f2bcb1575d09b6cfc6a96e206f1f75c5938fc170d548c4c7bca"
+      },
+      {
+        "dest_name": "intercept_prob_head.2.bias",
+        "src_name": "intercept_prob_head.2.bias",
+        "shape": [
+          180
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "2ac01369a273eb091909c872da8517f6ab352f77399e51dda94518098c546eec"
+      },
+      {
+        "dest_name": "intercept_time_head.0.weight",
+        "src_name": "intercept_time_head.0.weight",
+        "shape": [
+          128,
+          256
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "51f58676f5941f2ddf26fc26c5b99da4a492fab5e5f0564955d50b240eb85524"
+      },
+      {
+        "dest_name": "intercept_time_head.0.bias",
+        "src_name": "intercept_time_head.0.bias",
+        "shape": [
+          128
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "86e70c2d9d42b400990a3065fe4f097cde5613f4974dd007b5e33b141867145f"
+      },
+      {
+        "dest_name": "intercept_time_head.2.weight",
+        "src_name": "intercept_time_head.2.weight",
+        "shape": [
+          180,
+          128
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "04c2df133491d6c9caf4c74643bd830d9a7ac7b2a906f2ea2289d6286cc604e4"
+      },
+      {
+        "dest_name": "intercept_time_head.2.bias",
+        "src_name": "intercept_time_head.2.bias",
+        "shape": [
+          180
+        ],
+        "transformation": "direct_copy",
+        "dest_sha256": "d155f2e5c4695a09ab7f8d1cf9317c27f23adaa5b2e551d10613f71cfb367f58"
+      }
+    ]
+  },
+  "control_3_interaction_scale": {
+    "status": "PASS",
+    "initial_i_max": 0.0,
+    "interaction_ratio": 0.0
+  },
+  "control_4_gradient_isolation": {
+    "status": "PASS",
+    "shared_grad_norm": 7.922898769378662,
+    "interaction_grad_norm": 0.002068671165034175,
+    "grad_ratio": 0.00026110030012205243
+  },
+  "control_5_objective_invariants": {
+    "status": "PASS",
+    "gamma": 0.99,
+    "c_dwell": 2.0,
+    "dwell_multipliers": [
+      0.25,
+      1.0,
+      2.5,
+      1.0,
+      1.0
+    ],
+    "beta_mode": 0.5,
+    "replay_mix": 0.5
+  },
+  "control_6_gradient_sentinel": {
+    "status": "PASS",
+    "pre_clip_ceiling": 50.0
+  },
+  "overall_preflight_verdict": "PREFLIGHT_PASSED_AUTHORIZED_FOR_TRAINING"
+}

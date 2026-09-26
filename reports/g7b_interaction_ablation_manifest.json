@@ -1,0 +1,386 @@
+{
+  "timestamp_utc": "2026-09-26T23:05:00Z",
+  "checkpoint_sha256": "3cdfa87d88549ffa4982f96458ed316e69347271e51674a5df6638e86d9f8035",
+  "action_divergence_pct": 0.03,
+  "total_action_flips": 3,
+  "full_evaluation": {
+    "mode_entropy": 0.5730901709823519,
+    "mode_distribution_pct": {
+      "SHORT_DWELL": 19.66,
+      "NORMAL_DWELL": 1.38,
+      "LONG_DWELL": 0.1,
+      "REVISIT": 78.86,
+      "PREEMPTIVE_INTERCEPT": 0.0
+    },
+    "mean_pd": 76.15384092633258,
+    "gross_hits_per_ms": 0.8912827117850243,
+    "scenarios": {
+      "config_117": {
+        "steps": 1000,
+        "hits": 784,
+        "dwell_ms": 413.0,
+        "gross_hits_per_ms": 1.8983050847457628,
+        "pd": 100.0,
+        "modes": {
+          "SHORT_DWELL": 234,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 751,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_119": {
+        "steps": 1000,
+        "hits": 4,
+        "dwell_ms": 449.375,
+        "gross_hits_per_ms": 0.00890125173852573,
+        "pd": 28.57142857142857,
+        "modes": {
+          "SHORT_DWELL": 137,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 848,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_143": {
+        "steps": 1000,
+        "hits": 10,
+        "dwell_ms": 449.375,
+        "gross_hits_per_ms": 0.022253129346314324,
+        "pd": 90.9090909090909,
+        "modes": {
+          "SHORT_DWELL": 137,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 848,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_194": {
+        "steps": 1000,
+        "hits": 992,
+        "dwell_ms": 408.125,
+        "gross_hits_per_ms": 2.4306278713629403,
+        "pd": 100.0,
+        "modes": {
+          "SHORT_DWELL": 247,
+          "NORMAL_DWELL": 13,
+          "LONG_DWELL": 1,
+          "REVISIT": 739,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_195": {
+        "steps": 1000,
+        "hits": 806,
+        "dwell_ms": 452.75,
+        "gross_hits_per_ms": 1.7802319160684705,
+        "pd": 99.50617283950616,
+        "modes": {
+          "SHORT_DWELL": 128,
+          "NORMAL_DWELL": 13,
+          "LONG_DWELL": 1,
+          "REVISIT": 858,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_241": {
+        "steps": 1000,
+        "hits": 34,
+        "dwell_ms": 449.375,
+        "gross_hits_per_ms": 0.0756606397774687,
+        "pd": 79.06976744186046,
+        "modes": {
+          "SHORT_DWELL": 137,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 848,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_29": {
+        "steps": 1000,
+        "hits": 9,
+        "dwell_ms": 449.375,
+        "gross_hits_per_ms": 0.020027816411682893,
+        "pd": 32.142857142857146,
+        "modes": {
+          "SHORT_DWELL": 137,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 848,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_42": {
+        "steps": 1000,
+        "hits": 83,
+        "dwell_ms": 449.375,
+        "gross_hits_per_ms": 0.1847009735744089,
+        "pd": 40.09661835748793,
+        "modes": {
+          "SHORT_DWELL": 137,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 848,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_64": {
+        "steps": 1000,
+        "hits": 600,
+        "dwell_ms": 294.875,
+        "gross_hits_per_ms": 2.0347604917337856,
+        "pd": 98.52216748768473,
+        "modes": {
+          "SHORT_DWELL": 549,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 436,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_96": {
+        "steps": 1000,
+        "hits": 484,
+        "dwell_ms": 454.625,
+        "gross_hits_per_ms": 1.0646136926037943,
+        "pd": 92.72030651340997,
+        "modes": {
+          "SHORT_DWELL": 123,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 862,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      }
+    }
+  },
+  "ablated_evaluation": {
+    "mode_entropy": 0.573506611541267,
+    "mode_distribution_pct": {
+      "SHORT_DWELL": 19.689999999999998,
+      "NORMAL_DWELL": 1.38,
+      "LONG_DWELL": 0.1,
+      "REVISIT": 78.83,
+      "PREEMPTIVE_INTERCEPT": 0.0
+    },
+    "mean_pd": 76.18687007920344,
+    "gross_hits_per_ms": 0.8922203027552484,
+    "scenarios": {
+      "config_117": {
+        "steps": 1000,
+        "hits": 784,
+        "dwell_ms": 413.0,
+        "gross_hits_per_ms": 1.8983050847457628,
+        "pd": 100.0,
+        "modes": {
+          "SHORT_DWELL": 234,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 751,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_119": {
+        "steps": 1000,
+        "hits": 4,
+        "dwell_ms": 449.375,
+        "gross_hits_per_ms": 0.00890125173852573,
+        "pd": 28.57142857142857,
+        "modes": {
+          "SHORT_DWELL": 137,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 848,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_143": {
+        "steps": 1000,
+        "hits": 10,
+        "dwell_ms": 449.375,
+        "gross_hits_per_ms": 0.022253129346314324,
+        "pd": 90.9090909090909,
+        "modes": {
+          "SHORT_DWELL": 137,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 848,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_194": {
+        "steps": 1000,
+        "hits": 992,
+        "dwell_ms": 408.125,
+        "gross_hits_per_ms": 2.4306278713629403,
+        "pd": 100.0,
+        "modes": {
+          "SHORT_DWELL": 247,
+          "NORMAL_DWELL": 13,
+          "LONG_DWELL": 1,
+          "REVISIT": 739,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_195": {
+        "steps": 1000,
+        "hits": 806,
+        "dwell_ms": 452.75,
+        "gross_hits_per_ms": 1.7802319160684705,
+        "pd": 99.50617283950616,
+        "modes": {
+          "SHORT_DWELL": 128,
+          "NORMAL_DWELL": 13,
+          "LONG_DWELL": 1,
+          "REVISIT": 858,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_241": {
+        "steps": 1000,
+        "hits": 34,
+        "dwell_ms": 449.375,
+        "gross_hits_per_ms": 0.0756606397774687,
+        "pd": 79.06976744186046,
+        "modes": {
+          "SHORT_DWELL": 137,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 848,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_29": {
+        "steps": 1000,
+        "hits": 9,
+        "dwell_ms": 449.375,
+        "gross_hits_per_ms": 0.020027816411682893,
+        "pd": 32.142857142857146,
+        "modes": {
+          "SHORT_DWELL": 137,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 848,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_42": {
+        "steps": 1000,
+        "hits": 83,
+        "dwell_ms": 449.375,
+        "gross_hits_per_ms": 0.1847009735744089,
+        "pd": 40.09661835748793,
+        "modes": {
+          "SHORT_DWELL": 137,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 848,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_64": {
+        "steps": 1000,
+        "hits": 603,
+        "dwell_ms": 293.75,
+        "gross_hits_per_ms": 2.0527659574468085,
+        "pd": 98.85245901639344,
+        "modes": {
+          "SHORT_DWELL": 552,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 433,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      },
+      "config_96": {
+        "steps": 1000,
+        "hits": 484,
+        "dwell_ms": 454.625,
+        "gross_hits_per_ms": 1.0646136926037943,
+        "pd": 92.72030651340997,
+        "modes": {
+          "SHORT_DWELL": 123,
+          "NORMAL_DWELL": 14,
+          "LONG_DWELL": 1,
+          "REVISIT": 862,
+          "PREEMPTIVE_INTERCEPT": 0
+        }
+      }
+    }
+  },
+  "scenario_comparison": {
+    "config_117": {
+      "pd_full": 100.0,
+      "pd_ablated": 100.0,
+      "delta_pd": 0.0,
+      "action_flips": 0,
+      "action_flips_pct": 0.0
+    },
+    "config_119": {
+      "pd_full": 28.57142857142857,
+      "pd_ablated": 28.57142857142857,
+      "delta_pd": 0.0,
+      "action_flips": 0,
+      "action_flips_pct": 0.0
+    },
+    "config_143": {
+      "pd_full": 90.9090909090909,
+      "pd_ablated": 90.9090909090909,
+      "delta_pd": 0.0,
+      "action_flips": 0,
+      "action_flips_pct": 0.0
+    },
+    "config_194": {
+      "pd_full": 100.0,
+      "pd_ablated": 100.0,
+      "delta_pd": 0.0,
+      "action_flips": 0,
+      "action_flips_pct": 0.0
+    },
+    "config_195": {
+      "pd_full": 99.50617283950616,
+      "pd_ablated": 99.50617283950616,
+      "delta_pd": 0.0,
+      "action_flips": 0,
+      "action_flips_pct": 0.0
+    },
+    "config_241": {
+      "pd_full": 79.06976744186046,
+      "pd_ablated": 79.06976744186046,
+      "delta_pd": 0.0,
+      "action_flips": 0,
+      "action_flips_pct": 0.0
+    },
+    "config_29": {
+      "pd_full": 32.142857142857146,
+      "pd_ablated": 32.142857142857146,
+      "delta_pd": 0.0,
+      "action_flips": 0,
+      "action_flips_pct": 0.0
+    },
+    "config_42": {
+      "pd_full": 40.09661835748793,
+      "pd_ablated": 40.09661835748793,
+      "delta_pd": 0.0,
+      "action_flips": 0,
+      "action_flips_pct": 0.0
+    },
+    "config_64": {
+      "pd_full": 98.52216748768473,
+      "pd_ablated": 98.85245901639344,
+      "delta_pd": 0.33029152870871314,
+      "action_flips": 3,
+      "action_flips_pct": 0.3
+    },
+    "config_96": {
+      "pd_full": 92.72030651340997,
+      "pd_ablated": 92.72030651340997,
+      "delta_pd": 0.0,
+      "action_flips": 0,
+      "action_flips_pct": 0.0
+    }
+  }
+}
