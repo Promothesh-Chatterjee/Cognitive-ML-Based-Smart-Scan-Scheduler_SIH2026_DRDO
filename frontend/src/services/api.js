@@ -244,6 +244,10 @@ export const api = {
     });
   },
 
+  getMissionScenarios(options = {}) {
+    return request("/mission/scenarios", options);
+  },
+
   getBenchmarkScenarios(options = {}) {
     return request("/benchmark/scenarios", options);
   },

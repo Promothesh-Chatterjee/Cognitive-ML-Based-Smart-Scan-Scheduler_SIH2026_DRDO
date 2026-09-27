@@ -1,0 +1,28 @@
+# =============================================================================
+# Google Cloud Build Manifest for Cognitive EW Mission Controller Backend
+# Builds container image from repository Dockerfile and pushes to Artifact Registry
+# Region: asia-south1 (Mumbai)
+# =============================================================================
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'asia-south1-docker.pkg.dev/$PROJECT_ID/ew/cognitive-ew-backend:gate27'
+      - '-t'
+      - 'asia-south1-docker.pkg.dev/$PROJECT_ID/ew/cognitive-ew-backend:$COMMIT_SHA'
+      - '-f'
+      - 'Dockerfile'
+      - '.'
+    timeout: '1200s'
+
+images:
+  - 'asia-south1-docker.pkg.dev/$PROJECT_ID/ew/cognitive-ew-backend:gate27'
+  - 'asia-south1-docker.pkg.dev/$PROJECT_ID/ew/cognitive-ew-backend:$COMMIT_SHA'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_STANDARD_2'
+
+timeout: '1800s'

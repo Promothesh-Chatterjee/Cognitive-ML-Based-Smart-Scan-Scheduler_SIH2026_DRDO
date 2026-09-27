@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   BandMatrix,
   CmdBadge,
@@ -10,8 +10,44 @@ import {
 } from "../components/stitch";
 import { useOverviewTelemetry } from "../services/useOverviewTelemetry";
 import { useMetricsWebSocket } from "../hooks/useMetricsWebSocket";
+import { api } from "../services/api";
 import LiveMetricsDashboard from "../components/LiveMetricsDashboard";
 import SpectrumWaterfall from "../components/SpectrumWaterfall";
+
+// ── Fallback Scenario Catalog ────────────────────────────────────────────────
+const FALLBACK_BENCHMARKS = [
+  { id: "config_119", name: "Config 119", display_name: "Config 119 — Sparse Agile", class: "sparse", display_class: "Sparse Agile", benchmark: true, source: "tsrd" },
+  { id: "config_29", name: "Config 29", display_name: "Config 29 — Slow Agile Hopper", class: "slow_agile", display_class: "Slow Agile Hopper", benchmark: true, source: "tsrd" },
+  { id: "config_241", name: "Config 241", display_name: "Config 241 — Fast Agile Hopper", class: "fast_agile", display_class: "Fast Agile Hopper", benchmark: true, source: "tsrd" },
+  { id: "config_195", name: "Config 195", display_name: "Config 195 — Dense Battlefield", class: "dense", display_class: "Dense Battlefield", benchmark: true, source: "tsrd" },
+  { id: "config_64", name: "Config 64", display_name: "Config 64 — Dense Agile", class: "dense", display_class: "Dense Agile", benchmark: true, source: "tsrd" },
+  { id: "config_42", name: "Config 42", display_name: "Config 42 — Dense Radar", class: "dense", display_class: "Dense Radar", benchmark: true, source: "tsrd" },
+  { id: "config_96", name: "Config 96", display_name: "Config 96 — Mixed Multi-Emitter", class: "mixed", display_class: "Mixed Multi-Emitter", benchmark: true, source: "tsrd" },
+  { id: "config_117", name: "Config 117", display_name: "Config 117 — Mixed Multi-Emitter", class: "mixed", display_class: "Mixed Multi-Emitter", benchmark: true, source: "tsrd" },
+  { id: "config_143", name: "Config 143", display_name: "Config 143 — Sparse Agile", class: "sparse", display_class: "Sparse Agile", benchmark: true, source: "tsrd" },
+  { id: "config_194", name: "Config 194", display_name: "Config 194 — Sparse Agile", class: "sparse", display_class: "Sparse Agile", benchmark: true, source: "tsrd" },
+  { id: "final_grc", name: "final.grc", display_name: "final.grc — GNU Radio 5-Emitter Agile FHSS", class: "fast_agile", display_class: "GNU Radio Agile FHSS", benchmark: false, source: "gnu_radio" },
+  { id: "saa_grc", name: "saa.grc", display_name: "saa.grc — GNU Radio Sample & Hold / Chirp", class: "mixed", display_class: "GNU Radio S&H Chirp", benchmark: false, source: "gnu_radio" },
+];
+
+function getScenarioBadgeStyle(scenarioClass) {
+  switch (scenarioClass) {
+    case "sparse":
+      return { bg: "rgba(73, 223, 157, 0.12)", border: "#49df9d", color: "#49df9d" };
+    case "fast_agile":
+      return { bg: "rgba(56, 189, 248, 0.12)", border: "#38bdf8", color: "#38bdf8" };
+    case "slow_agile":
+      return { bg: "rgba(189, 194, 255, 0.12)", border: "#bdc2ff", color: "#bdc2ff" };
+    case "dense":
+      return { bg: "rgba(245, 158, 11, 0.12)", border: "#f59e0b", color: "#f59e0b" };
+    case "mixed":
+      return { bg: "rgba(236, 72, 153, 0.12)", border: "#ec4899", color: "#ec4899" };
+    case "periodic":
+      return { bg: "rgba(168, 85, 247, 0.12)", border: "#a855f7", color: "#a855f7" };
+    default:
+      return { bg: "rgba(144, 143, 158, 0.12)", border: "#908f9e", color: "#908f9e" };
+  }
+}
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -104,7 +140,8 @@ function MissionControls({
   controlError,
   setControlError,
 }) {
-  const [selectedScenario, setSelectedScenario] = useState("final_grc");
+  const [scenarios, setScenarios] = useState(FALLBACK_BENCHMARKS);
+  const [selectedScenario, setSelectedScenario] = useState("config_119");
   const [selectedSpeed, setSelectedSpeed] = useState(15.0);
 
   const {
@@ -119,8 +156,40 @@ function MissionControls({
     stepMission,
     stopMission,
     resetMission,
+    totalDwells,
     lastError,
   } = t;
+
+  useEffect(() => {
+    let unmounted = false;
+    api
+      .getMissionScenarios()
+      .then((data) => {
+        if (!unmounted && Array.isArray(data) && data.length > 0) {
+          setScenarios(data);
+          setSelectedScenario((prev) => {
+            if (data.some((s) => s.id === prev)) return prev;
+            const firstBench = data.find((s) => s.benchmark) || data[0];
+            return firstBench ? firstBench.id : prev;
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn("Failed fetching scenarios from backend, using fallback list:", err);
+      });
+    return () => {
+      unmounted = true;
+    };
+  }, []);
+
+  const currentScenarioObj = useMemo(() => {
+    return scenarios.find((s) => s.id === selectedScenario) || FALLBACK_BENCHMARKS[0];
+  }, [scenarios, selectedScenario]);
+
+  const benchmarkScenarios = useMemo(() => scenarios.filter((s) => s.benchmark), [scenarios]);
+  const otherTsrdScenarios = useMemo(() => scenarios.filter((s) => s.source === "tsrd" && !s.benchmark), [scenarios]);
+  const gnuScenarios = useMemo(() => scenarios.filter((s) => s.source === "gnu_radio"), [scenarios]);
+  const badgeStyle = getScenarioBadgeStyle(currentScenarioObj?.class);
 
   const isLiveActive = streamRunning || missionActive;
 
@@ -175,7 +244,7 @@ function MissionControls({
           </span>
 
           {/* Scenario & Speed Selectors */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
             <select
               value={selectedScenario}
               onChange={(e) => setSelectedScenario(e.target.value)}
@@ -188,12 +257,74 @@ function MissionControls({
                 padding: "4px 8px",
                 cursor: isLiveActive ? "not-allowed" : "pointer",
                 fontWeight: 600,
+                maxWidth: 380,
               }}
-              title="Select GNU Radio RF scenario"
+              title="Select threat scenario dataset"
             >
-              <option value="final_grc">final.grc — GNU Radio 5-Emitter Agile FHSS (4,000 Dwells)</option>
-              <option value="saa_grc">saa.grc — GNU Radio Sample & Hold / Chirp (4,000 Dwells)</option>
+              {benchmarkScenarios.length > 0 && (
+                <optgroup label="CANONICAL BENCHMARK CONFIGURATIONS (TSRD H5)">
+                  {benchmarkScenarios.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      ★ {s.display_name} {s.available === false ? "(missing)" : ""}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              {otherTsrdScenarios.length > 0 && (
+                <optgroup label={`ADDITIONAL TSRD VALIDATION RECORDINGS (${otherTsrdScenarios.length} files)`}>
+                  {otherTsrdScenarios.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.display_name}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              {gnuScenarios.length > 0 && (
+                <optgroup label="GNU RADIO PHYSICAL EMULATION">
+                  {gnuScenarios.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.display_name}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
             </select>
+
+            {/* Dynamic Metadata Badges */}
+            <span
+              style={{
+                background: badgeStyle.bg,
+                border: `1px solid ${badgeStyle.border}60`,
+                color: badgeStyle.color,
+                fontSize: 10,
+                fontWeight: 700,
+                padding: "3px 8px",
+                letterSpacing: "0.04em",
+              }}
+              title={`Scenario Class: ${currentScenarioObj?.display_class}`}
+            >
+              {currentScenarioObj?.display_class?.toUpperCase() || "TSRD SCENARIO"}
+            </span>
+
+            <span
+              style={{
+                background: "rgba(0, 0, 0, 0.35)",
+                border: "1px solid #49df9d40",
+                color: "#49df9d",
+                fontSize: 10,
+                fontWeight: 700,
+                padding: "3px 8px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+              title="Dataset verification: real HDF5 flight recording"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 13 }}>
+                verified
+              </span>
+              {currentScenarioObj?.source === "tsrd" ? "TSRD REAL H5" : "GNU RADIO"}
+            </span>
 
             <select
               value={selectedSpeed}
@@ -254,7 +385,7 @@ function MissionControls({
                   gap: 6,
                   boxShadow: "0 0 8px rgba(73, 223, 157, 0.2)",
                 }}
-                title="Start continuous operational mission streaming 4000 dwells"
+                title="Start continuous operational mission streaming real TSRD pulses"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
                   play_arrow
@@ -274,7 +405,7 @@ function MissionControls({
                     animation: "st-pulse 1.5s ease-in-out infinite",
                   }}
                 >
-                  ● STREAMING {selectedScenario === "saa_grc" ? "saa.grc" : "final.grc"} (4000 Dwells)
+                  ● STREAMING {currentScenarioObj?.name || selectedScenario} ({totalDwells} Dwells)
                 </span>
                 <button
                   type="button"

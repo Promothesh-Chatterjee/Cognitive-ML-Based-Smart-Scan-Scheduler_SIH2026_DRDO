@@ -114,7 +114,14 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from ew_core.deployment.auth import require_api_key, get_valid_api_keys
-from ew_core.deployment.dataset_service import get_tsrd_root, list_scenarios, download_from_blob
+from ew_core.deployment.dataset_service import (
+    get_tsrd_root,
+    list_scenarios,
+    list_tsrd_scenarios,
+    resolve_scenario_path,
+    download_from_blob,
+    ensure_operational_checkpoint,
+)
 hidden_lock = Lock()
 try:
     from fastapi.middleware.base import BaseHTTPMiddleware  # type: ignore
@@ -382,7 +389,8 @@ class MissionStartRequest(BaseModel):
     """Request to start a closed-loop scanning mission."""
 
     initial_time_us: float = Field(0.0, description="Initial mission clock time in microseconds")
-    scenario: Optional[str] = Field(default="final_grc", description="GNU Radio scenario: 'final_grc' (final.grc) or 'saa_grc' (saa.grc)")
+    scenario: Optional[str] = Field(default="config_119", description="Scenario ID: TSRD config (e.g. 'config_119') or GNU Radio scenario ('final_grc')")
+    scenario_id: Optional[str] = Field(default=None, description="Optional alias for scenario identifier")
     speed_hz: Optional[float] = Field(default=15.0, ge=1.0, le=100.0, description="Simulation frequency in Hz")
     max_dwells: Optional[int] = Field(default=4000, description="Max dwell steps (default: 4000 dwells)")
     auto_stream: bool = Field(default=True, description="Automatically start continuous stream of dwells")
@@ -679,6 +687,13 @@ async def lifespan(app: FastAPI):  # type: ignore
                 scheduler_ckpts.append(p_env)
 
     # 2. Check operational candidate directories via CheckpointGuard
+    try:
+        ensure_operational_checkpoint()
+    except Exception as exc:
+        logger.error("Failed ensuring Gate-27 operational checkpoint: %s", exc)
+        if os.getenv("REQUIRE_OPERATIONAL_CHECKPOINT", "false").lower() in ("true", "1") or os.getenv("K_SERVICE"):
+            raise CheckpointSecurityError(f"Fail-closed: Gate-27 operational checkpoint required: {exc}")
+
     candidate_dirs = [
         PACKAGE_ROOT / "experiments/checkpoints/scheduler_v2_operational_candidate",
         Path("experiments/checkpoints/scheduler_v2_operational_candidate"),
@@ -686,6 +701,7 @@ async def lifespan(app: FastAPI):  # type: ignore
         PACKAGE_ROOT / "checkpoints/scheduler_v2_operational_candidate",
     ]
     seen_dirs = set()
+    has_operational_manifest = False
     for cand_dir in candidate_dirs:
         try:
             r_dir = cand_dir.resolve()
@@ -696,25 +712,33 @@ async def lifespan(app: FastAPI):  # type: ignore
         seen_dirs.add(r_dir)
 
         if cand_dir.exists() and (cand_dir / "ACTIVE_CHECKPOINT.json").exists():
+            has_operational_manifest = True
             guard = CheckpointGuard(cand_dir)
             active_ckpt = guard.get_active_checkpoint()
             if active_ckpt not in scheduler_ckpts:
                 scheduler_ckpts.append(active_ckpt)
 
     # 3. Fallback non-candidate discovery paths (Baseline / ONNX)
-    fallback_ckpts = [
-        PACKAGE_ROOT / "experiments/checkpoints/production_baseline/checkpoint_gate_25000_frozen.pt",
-        Path("experiments/checkpoints/production_baseline/checkpoint_gate_25000_frozen.pt"),
-        PACKAGE_ROOT / "experiments/checkpoints/scheduler/checkpoint_gate_25000_frozen.pt",
-        Path("experiments/checkpoints/scheduler/checkpoint_gate_25000_frozen.pt"),
-        PACKAGE_ROOT / "experiments/checkpoints/onnx/scheduler.onnx",
-        Path("experiments/checkpoints/onnx/scheduler.onnx"),
-        Path("checkpoints/onnx/scheduler.onnx"),
-        PACKAGE_ROOT / "checkpoints/onnx/scheduler.onnx",
-    ]
-    for fb in fallback_ckpts:
-        if fb not in scheduler_ckpts:
-            scheduler_ckpts.append(fb)
+    # Fail-closed: Never fall back to Gate-25 if operational manifest is active or running in Cloud Run
+    is_cloud_or_operational = (
+        has_operational_manifest
+        or bool(os.getenv("K_SERVICE"))
+        or os.getenv("REQUIRE_OPERATIONAL_CHECKPOINT", "false").lower() in ("true", "1")
+    )
+    if not is_cloud_or_operational:
+        fallback_ckpts = [
+            PACKAGE_ROOT / "experiments/checkpoints/production_baseline/checkpoint_gate_25000_frozen.pt",
+            Path("experiments/checkpoints/production_baseline/checkpoint_gate_25000_frozen.pt"),
+            PACKAGE_ROOT / "experiments/checkpoints/scheduler/checkpoint_gate_25000_frozen.pt",
+            Path("experiments/checkpoints/scheduler/checkpoint_gate_25000_frozen.pt"),
+            PACKAGE_ROOT / "experiments/checkpoints/onnx/scheduler.onnx",
+            Path("experiments/checkpoints/onnx/scheduler.onnx"),
+            Path("checkpoints/onnx/scheduler.onnx"),
+            PACKAGE_ROOT / "checkpoints/onnx/scheduler.onnx",
+        ]
+        for fb in fallback_ckpts:
+            if fb not in scheduler_ckpts:
+                scheduler_ckpts.append(fb)
 
     for ckpt in scheduler_ckpts:
         if ckpt.exists():
@@ -2113,9 +2137,15 @@ def list_emitters() -> list[dict[str, Any]]:
 
 # ── Operational Mission Endpoints (Closed-Loop Demonstration) ────────────────
 
+@app.get("/mission/scenarios", tags=["mission"])
+def mission_scenarios(request: Request = None) -> list[dict[str, Any]]:
+    """List available threat scenarios (canonical benchmark configs, TSRD recordings, GNU Radio)."""
+    return list_tsrd_scenarios()
+
+
 @app.post("/mission/start", tags=["mission"])
 async def mission_start(req: MissionStartRequest, request: Request) -> dict[str, Any]:
-    """Start or restart a closed-loop operational mission and launch continuous GNU Radio stream."""
+    """Start or restart a closed-loop operational mission and launch continuous real pulse stream."""
     if not _is_authorized(request):
         raise HTTPException(status_code=401, detail="Unauthorized")
     controller = STATE.get("controller")
@@ -2125,9 +2155,19 @@ async def mission_start(req: MissionStartRequest, request: Request) -> dict[str,
             detail="OperationalReceiverController not initialised (trained v2 scheduler required)",
         )
     try:
+        scenario = req.scenario_id or req.scenario or "config_119"
+        clean_name = scenario.replace(".h5", "").strip()
+        is_tsrd = clean_name.startswith("config_") or "tsrd" in clean_name.lower()
+
+        resolved = resolve_scenario_path(clean_name)
+        if is_tsrd and resolved is None:
+            raise HTTPException(
+                status_code=404,
+                detail=f"TSRD scenario '{scenario}' not found. Fail-closed: synthetic fallbacks are disabled in TSRD mission mode.",
+            )
+
         controller.start_mission(initial_time_us=req.initial_time_us)
         global _stream_task, _stream_running
-        scenario = req.scenario or "final_grc"
         speed_hz = float(req.speed_hz or 15.0)
         max_dwells = req.max_dwells if req.max_dwells is not None else 4000
 
@@ -2145,9 +2185,12 @@ async def mission_start(req: MissionStartRequest, request: Request) -> dict[str,
             "mission_active": controller.is_mission_active,
             "stream_started": bool(req.auto_stream),
             "scenario": scenario,
+            "scenario_path": str(resolved) if resolved else scenario,
             "speed_hz": speed_hz,
             "max_dwells": max_dwells,
         }
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
@@ -3180,7 +3223,13 @@ def load_scenario_pulses_from_dataset(matched_path: Path, time_horizon_us: float
     if matched_path.suffix == ".h5":
         try:
             from ..environment.scenario_generator import load_h5_records
-            records = load_h5_records(matched_path, freq_min_mhz=0.0, freq_max_mhz=18000.0, max_pulses=50000)
+            records = load_h5_records(
+                matched_path,
+                freq_min_mhz=0.0,
+                freq_max_mhz=18000.0,
+                max_pulses=50000,
+                chunk_mode="first",
+            )
             for idx, r in enumerate(records):
                 scenario_pulses.append({
                     "toa_us": float(r.toa_us),
@@ -3189,6 +3238,8 @@ def load_scenario_pulses_from_dataset(matched_path: Path, time_horizon_us: float
                     "pulse_width_us": float(r.pulse_width_us),
                     "amplitude_db": float(r.amplitude_db),
                     "aoa_deg": float(r.aoa_deg),
+                    "emitter_id": getattr(r, "emitter_id", 1),
+                    "source_id": getattr(r, "source_id", matched_path.stem),
                     "pulse_id": idx,
                 })
             logger.info("Loaded %d pulses from TSRD %s", len(scenario_pulses), matched_path.name)
@@ -3219,14 +3270,28 @@ async def _run_live_mission_stream(scenario_name: str, speed_hz: float, max_dwel
         "rolling_pd": 0.0,
     }
 
-    # Resolve and load pulses from GNU RF Environment, TSRD H5, or synthetic fallback
+    # Resolve and load pulses from TSRD H5 or GNU RF Environment
     scenario_pulses: list[dict[str, Any]] = []
-    matched_path = find_gnu_scenario_file(scenario_name)
+    matched_path = resolve_scenario_path(scenario_name) or find_gnu_scenario_file(scenario_name)
     if matched_path:
         scenario_pulses = load_scenario_pulses_from_dataset(matched_path, time_horizon_us=1_000_000.0)
 
+    clean_name = scenario_name.replace(".h5", "").strip()
+    is_tsrd = clean_name.startswith("config_") or "tsrd" in clean_name.lower()
+
     if not scenario_pulses:
-        # Fallback to realistic agile radar generator matching config_29
+        if is_tsrd:
+            err_msg = (
+                f"TSRD scenario '{scenario_name}' could not be loaded from disk or cloud storage. "
+                f"Fail-closed: synthetic fallbacks are disabled in TSRD mission mode."
+            )
+            logger.error(err_msg)
+            _stream_running = False
+            _stream_info["running"] = False
+            _stream_info["error"] = err_msg
+            return
+
+        # Fallback only for non-TSRD scenarios (e.g. general agile simulation)
         try:
             from scripts.evaluate_agile_benchmark import generate_agile_scenario
             raw_recs = generate_agile_scenario("AG-10", time_horizon_us=1_000_000.0, seed=42)
