@@ -78,6 +78,7 @@ smartscan_deployment_bundle_latest.zip
 
 # Environment
 .env.production
+!frontend/.env.production
 
 # Frontend build outputs
 frontend/dist/

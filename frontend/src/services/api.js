@@ -16,7 +16,7 @@ export function getApiBaseUrl() {
     return envUrl.trim().replace(/\/+$/, "");
   }
   const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-  return isLocal ? "http://localhost:8080" : "https://smartscan-backend-q6ay.onrender.com";
+  return isLocal ? "http://localhost:8080" : "https://cognitive-ew-backend-753709137146.asia-south1.run.app";
 }
 
 export function setApiBaseUrl(url) {

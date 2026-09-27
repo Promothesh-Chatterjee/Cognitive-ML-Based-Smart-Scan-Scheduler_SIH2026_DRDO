@@ -43,7 +43,7 @@ export function getWsBaseUrl() {
   }
 
   const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-  return isLocal ? "ws://localhost:8080" : "wss://smartscan-backend-q6ay.onrender.com";
+  return isLocal ? "ws://localhost:8080" : "wss://cognitive-ew-backend-753709137146.asia-south1.run.app";
 }
 
 const WS_BASE_URL = getWsBaseUrl();

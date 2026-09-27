@@ -21,7 +21,7 @@ export function getApiBaseUrl() {
   // 2. Default fallback: localhost in dev, current origin in production
   if (typeof window !== "undefined") {
     const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    return isLocal ? "http://localhost:8000" : window.location.origin;
+    return isLocal ? "http://localhost:8000" : "https://cognitive-ew-backend-753709137146.asia-south1.run.app";
   }
 
   return "http://localhost:8000";

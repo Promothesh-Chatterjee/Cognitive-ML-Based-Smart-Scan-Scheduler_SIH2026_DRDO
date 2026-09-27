@@ -99,7 +99,7 @@ export default function SystemConfig() {
               type="text"
               value={apiUrl}
               onChange={(e) => setApiUrl(e.target.value)}
-              placeholder="https://smartscan-backend-q6ay.onrender.com"
+              placeholder="https://cognitive-ew-backend-753709137146.asia-south1.run.app"
               style={{
                 flex: "1 1 320px",
                 padding: "8px 12px",
