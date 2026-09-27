@@ -27,8 +27,10 @@ experiments/checkpoints/scheduler_g*/
 experiments/checkpoints/g7a*/
 experiments/checkpoints/ablations/
 experiments/checkpoints/production_baseline/
-experiments/checkpoints/scheduler_v2_operational_candidate/
+experiments/checkpoints/scheduler_v2_operational_candidate/*.pt
 
-# Include required operational checkpoints and deinterleaver
+# Include required operational checkpoints and manifests
+!experiments/checkpoints/scheduler_v2_operational_candidate/ACTIVE_CHECKPOINT.json
+!experiments/checkpoints/scheduler_v2_operational_candidate/GATE27_OPERATIONAL_MANIFEST.json
 !experiments/checkpoints/deinterleaver/best.pt
 !experiments/checkpoints/deinterleaver/normalization_stats.json

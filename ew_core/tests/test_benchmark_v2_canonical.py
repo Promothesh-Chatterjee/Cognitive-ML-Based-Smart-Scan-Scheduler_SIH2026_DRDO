@@ -126,8 +126,14 @@ class BenchmarkV2CanonicalTests(unittest.TestCase):
             self.assertIn("status", data)
             if res.status_code == 200:
                 self.assertEqual(data["status"], "ok")
-                self.assertEqual(data["active_model"], "Gate-25k-R4.2-alpha020")
-                self.assertEqual(data["checkpoint_sha256"], "7a99c659affda277fa63fd612a3564d08a8d2e3cf7d033fe892d778871c186b0")
+                self.assertIn(data["active_model"], ["Gate-27 Operational Baseline", "Gate-25k-R4.2-alpha020"])
+                self.assertIn(
+                    data["checkpoint_sha256"],
+                    [
+                        "fac0577454fe0a89687c27ebdffa568229e2d03435eebd9e82b50fca14292094",
+                        "7a99c659affda277fa63fd612a3564d08a8d2e3cf7d033fe892d778871c186b0",
+                    ],
+                )
                 self.assertEqual(data["benchmark_version"], BENCHMARK_VERSION)
 
 

@@ -694,7 +694,15 @@ async def lifespan(app: FastAPI):  # type: ignore
 
     # 2. Check operational candidate directories via CheckpointGuard
     try:
-        ensure_operational_checkpoint()
+        op_ckpt = ensure_operational_checkpoint()
+        if op_ckpt and op_ckpt.is_file():
+            cand_dir = op_ckpt.parent
+            if (cand_dir / "ACTIVE_CHECKPOINT.json").exists():
+                guard = CheckpointGuard(cand_dir)
+                active_ckpt = guard.get_active_checkpoint()
+                if active_ckpt not in scheduler_ckpts:
+                    scheduler_ckpts.append(active_ckpt)
+                has_operational_manifest = True
     except Exception as exc:
         logger.error("Failed ensuring Gate-27 operational checkpoint: %s", exc)
         if os.getenv("REQUIRE_OPERATIONAL_CHECKPOINT", "false").lower() in ("true", "1") or os.getenv("K_SERVICE"):
@@ -821,7 +829,8 @@ async def lifespan(app: FastAPI):  # type: ignore
                     try:
                         import hashlib
                         STATE["scheduler_ckpt_sha256"] = hashlib.sha256(ckpt.read_bytes()).hexdigest()
-                    except Exception:
+                    except Exception as e:
+                        logger.warning("Failed calculating scheduler checkpoint SHA-256: %s", e)
                         STATE["scheduler_ckpt_sha256"] = None
                     # Init hidden
                     try:
@@ -830,8 +839,8 @@ async def lifespan(app: FastAPI):  # type: ignore
                             STATE["hidden"] = hidden
                             moe.eager_agent.hidden = hidden
                         STATE["hidden_state_ready"] = True
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.warning("Failed initializing hidden state for scheduler: %s", e)
                     logger.info("Loaded scheduler PT %s", ckpt)
                     break
             except (CheckpointSecurityError, CheckpointTamperedError, ExplicitPromotionRequiredError, QuarantinedCheckpointError) as sec_exc:
@@ -977,7 +986,7 @@ async def lifespan(app: FastAPI):  # type: ignore
                 n_modes=CANONICAL_N_MODES,
             )
             STATE["controller"] = controller
-            logger.info("OperationalReceiverController initialised with Gate-25k-R4.2-alpha020")
+            logger.info("OperationalReceiverController initialised with %s", STATE.get("active_model", "Gate-27 Operational Baseline"))
         else:
             STATE["controller"] = None
             logger.warning("OperationalReceiverController not initialised: scheduler not loaded")

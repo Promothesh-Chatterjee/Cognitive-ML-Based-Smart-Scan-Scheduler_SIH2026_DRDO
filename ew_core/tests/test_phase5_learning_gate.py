@@ -218,6 +218,7 @@ def test_gate_5_3_time_aware_bellman_target():
         device=torch.device("cpu"),
         aux_coef=0.0,
         stats=stats,
+        objective_mode="smdp_only",
     )
     assert np.isfinite(loss_val)
     assert "gamma_eff_mean" in stats
