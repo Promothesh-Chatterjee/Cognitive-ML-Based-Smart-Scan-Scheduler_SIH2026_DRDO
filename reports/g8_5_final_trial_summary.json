@@ -1,0 +1,32 @@
+{
+  "status": "HALTED",
+  "trial_history": [
+    {
+      "gate_step": 30000,
+      "checkpoint": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_5_final_trial\\checkpoint_gate_30000.pt",
+      "disposition": "HALT_TRIGGERED",
+      "stop_reasons": [
+        "Mean Pd 55.04% < 80.0% floor",
+        "Agile Pd 0.00% < 65.0% floor",
+        "config_29 Pd 0.00% < 85.0% floor",
+        "Worst-case Pd 0.00% < 30.0% floor (config_119)",
+        "Total blackouts 4 > 0 floor",
+        "Gross hits/ms 0.8355 < 0.85 floor",
+        "Thrashing cycle occupancy 90.11% >= 5.0% ceiling"
+      ],
+      "mean_pd": 55.043638845512625,
+      "agile_pd": 0.0,
+      "dense_pd": 97.01035461410218,
+      "config_29_pd": 0.0,
+      "worst_case_pd": 0.0,
+      "blackouts": 4,
+      "gross_hits_per_ms": 0.8355,
+      "thrashing_cycle_occupancy": 0.90115,
+      "q_max": 92.25376892089844,
+      "q_mean": -9.363348960876465,
+      "mean_delta_q": 0.1686264634102583,
+      "probe_rho": 0.8236456812968861,
+      "probe_flips": 350
+    }
+  ]
+}

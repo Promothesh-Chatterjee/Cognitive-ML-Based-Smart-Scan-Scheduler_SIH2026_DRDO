@@ -1,0 +1,126 @@
+# Phase G8: FiLM-Gated Factorized DRQN Configuration
+# Inherits base environment/reward/validation from training_config.yaml
+
+data_dir: "${DATA_DIR:-data}"
+seed: 42
+subset: "train"
+mode: "scan"
+world_mode: "stare"
+observation_mode: "scan"
+training_mode: "real_tsrd"
+deinterleaver_ckpt: "experiments/checkpoints/deinterleaver/best.pt"
+scheduler_ckpt: "experiments/checkpoints/g7a_targeted_replay/checkpoint_gate_26000.pt"
+normalization_stats: "experiments/checkpoints/deinterleaver/normalization_stats.json"
+
+scheduler:
+  version: "v2"
+  action_selection_mode: "flat_argmax"
+
+  # === G8-SPECIFIC ARCHITECTURE & OBJECTIVE SETTINGS ===
+  use_g8_film: true                     # Activates FiLM model creation path
+  objective_mode: "step_based"          # Issue 3 Fix: dwell penalty applied solely by G8 shaper (no double count)
+  weights_only: false                   # Issue 4 Fix: in-flight resume from G7-A 26k (global_step=26000)
+  fresh_optimizer: true                 # Fresh Adam for new FiLM parameters
+
+  # Training bounds & cadence
+  total_timesteps: 27000                # Hard stop at 27k for manual review
+  learning_rate: 2.5e-5
+  replay_buffer_size: 50000
+  batch_size: 32
+  seq_len: 16
+  burn_in: 8
+  update_freq: 4
+  target_update_freq: 250
+  staged_gates: "27000"
+
+  # Regularization
+  lambda_entropy: 0.01                  # Base entropy weight (overridden dynamically by cosine_beta_schedule)
+  q_reg_coef: 1e-4
+  target_q_max: 100.0
+  target_q_min: -50.0
+  c_dwell: 2.0                         # Passed to RelativeDwellShaper
+
+  # G8 Reward Shaper
+  g8_dwell_ema_alpha: 0.05             # EMA smoothing for relative dwell penalty
+  g8_beta_max: 0.10                    # Peak entropy weight during warmup
+  g8_warmup_frac: 0.10                 # Fraction of steps dedicated to warmup
+
+  # G8 Mode Collapse Guard
+  g8_collapse_window: 500              # Rolling window for greedy SHORT fraction
+  g8_short_ceiling: 0.80              # Circuit breaker trips if SHORT > 80%
+  g8_min_entropy: 0.30               # Circuit breaker trips if mode entropy < 0.30
+
+  # Exploration (Slower decay continued: 0.15 -> 0.05)
+  exploration_schedule: "slower"
+  eps_start: 0.15
+  eps_end: 0.05
+  eps_decay: 10000.0
+  thompson_warmup_steps: 0
+  targeted_exploration: true
+  band_discovery_quota: 2
+
+  # Safety sentinels
+  abort_on_q_max_exceeded: true
+  max_allowed_q: 50.0
+
+environment:
+  n_bands: 36
+  band_features: 10
+  obs_dim: 360
+  n_modes: 5
+  n_actions: 180
+  freq_min_mhz: 0.0
+  freq_max_mhz: 18000.0
+  ibw_mhz: 500.0
+  dwell_time_us: 500.0
+  detection_threshold_db: -140.0
+  frequency_step_mhz: 500.0
+  time_horizon_us: 30000000.0
+  max_pulses: 50000
+  max_steps_per_episode: 1000
+  belief:
+    ema_alpha: 0.30
+    ema_alpha_miss_confirmed: 0.20
+  reward:
+    version: "v2"
+    variant: "baseline"
+    w_hit_novel: 10.0
+    w_hit_repeat: 8.0
+    w_latency: 5.0
+    w_agile_bonus: 2.0
+    w_prediction: 0.5
+    w_miss: -4.0
+    w_false_alarm: -1.0
+    w_redundant: -0.25
+    w_dwell_cost: -0.01
+
+reward:
+  version: "v2"
+  variant: "baseline"
+  w_hit_novel: 10.0
+  w_hit_repeat: 8.0
+  w_latency: 5.0
+  w_agile_bonus: 2.0
+  w_prediction: 0.5
+  w_miss: -4.0
+  w_false_alarm: -1.0
+  w_redundant: -0.25
+  w_dwell_cost: -0.01
+
+validation:
+  subset: "val"
+  n_files: 10
+  seed: 42
+  allow_synthetic_fallback: false
+
+distribution_shift:
+  enabled: true
+  monitor_only: true
+  threshold: 0.15
+  critical_threshold: 0.40
+  window_size: 500
+  eval_interval_steps: 50
+  action_on_threshold: "warn"
+
+telemetry:
+  schema_version: "2.0"

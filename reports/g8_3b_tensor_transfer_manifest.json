@@ -1,0 +1,56 @@
+{
+  "inherited_exact": [
+    "input_norm.weight",
+    "input_norm.bias",
+    "lstm.weight_ih_l0",
+    "lstm.weight_hh_l0",
+    "lstm.bias_ih_l0",
+    "lstm.bias_hh_l0",
+    "lstm.weight_ih_l1",
+    "lstm.weight_hh_l1",
+    "lstm.bias_ih_l1",
+    "lstm.bias_hh_l1",
+    "value_stream.0.weight",
+    "value_stream.0.bias",
+    "value_stream.2.weight",
+    "value_stream.2.bias",
+    "band_encoder.0.weight",
+    "band_encoder.0.bias",
+    "ctx_proj.0.weight",
+    "ctx_proj.0.bias",
+    "band_head.0.weight",
+    "band_head.0.bias",
+    "band_head.2.weight",
+    "band_head.2.bias",
+    "intercept_prob_head.0.weight",
+    "intercept_prob_head.0.bias",
+    "intercept_prob_head.2.weight",
+    "intercept_prob_head.2.bias",
+    "intercept_time_head.0.weight",
+    "intercept_time_head.0.bias",
+    "intercept_time_head.2.weight",
+    "intercept_time_head.2.bias",
+    "dwell_head.0.bias",
+    "dwell_head.2.weight",
+    "dwell_head.2.bias"
+  ],
+  "inherited_reshaped": [
+    {
+      "source": "mode_head.0.weight (64, 256)",
+      "target": "dwell_head.0.weight (64, 288)",
+      "rule": "Cols 0..255 from parent mode_head.0; Cols 256..287 initialized to 0.0"
+    }
+  ],
+  "intentionally_replaced": [
+    "mode_head.0.weight",
+    "mode_head.0.bias",
+    "mode_head.2.weight",
+    "mode_head.2.bias"
+  ],
+  "intentionally_dropped": [
+    "film_proj.0.weight",
+    "film_proj.0.bias",
+    "film_proj.2.weight",
+    "film_proj.2.bias"
+  ]
+}

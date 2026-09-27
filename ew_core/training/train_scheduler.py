@@ -42,6 +42,10 @@ from ..training.replay_buffer import SequenceReplayBuffer
 from ..training.thompson_sampling import ThompsonSamplingExplorer
 from ..training.training_gate import require_training_gate
 from ..training.val_set import FixedValidationSet
+from ..models.film_factorized_drqn import FiLMGatedFactorizedDRQN
+from ..training.mode_collapse_guard import ModeCollapseGuard
+from ..training.reward_g8 import RelativeDwellShaper, cosine_beta_schedule
+from ..training.stratified_replay_sampler import StratifiedReplaySampler
 
 logger = logging.getLogger(__name__)
 
@@ -213,6 +217,7 @@ def _do_drqn_update(
     mode_collapse_rate_threshold: float = 0.50,
     objective_mode: str = "step_based",
     c_dwell: float = 2.0,
+    tau_ref: float = 1.0,
 ) -> float:
 
     """One Double-DQN BPTT update on a sampled batch. Returns loss value.
@@ -284,6 +289,11 @@ def _do_drqn_update(
         # r' = r - c_dwell * (tau - 1.0)
         gamma_eff = torch.pow(gamma_tensor, tau_b)
         eff_rew_b = rew_b - c_dwell * (tau_b - 1.0)
+    elif objective_mode in ("g8_fixed_ref", "fixed_ref_centered"):
+        # Arm C: Fixed-reference centered dwell term with gamma^tau discounting
+        # r' = r - c_dwell * (tau - tau_ref)
+        gamma_eff = torch.pow(gamma_tensor, tau_b)
+        eff_rew_b = rew_b - c_dwell * (tau_b - tau_ref)
     elif objective_mode in ("g3a_reward_rate", "reward_rate"):
         # G3-A: Reward-rate scaling (r' = r / tau, fixed gamma)
         gamma_eff = gamma_tensor
@@ -492,6 +502,7 @@ def train_scheduler(
     reset_semantic_memory: bool = False,
     staged_gates: list[int] | None = None,
     stop_at_step: int | None = None,
+    start_step_override: int | None = None,
     resume_checkpoint: str | None = None,
     override_epsilon: float | None = None,
     disable_latency_reward: bool = False,
@@ -513,9 +524,17 @@ def train_scheduler(
     mode_collapse_rate_threshold: float | None = None,
     objective_mode: str | None = None,
     c_dwell: float | None = None,
+    tau_ref: float | None = None,
+    gamma: float | None = None,
     fresh_optimizer: bool = False,
     abort_on_q_max_exceeded: bool = False,
     max_allowed_q: float = 100.0,
+    use_g8_film: bool | None = None,
+    use_online_reward_shaper: bool = False,
+    preloaded_buffer_path: str | Path | None = None,
+    probe_batch_path: str | Path | None = None,
+    learning_rate: float | None = None,
+    targeted_spec: dict[str, Any] | None = None,
 ) -> None:
     """Full DRQN training with Thompson warmup, BPTT, target network, and MoE eval.
 
@@ -766,15 +785,64 @@ def train_scheduler(
     lstm_hidden = int(drqn_cfg.get("lstm_hidden", 256))
     lstm_layers = int(drqn_cfg.get("lstm_layers", 2))
 
-    online_drqn = DRQNScheduler(
-        obs_dim=obs_dim,
-        n_bands=n_bands,
-        n_actions=n_actions,
-        lstm_hidden=lstm_hidden,
-        lstm_layers=lstm_layers,
-    ).to(device)
-    target_drqn = copy.deepcopy(online_drqn).to(device)
-    target_drqn.eval()
+    if use_g8_film is None:
+        use_g8_film = bool(sched_cfg.get("use_g8_film", False))
+
+    if use_g8_film:
+        _g8_ckpt_target = resume_checkpoint or train_cfg.get("scheduler_ckpt") or sched_cfg.get("scheduler_ckpt")
+        if _g8_ckpt_target is None:
+            raise RuntimeError("G8 FiLM mode requires an explicit parent checkpoint (--resume or scheduler_ckpt)")
+        _g8_payload = torch.load(_g8_ckpt_target, map_location=device, weights_only=False)
+        _g8_sd = _g8_payload.get("state_dict", _g8_payload.get("online_drqn", _g8_payload))
+        if "dwell_head.0.weight" in _g8_sd:
+            from ..models.band_conditioned_drqn import BandConditionedFactorizedDRQN
+            online_drqn = BandConditionedFactorizedDRQN(
+                obs_dim=obs_dim,
+                n_bands=n_bands,
+                n_modes=n_modes,
+                lstm_hidden=lstm_hidden,
+                lstm_layers=lstm_layers,
+            ).to(device)
+            online_drqn.load_state_dict(_g8_sd, strict=True)
+            logger.info("G8.3-B BandConditionedFactorizedDRQN loaded directly from checkpoint %s (strict=True)", _g8_ckpt_target)
+        elif "film_proj.0.weight" in _g8_sd:
+            online_drqn = FiLMGatedFactorizedDRQN(
+                obs_dim=obs_dim,
+                n_bands=n_bands,
+                n_modes=n_modes,
+                lstm_hidden=lstm_hidden,
+                lstm_layers=lstm_layers,
+            ).to(device)
+            online_drqn.load_state_dict(_g8_sd, strict=True)
+            logger.info("G8 FiLM model loaded directly from materialized checkpoint %s (strict=True)", _g8_ckpt_target)
+        else:
+            online_drqn, film_manifest = FiLMGatedFactorizedDRQN.from_g7a_checkpoint(
+                ckpt_path=Path(_g8_ckpt_target),
+                seed=seed,
+            )
+            online_drqn = online_drqn.to(device)
+            logger.info(
+                "G8 FiLM model converted from G7-A parent %s: inherited %d params, dropped %s, new FiLM params: %d",
+                _g8_ckpt_target,
+                film_manifest["inherited_params_count"],
+                film_manifest["dropped_keys"],
+                film_manifest["newly_initialized_params_count"],
+            )
+        target_drqn = copy.deepcopy(online_drqn).to(device)
+        if isinstance(_g8_payload, dict) and "target_state_dict" in _g8_payload:
+            target_drqn.load_state_dict(_g8_payload["target_state_dict"], strict=True)
+            logger.info("Loaded target_state_dict into target_drqn (strict=True)")
+        target_drqn.eval()
+    else:
+        online_drqn = DRQNScheduler(
+            obs_dim=obs_dim,
+            n_bands=n_bands,
+            n_actions=n_actions,
+            lstm_hidden=lstm_hidden,
+            lstm_layers=lstm_layers,
+        ).to(device)
+        target_drqn = copy.deepcopy(online_drqn).to(device)
+        target_drqn.eval()
 
     # Phase-1 Task 1.3: Training-mode MoE config override.
     # During training the MoE is used PASSIVELY for telemetry/attribution only;
@@ -797,8 +865,12 @@ def train_scheduler(
     }
     moe = SmartScanMoE(online_drqn, _training_moe_cfg).to(device)
 
-    learning_rate = float(sched_cfg.get("learning_rate", drqn_cfg.get("lr", 1e-4)))
+    if learning_rate is None:
+        learning_rate = float(sched_cfg.get("learning_rate", drqn_cfg.get("lr", 2.5e-5)))
+    else:
+        learning_rate = float(learning_rate)
     optimizer = optim.Adam(online_drqn.parameters(), lr=learning_rate)
+    logger.info("Scheduler optimizer initialized with lr=%.2e", learning_rate)
     loss_fn = nn.HuberLoss()
 
     # WandB optional
@@ -819,7 +891,10 @@ def train_scheduler(
     eps_start = float(sched_cfg.get("eps_start", drqn_cfg.get("eps_start", 1.0)))
     eps_end = float(sched_cfg.get("eps_end", drqn_cfg.get("eps_end", 0.05)))
     eps_decay = float(sched_cfg.get("eps_decay", drqn_cfg.get("eps_decay", 10000)))
-    gamma = float(drqn_cfg.get("gamma", 0.99))
+    if gamma is None:
+        gamma = float(drqn_cfg.get("gamma", 0.99))
+    else:
+        gamma = float(gamma)
     seq_len = int(sched_cfg.get("seq_len", 16))
     burn_in = int(sched_cfg.get("burn_in", 8))
     batch_size = int(sched_cfg.get("batch_size", 32))
@@ -845,6 +920,8 @@ def train_scheduler(
         objective_mode = str(sched_cfg.get("objective_mode", "step_based"))
     if c_dwell is None:
         c_dwell = float(sched_cfg.get("c_dwell", 2.0))
+    if tau_ref is None:
+        tau_ref = float(sched_cfg.get("tau_ref", 1.0))
     if not fresh_optimizer:
         fresh_optimizer = bool(sched_cfg.get("fresh_optimizer", False))
     if not abort_on_q_max_exceeded:
@@ -866,6 +943,64 @@ def train_scheduler(
         obs_dim=obs_dim,
         burn_in=burn_in,
         seed=seed,
+    )
+
+    if preloaded_buffer_path is None:
+        preloaded_buf_path = sched_cfg.get("preloaded_buffer_path") or train_cfg.get("preloaded_buffer_path")
+    else:
+        preloaded_buf_path = str(preloaded_buffer_path)
+    if preloaded_buf_path:
+        p_buf = Path(preloaded_buf_path)
+        if p_buf.exists():
+            n_loaded = buffer.load_episodes(p_buf)
+            logger.info("Preloaded %d episodes into replay buffer from %s", buffer.n_episodes(), p_buf)
+        else:
+            raise FileNotFoundError(f"FATAL: preloaded_buffer_path '{p_buf}' does not exist!")
+
+    reward_shaper = (
+        RelativeDwellShaper(
+            ema_alpha=float(sched_cfg.get("g8_dwell_ema_alpha", 0.05)),
+            c_dwell=c_dwell,
+        )
+        if (use_g8_film and use_online_reward_shaper)
+        else None
+    )
+    if probe_batch_path is None:
+        probe_batch_path = sched_cfg.get("probe_batch_path") or train_cfg.get("probe_batch_path")
+    collapse_guard = (
+        ModeCollapseGuard(
+            window=int(sched_cfg.get("g8_collapse_window", 500)),
+            short_ceiling=float(sched_cfg.get("g8_short_ceiling", 0.88)),
+            min_entropy=float(sched_cfg.get("g8_min_entropy", 0.30)),
+            parent_short_frac=float(sched_cfg.get("g8_parent_short_frac", 0.5315)),
+            degradation_delta=float(sched_cfg.get("g8_degradation_delta", 0.08)),
+            probe_batch_path=probe_batch_path,
+        )
+        if use_g8_film
+        else None
+    )
+    use_stratified_replay = bool(
+        sched_cfg.get("use_g8_1_stratified_replay", False)
+        or train_cfg.get("use_g8_1_stratified_replay", False)
+        or use_g8_film
+    )
+    strata_weights = sched_cfg.get("strata_weights", {
+        "agile": 0.30,
+        "sparse": 0.25,
+        "dense": 0.25,
+        "mixed": 0.20,
+    })
+    min_episodes_per_stratum = int(sched_cfg.get("min_episodes_per_stratum", 5))
+
+    stratified_sampler = (
+        StratifiedReplaySampler(
+            buffer=buffer,
+            strata_weights=strata_weights,
+            min_episodes_per_stratum=min_episodes_per_stratum,
+            targeted_spec=targeted_spec or sched_cfg.get("targeted_spec"),
+        )
+        if use_stratified_replay
+        else None
     )
 
     # Phase 17: canonical layout — never resolve to the ambiguous root
@@ -1007,21 +1142,27 @@ def train_scheduler(
         parent_sha256 = ckpt.get("parent_sha256") or ckpt.get("metadata", {}).get("extra", {}).get("parent_sha256", FROZEN_25K_SHA)
         logger.info("Phase 11 lineage preserved: root parent SHA-256 = %s", parent_sha256)
 
-    # Architecture verification (360 obs_dim, 180 actions)
-    state_dict = ckpt["state_dict"] if isinstance(ckpt, dict) and "state_dict" in ckpt else ckpt
-    model_state = online_drqn.state_dict()
-    for k, v in state_dict.items():
-        if k in model_state:
-            if model_state[k].shape != v.shape:
-                raise RuntimeError(
-                    f"FATAL: Architecture mismatch for layer '{k}': "
-                    f"model expected {model_state[k].shape}, checkpoint has {v.shape}."
-                )
+    if not use_g8_film:
+        # Architecture verification (360 obs_dim, 180 actions)
+        state_dict = ckpt["state_dict"] if isinstance(ckpt, dict) and "state_dict" in ckpt else ckpt
+        model_state = online_drqn.state_dict()
+        for k, v in state_dict.items():
+            if k in model_state:
+                if model_state[k].shape != v.shape:
+                    raise RuntimeError(
+                        f"FATAL: Architecture mismatch for layer '{k}': "
+                        f"model expected {model_state[k].shape}, checkpoint has {v.shape}."
+                    )
 
-    # Weights-only loading into online and target DRQN
-    online_drqn.load_state_dict(state_dict, strict=True)
-    target_drqn.load_state_dict(ckpt.get("target_state_dict", state_dict) if isinstance(ckpt, dict) else state_dict, strict=True)
-    logger.info("Loaded parent weights into online and target DRQN (strict=True).")
+        # Weights-only loading into online and target DRQN
+        online_drqn.load_state_dict(state_dict, strict=True)
+        target_drqn.load_state_dict(ckpt.get("target_state_dict", state_dict) if isinstance(ckpt, dict) else state_dict, strict=True)
+        logger.info("Loaded parent weights into online and target DRQN (strict=True).")
+    else:
+        logger.info(
+            "G8 FiLM mode: skipping load_state_dict (weights already loaded by from_g7a_checkpoint). "
+            "Proceeding to checkpoint metadata restoration."
+        )
 
     # Determine restart vs in-flight continuation contract
     is_baseline_restart = (
@@ -1034,7 +1175,12 @@ def train_scheduler(
     best_reward = -float("inf")
     eps = eps_start
     reward_baseline = -0.39
-    start_step = int(sched_cfg.get("start_step", 25000 if is_baseline_restart else 0))
+    if start_step_override is not None:
+        start_step = int(start_step_override)
+    elif isinstance(ckpt, dict) and int(ckpt.get("global_step", ckpt.get("step", 0))) > 0:
+        start_step = int(ckpt.get("global_step", ckpt.get("step", 0)))
+    else:
+        start_step = int(sched_cfg.get("start_step", 25000 if is_baseline_restart else 0))
 
     if is_baseline_restart:
         logger.info("Weights-only baseline restart contract ACTIVE: fresh optimizer, fresh replay, fresh RNG, fresh exploration starting at step %d.", start_step)
@@ -1317,6 +1463,49 @@ def train_scheduler(
                     act_source = "greedy"
                     decision_source = "ml_exploitation"
 
+            if collapse_guard is not None:
+                if act_source == "greedy":
+                    mode_chosen = int(action % n_modes)
+                    guard_result = collapse_guard.update(mode_chosen)
+                else:
+                    guard_result = {"triggered": False}
+
+                # Shadow-greedy probe evaluation every guard_check_freq (default 10) steps
+                guard_check_freq = int(sched_cfg.get("guard_check_freq", 10))
+                if collapse_guard.probe_obs is not None and (global_step % guard_check_freq == 0):
+                    shadow_result = collapse_guard.check_shadow_greedy(online_drqn, global_step, device)
+                    if shadow_result.get("triggered", False):
+                        guard_result = shadow_result
+
+                if guard_result.get("triggered", False):
+                    logger.error(
+                        "MODE COLLAPSE GUARD TRIGGERED (%s) at step %d: SHORT=%.1f%%, entropy=%.3f. "
+                        "Saving emergency checkpoint and halting.",
+                        guard_result.get("reason", "unknown"),
+                        global_step,
+                        guard_result["short_frac"] * 100.0,
+                        guard_result["entropy"],
+                    )
+                    from ..utils.checkpoint_meta import build_train_metadata, save_state
+
+                    emergency_meta = build_train_metadata(
+                        split=subset,
+                        n_bands=n_bands,
+                        arch="FiLMGatedFactorizedDRQN",
+                        seed=seed,
+                        metrics={"collapse_triggered_step": global_step},
+                        extra={"parent_sha256": parent_sha256, "collapse_guard": guard_result},
+                    )
+                    save_state(
+                        online_drqn,
+                        output_dir / f"emergency_collapse_step_{global_step}.pt",
+                        emergency_meta,
+                    )
+                    raise RuntimeError(
+                        f"Mode collapse guard triggered ({guard_result.get('reason', 'unknown')}) at step {global_step}: "
+                        f"SHORT={guard_result['short_frac']:.1%}, entropy={guard_result['entropy']:.3f}"
+                    )
+
             # ---- Step env ----
             dec_telem = getattr(online_drqn, "last_decision_telemetry", None)
             if act_source in ("thompson", "random", "targeted_random") or dec_telem is None:
@@ -1411,10 +1600,16 @@ def train_scheduler(
 
             actual_dwell_us = float(info.get("dwell_time_us", 500.0 * DEFAULT_DWELL_MULTIPLIERS[action % n_modes]))
 
+            if reward_shaper is not None:
+                mode_chosen = int(action % n_modes)
+                shaped_reward = reward_shaper.shape(float(reward), mode_chosen, actual_dwell_us)
+            else:
+                shaped_reward = float(reward)
+
             buffer.add(
                 np.asarray(obs, dtype=np.float32),
                 action,
-                float(reward),
+                shaped_reward,
                 np.asarray(next_obs, dtype=np.float32),
                 done,
                 hit_prob=float(info.get("hit_prob", 1.0 if info["hit"] else 0.0)),
@@ -1435,12 +1630,28 @@ def train_scheduler(
                     total_train_steps = max(1, total_steps - start_step)
                     progress = min(1.0, max(0.0, (global_step - start_step) / total_train_steps))
                     min_lr = float(sched_cfg.get("min_lr", 5.0e-6))
-                    base_lr = float(sched_cfg.get("learning_rate", drqn_cfg.get("lr", 1e-4)))
+                    base_lr = learning_rate
                     current_lr = min_lr + 0.5 * (base_lr - min_lr) * (1.0 + np.cos(np.pi * progress))
                     for param_group in optimizer.param_groups:
                         param_group["lr"] = current_lr
                 try:
-                    batch = buffer.sample(batch_size, target_hit_seq_fraction=0.40)
+                    if stratified_sampler is not None:
+                        batch = stratified_sampler.sample(batch_size, target_hit_seq_fraction=0.40)
+                    else:
+                        batch = buffer.sample(batch_size, target_hit_seq_fraction=0.40)
+
+                    if use_g8_film:
+                        effective_lambda_entropy = cosine_beta_schedule(
+                            step=global_step,
+                            total_steps=total_steps,
+                            start_step=26000,
+                            beta_max=float(sched_cfg.get("g8_beta_max", 0.10)),
+                            warmup_frac=float(sched_cfg.get("g8_warmup_frac", 0.10)),
+                            beta_min=float(sched_cfg.get("lambda_entropy", 0.01)),
+                        )
+                    else:
+                        effective_lambda_entropy = lambda_entropy
+
                     upd_stats: dict = {}
                     loss_val = _do_drqn_update(
                         online_drqn,
@@ -1458,7 +1669,7 @@ def train_scheduler(
                         q_reg_coef=q_reg_coef,
                         n_bands=n_bands,
                         n_modes=n_modes,
-                        lambda_entropy=lambda_entropy,
+                        lambda_entropy=effective_lambda_entropy,
                         band_diversity_penalty_coef=band_diversity_penalty_coef,
                         band_diversity_threshold=band_diversity_threshold,
                         mode_diversity_penalty_coef=mode_diversity_penalty_coef,
@@ -1466,6 +1677,7 @@ def train_scheduler(
                         mode_collapse_rate_threshold=mode_collapse_rate_threshold,
                         objective_mode=objective_mode,
                         c_dwell=c_dwell,
+                        tau_ref=tau_ref,
                     )
                     if upd_stats.get("optimizer_update_attempted", False):
                         update_integrity_counters["optimizer_updates_attempted"] += 1
@@ -2255,6 +2467,12 @@ if __name__ == "__main__":
     parser.add_argument("--mode-diversity-penalty-coef", type=float, default=None, help="Per-band mode diversity penalty coefficient.")
     parser.add_argument("--mode-diversity-threshold", type=float, default=None, help="Per-band mode concentration threshold.")
     parser.add_argument("--mode-collapse-rate-threshold", type=float, default=None, help="Fraction of bands with mode concentration required to trigger penalty.")
+    parser.add_argument("--use-g8-film", action="store_true", default=None, help="Use FiLM-gated factorized DRQN architecture.")
+    parser.add_argument("--objective-mode", type=str, default=None, help="DRQN objective mode (e.g. g3d_hybrid, g3b_smdp_only, g8_fixed_ref, step_based).")
+    parser.add_argument("--c-dwell", type=float, default=None, help="Dwell penalty coefficient c_dwell.")
+    parser.add_argument("--tau-ref", type=float, default=None, help="Fixed reference dwell multiplier tau_ref for centered dwell shaping.")
+    parser.add_argument("--fresh-optimizer", action="store_true", default=False, help="Initialize fresh AdamW optimizer state upon resume.")
+    parser.add_argument("--use-online-reward-shaper", action="store_true", default=False, help="Enable online EMA reward shaper on buffer.add.")
     args = parser.parse_args()
     if args.device:
         os.environ["DEVICE"] = args.device
@@ -2286,5 +2504,11 @@ if __name__ == "__main__":
         mode_diversity_penalty_coef=args.mode_diversity_penalty_coef,
         mode_diversity_threshold=args.mode_diversity_threshold,
         mode_collapse_rate_threshold=args.mode_collapse_rate_threshold,
+        use_g8_film=args.use_g8_film,
+        objective_mode=args.objective_mode,
+        c_dwell=args.c_dwell,
+        tau_ref=args.tau_ref,
+        fresh_optimizer=args.fresh_optimizer,
+        use_online_reward_shaper=args.use_online_reward_shaper,
     )
 

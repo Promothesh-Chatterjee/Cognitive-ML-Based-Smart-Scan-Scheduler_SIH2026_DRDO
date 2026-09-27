@@ -1,0 +1,298 @@
+{
+  "checkpoint_sha256": "07480d2c3ad37880b13f0710b42d9e03c8147236617d4fe246de6f63e1941e17",
+  "phase": "G8-A",
+  "step": 27000,
+  "mode_entropy": 0.8409330162004809,
+  "mode_distribution_pct": {
+    "SHORT_DWELL": 54.190000000000005,
+    "NORMAL_DWELL": 4.6899999999999995,
+    "LONG_DWELL": 41.120000000000005,
+    "REVISIT": 0.0,
+    "PREEMPTIVE_INTERCEPT": 0.0
+  },
+  "short_fraction_pct": 54.190000000000005,
+  "q_max": 39.392860412597656,
+  "q_min": -19.824512481689453,
+  "q_mean": -17.093231201171875,
+  "q_std": 10.02324104309082,
+  "mean_pd": 55.31331864726921,
+  "sparse_pd": 40.625,
+  "agile_pd": 24.892703862660944,
+  "repeated_band_dwell_fraction": 0.48494849484948493,
+  "gross_hits_per_ms": 0.5768460187958278,
+  "novel_hits_per_ms": 0.0021480945987813692,
+  "film_gate_stats": {
+    "gamma_mean": 1.0017856359481812,
+    "gamma_std": 0.002608620561659336,
+    "gamma_min": 0.997905433177948,
+    "gamma_max": 1.0292086601257324,
+    "beta_mean": -0.002616109559312463,
+    "beta_std": 0.007213293574750423,
+    "beta_min": -0.0627816691994667,
+    "beta_max": 0.034085147082805634
+  },
+  "criteria": {
+    "c1_mean_pd_ge_78": {
+      "value": 55.31331864726921,
+      "passed": false
+    },
+    "c2_hmode_ge_040": {
+      "value": 0.8409330162004809,
+      "passed": true
+    },
+    "c3_config29_pd_gt_0": {
+      "value": 0.0,
+      "passed": false
+    },
+    "c4_config119_pd_gt_0": {
+      "value": 0.0,
+      "passed": false
+    },
+    "c5_config241_pd_gt_0": {
+      "value": 0.0,
+      "passed": false
+    },
+    "c6_short_range_15_to_80": {
+      "value": 54.190000000000005,
+      "passed": true
+    },
+    "c7_qmax_le_35": {
+      "value": 39.392860412597656,
+      "passed": false
+    }
+  },
+  "all_criteria_met": false,
+  "verdict": "NON_QUALIFIED",
+  "scenarios": {
+    "config_117": {
+      "steps": 1000,
+      "hits": 961,
+      "novel_hits": 1,
+      "dwell_ms": 1214.0,
+      "gross_hits_per_ms": 0.7915980230642504,
+      "novel_hits_per_ms": 0.0008237232289950577,
+      "ir_decision": 96.1,
+      "pd": 100.0,
+      "pfa": 0.0,
+      "first_hit_latency_ms": 20.0,
+      "mean_consecutive_band_run": 25.0,
+      "max_consecutive_band_run": 961,
+      "repeated_band_fraction": 0.960960960960961,
+      "modes": {
+        "SHORT_DWELL": 0,
+        "NORMAL_DWELL": 48,
+        "LONG_DWELL": 952,
+        "REVISIT": 0,
+        "PREEMPTIVE_INTERCEPT": 0
+      },
+      "short_fraction_pct": 0.0
+    },
+    "config_119": {
+      "steps": 1000,
+      "hits": 0,
+      "novel_hits": 0,
+      "dwell_ms": 256.625,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0,
+      "ir_decision": 0.0,
+      "pd": 0.0,
+      "pfa": 0.0,
+      "first_hit_latency_ms": 256.625,
+      "mean_consecutive_band_run": 1.0834236186348862,
+      "max_consecutive_band_run": 8,
+      "repeated_band_fraction": 0.07707707707707707,
+      "modes": {
+        "SHORT_DWELL": 851,
+        "NORMAL_DWELL": 48,
+        "LONG_DWELL": 101,
+        "REVISIT": 0,
+        "PREEMPTIVE_INTERCEPT": 0
+      },
+      "short_fraction_pct": 85.1
+    },
+    "config_143": {
+      "steps": 1000,
+      "hits": 13,
+      "novel_hits": 1,
+      "dwell_ms": 258.125,
+      "gross_hits_per_ms": 0.05036319612590799,
+      "novel_hits_per_ms": 0.00387409200968523,
+      "ir_decision": 1.3,
+      "pd": 81.25,
+      "pfa": 0.0,
+      "first_hit_latency_ms": 3.5,
+      "mean_consecutive_band_run": 1.0660980810234542,
+      "max_consecutive_band_run": 23,
+      "repeated_band_fraction": 0.062062062062062065,
+      "modes": {
+        "SHORT_DWELL": 851,
+        "NORMAL_DWELL": 46,
+        "LONG_DWELL": 103,
+        "REVISIT": 0,
+        "PREEMPTIVE_INTERCEPT": 0
+      },
+      "short_fraction_pct": 85.1
+    },
+    "config_194": {
+      "steps": 1000,
+      "hits": 911,
+      "novel_hits": 3,
+      "dwell_ms": 1134.125,
+      "gross_hits_per_ms": 0.8032624269811529,
+      "novel_hits_per_ms": 0.0026452110657996255,
+      "ir_decision": 91.10000000000001,
+      "pd": 100.0,
+      "pfa": 0.0,
+      "first_hit_latency_ms": 3.0,
+      "mean_consecutive_band_run": 166.66666666666666,
+      "max_consecutive_band_run": 995,
+      "repeated_band_fraction": 0.994994994994995,
+      "modes": {
+        "SHORT_DWELL": 77,
+        "NORMAL_DWELL": 39,
+        "LONG_DWELL": 884,
+        "REVISIT": 0,
+        "PREEMPTIVE_INTERCEPT": 0
+      },
+      "short_fraction_pct": 7.7
+    },
+    "config_195": {
+      "steps": 1000,
+      "hits": 928,
+      "novel_hits": 3,
+      "dwell_ms": 1214.0,
+      "gross_hits_per_ms": 0.7644151565074135,
+      "novel_hits_per_ms": 0.002471169686985173,
+      "ir_decision": 92.80000000000001,
+      "pd": 99.57081545064378,
+      "pfa": 0.0,
+      "first_hit_latency_ms": 21.0,
+      "mean_consecutive_band_run": 23.25581395348837,
+      "max_consecutive_band_run": 929,
+      "repeated_band_fraction": 0.9579579579579579,
+      "modes": {
+        "SHORT_DWELL": 0,
+        "NORMAL_DWELL": 48,
+        "LONG_DWELL": 952,
+        "REVISIT": 0,
+        "PREEMPTIVE_INTERCEPT": 0
+      },
+      "short_fraction_pct": 0.0
+    },
+    "config_241": {
+      "steps": 1000,
+      "hits": 0,
+      "novel_hits": 0,
+      "dwell_ms": 256.625,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0,
+      "ir_decision": 0.0,
+      "pd": 0.0,
+      "pfa": 0.0,
+      "first_hit_latency_ms": 256.625,
+      "mean_consecutive_band_run": 1.0834236186348862,
+      "max_consecutive_band_run": 8,
+      "repeated_band_fraction": 0.07707707707707707,
+      "modes": {
+        "SHORT_DWELL": 851,
+        "NORMAL_DWELL": 48,
+        "LONG_DWELL": 101,
+        "REVISIT": 0,
+        "PREEMPTIVE_INTERCEPT": 0
+      },
+      "short_fraction_pct": 85.1
+    },
+    "config_29": {
+      "steps": 1000,
+      "hits": 0,
+      "novel_hits": 0,
+      "dwell_ms": 256.625,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0,
+      "ir_decision": 0.0,
+      "pd": 0.0,
+      "pfa": 0.0,
+      "first_hit_latency_ms": 256.625,
+      "mean_consecutive_band_run": 1.0834236186348862,
+      "max_consecutive_band_run": 8,
+      "repeated_band_fraction": 0.07707707707707707,
+      "modes": {
+        "SHORT_DWELL": 851,
+        "NORMAL_DWELL": 48,
+        "LONG_DWELL": 101,
+        "REVISIT": 0,
+        "PREEMPTIVE_INTERCEPT": 0
+      },
+      "short_fraction_pct": 85.1
+    },
+    "config_42": {
+      "steps": 1000,
+      "hits": 0,
+      "novel_hits": 0,
+      "dwell_ms": 256.625,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0,
+      "ir_decision": 0.0,
+      "pd": 0.0,
+      "pfa": 0.0,
+      "first_hit_latency_ms": 256.625,
+      "mean_consecutive_band_run": 1.0834236186348862,
+      "max_consecutive_band_run": 8,
+      "repeated_band_fraction": 0.07707707707707707,
+      "modes": {
+        "SHORT_DWELL": 851,
+        "NORMAL_DWELL": 48,
+        "LONG_DWELL": 101,
+        "REVISIT": 0,
+        "PREEMPTIVE_INTERCEPT": 0
+      },
+      "short_fraction_pct": 85.1
+    },
+    "config_64": {
+      "steps": 1000,
+      "hits": 556,
+      "novel_hits": 3,
+      "dwell_ms": 921.5,
+      "gross_hits_per_ms": 0.6033640803038525,
+      "novel_hits_per_ms": 0.0032555615843733042,
+      "ir_decision": 55.60000000000001,
+      "pd": 93.60269360269359,
+      "pfa": 0.0,
+      "first_hit_latency_ms": 102.75,
+      "mean_consecutive_band_run": 9.00900900900901,
+      "max_consecutive_band_run": 890,
+      "repeated_band_fraction": 0.8898898898898899,
+      "modes": {
+        "SHORT_DWELL": 260,
+        "NORMAL_DWELL": 48,
+        "LONG_DWELL": 692,
+        "REVISIT": 0,
+        "PREEMPTIVE_INTERCEPT": 0
+      },
+      "short_fraction_pct": 26.0
+    },
+    "config_96": {
+      "steps": 1000,
+      "hits": 122,
+      "novel_hits": 2,
+      "dwell_ms": 283.625,
+      "gross_hits_per_ms": 0.4301454385191714,
+      "novel_hits_per_ms": 0.007051564565888057,
+      "ir_decision": 12.2,
+      "pd": 78.70967741935485,
+      "pfa": 0.0,
+      "first_hit_latency_ms": 61.5,
+      "mean_consecutive_band_run": 3.115264797507788,
+      "max_consecutive_band_run": 166,
+      "repeated_band_fraction": 0.6796796796796797,
+      "modes": {
+        "SHORT_DWELL": 827,
+        "NORMAL_DWELL": 48,
+        "LONG_DWELL": 125,
+        "REVISIT": 0,
+        "PREEMPTIVE_INTERCEPT": 0
+      },
+      "short_fraction_pct": 82.69999999999999
+    }
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "parent_checkpoint": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_2\\parent_film_gate_26000.pt",
+  "parent_sha256": "a96564846225dc6b56d5392c49012e15e8395ab2f17e724a42290a89f4384a21",
+  "materialized_checkpoint": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_3b_targeted_replay\\initial_g8_3b_gate_26000.pt",
+  "materialized_sha256": "5bbf15b09caabe3e76331714d68b0ca52774ae88d5d8a6e9dcfc09fa1e7d4ad2",
+  "tensor_transfer_manifest": {
+    "inherited_exact": [
+      "input_norm.weight",
+      "input_norm.bias",
+      "lstm.weight_ih_l0",
+      "lstm.weight_hh_l0",
+      "lstm.bias_ih_l0",
+      "lstm.bias_hh_l0",
+      "lstm.weight_ih_l1",
+      "lstm.weight_hh_l1",
+      "lstm.bias_ih_l1",
+      "lstm.bias_hh_l1",
+      "value_stream.0.weight",
+      "value_stream.0.bias",
+      "value_stream.2.weight",
+      "value_stream.2.bias",
+      "band_encoder.0.weight",
+      "band_encoder.0.bias",
+      "ctx_proj.0.weight",
+      "ctx_proj.0.bias",
+      "band_head.0.weight",
+      "band_head.0.bias",
+      "band_head.2.weight",
+      "band_head.2.bias",
+      "intercept_prob_head.0.weight",
+      "intercept_prob_head.0.bias",
+      "intercept_prob_head.2.weight",
+      "intercept_prob_head.2.bias",
+      "intercept_time_head.0.weight",
+      "intercept_time_head.0.bias",
+      "intercept_time_head.2.weight",
+      "intercept_time_head.2.bias",
+      "dwell_head.0.bias",
+      "dwell_head.2.weight",
+      "dwell_head.2.bias"
+    ],
+    "inherited_reshaped": [
+      {
+        "source": "mode_head.0.weight (64, 256)",
+        "target": "dwell_head.0.weight (64, 288)",
+        "rule": "Cols 0..255 from parent mode_head.0; Cols 256..287 initialized to 0.0"
+      }
+    ],
+    "intentionally_replaced": [
+      "mode_head.0.weight",
+      "mode_head.0.bias",
+      "mode_head.2.weight",
+      "mode_head.2.bias"
+    ],
+    "intentionally_dropped": [
+      "film_proj.0.weight",
+      "film_proj.0.bias",
+      "film_proj.2.weight",
+      "film_proj.2.bias"
+    ]
+  },
+  "probe_batch_audit": {
+    "mean_abs_dq": 1.5543385245564423e-08,
+    "max_abs_dq": 9.5367431640625e-07,
+    "action_flip_rate_pct": 0.0,
+    "band_flip_rate_pct": 0.0,
+    "mode_flip_rate_pct": 0.0
+  },
+  "config_29_audit": {
+    "pd": 72.0,
+    "hits": 18,
+    "p_long_pct": 50.2,
+    "mean_delta_q_long": 0.010415745794773102
+  }
+}

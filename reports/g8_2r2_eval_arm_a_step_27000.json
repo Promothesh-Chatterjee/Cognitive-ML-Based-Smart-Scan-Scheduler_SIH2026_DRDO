@@ -1,0 +1,105 @@
+{
+  "mean_pd": 76.00861378783743,
+  "agile_pd": 44.61012736874805,
+  "sparse_pd": 61.11111111111111,
+  "dense_pd": 98.55134790289864,
+  "blackout_count": 1,
+  "h_mode": 0.4718480863963812,
+  "h_tau": 0.47184808631093544,
+  "tau_dist": {
+    "0.25": 0.1803,
+    "1.0": 0.8197,
+    "2.5": 0.0
+  },
+  "short_pct": 18.029999999999998,
+  "normal_pct": 0.0,
+  "long_pct": 0.0,
+  "revisit_pct": 81.97,
+  "preemptive_pct": 0.0,
+  "q_max": 32.21111297607422,
+  "q_mean": -8.435896873474121,
+  "q_std": 14.521249771118164,
+  "greedy_action_margin": 0.09613130241632462,
+  "distinct_bands": 36,
+  "top_band_fraction": 0.2072,
+  "film_flip_pct": 0.12,
+  "film_delta_q": 0.002835667854046915,
+  "film_rho": 0.00019527712137331848,
+  "scenarios": {
+    "config_117": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 882,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_119": {
+      "pd": 33.33333333333333,
+      "steps": 1000,
+      "hits": 1,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_143": {
+      "pd": 88.88888888888889,
+      "steps": 1000,
+      "hits": 16,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_194": {
+      "pd": 99.89858012170384,
+      "steps": 1000,
+      "hits": 985,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_195": {
+      "pd": 99.63235294117648,
+      "steps": 1000,
+      "hits": 813,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_241": {
+      "pd": 86.48648648648648,
+      "steps": 1000,
+      "hits": 96,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_29": {
+      "pd": 0.0,
+      "steps": 1000,
+      "hits": 0,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_42": {
+      "pd": 58.620689655172406,
+      "steps": 1000,
+      "hits": 170,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_64": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 801,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_96": {
+      "pd": 93.2258064516129,
+      "steps": 1000,
+      "hits": 578,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    }
+  },
+  "halted_by_guard": false,
+  "eval_step": 27000,
+  "arm": "A",
+  "arm_name": "Arm A2 (Canonical G3-D Control)",
+  "checkpoint_path": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_2r2_arm_a\\checkpoint_gate_27000.pt"
+}

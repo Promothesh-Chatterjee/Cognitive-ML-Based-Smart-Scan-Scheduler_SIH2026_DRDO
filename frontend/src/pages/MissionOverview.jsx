@@ -649,6 +649,81 @@ export default function MissionOverview() {
         </div>
       )}
 
+      {/* Authoritative Model Provenance & Frozen Validated Benchmark Banner */}
+      <section
+        style={{
+          background: "linear-gradient(90deg, #101524 0%, #0d121c 100%)",
+          border: "1px solid #3b4261",
+          borderLeft: "4px solid #49df9d",
+          padding: "10px 14px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+          margin: "4px 0",
+        }}
+        aria-label="Authoritative Model Provenance and Validated Benchmark"
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 20, color: "#49df9d" }}>
+              verified
+            </span>
+            <div>
+              <span style={{ fontSize: 10, color: "#908f9e", letterSpacing: "0.06em", fontWeight: 700 }}>
+                ACTIVE OPERATIONAL SCHEDULER:
+              </span>{" "}
+              <strong style={{ fontSize: 13, color: "#ffffff", letterSpacing: "0.02em" }}>
+                Gate-27 Operational Baseline
+              </strong>
+              <span style={{ marginLeft: 8, fontSize: 10, color: "#49df9d", background: "rgba(73, 223, 157, 0.15)", border: "1px solid #49df9d60", padding: "1px 6px", fontWeight: 700 }}>
+                TRAINING STEP 27,000 · FROZEN DEMONSTRATION
+              </span>
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "#a8a7b8" }}>
+            <span style={{ color: "#908f9e" }}>SHA-256:</span>
+            <code style={{ color: "#bdc2ff", background: "#0a0c12", padding: "2px 6px", border: "1px solid #282d3f", fontSize: 10 }}>
+              fac0577454fe0a89687c27ebdffa568229e2d03435eebd9e82b50fca14292094
+            </code>
+          </div>
+        </div>
+
+        {/* Frozen Benchmark Card */}
+        <div
+          style={{
+            background: "rgba(0, 0, 0, 0.4)",
+            border: "1px dashed #3b4261",
+            padding: "8px 12px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 12,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16, color: "#ffd700" }}>
+              workspace_premium
+            </span>
+            <span style={{ fontSize: 10.5, fontWeight: 700, color: "#ffd700", letterSpacing: "0.04em" }}>
+              VALIDATED GATE-27 TRAINING BENCHMARK (IMMUTABLE OFFLINE EVIDENCE)
+            </span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", fontSize: 11 }}>
+            <span style={{ color: "#908f9e" }}>Mean Pd: <strong style={{ color: "#49df9d" }}>85.09%</strong></span>
+            <span style={{ color: "#908f9e" }}>Agile Pd: <strong style={{ color: "#6afcb8" }}>71.92%</strong></span>
+            <span style={{ color: "#908f9e" }}>config29 Pd: <strong style={{ color: "#96ccff" }}>95.87%</strong></span>
+            <span style={{ color: "#908f9e" }}>Dense Pd: <strong style={{ color: "#bdc2ff" }}>97.33%</strong></span>
+            <span style={{ color: "#908f9e" }}>Blackouts: <strong style={{ color: "#49df9d" }}>0</strong></span>
+            <span style={{ color: "#908f9e" }}>IR(time): <strong style={{ color: "#ffd700" }}>0.9108 hits/ms</strong></span>
+            <span style={{ color: "#908f9e" }}>Qmax: <strong style={{ color: "#e2e2e8" }}>30.32</strong></span>
+          </div>
+          <span style={{ fontSize: 9.5, color: "#7a7d8c", fontStyle: "italic" }}>
+            *Reference validation evidence. Live mission telemetry is measured independently below.
+          </span>
+        </div>
+      </section>
+
       {/* KPI Strip */}
       <section className="st-kpi-grid" aria-label="Mission KPI strip">
         <KpiCard

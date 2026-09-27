@@ -1,0 +1,391 @@
+{
+  "checkpoint": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_4_reg_diagnostic\\checkpoint_gate_28000.pt",
+  "tier1_primary_metrics": {
+    "mean_pd": 78.0579469139777,
+    "agile_pd": 54.56930105306628,
+    "sparse_pd": 86.69059396734481,
+    "dense_pd": 97.30517348239678,
+    "worst_case_scenario": "config_29",
+    "worst_case_pd": 0.0,
+    "total_blackouts": 1,
+    "config_29_pd": 0.0,
+    "global_ir_time_gross_hits_per_ms": 0.8771,
+    "total_mission_time_ms": 10000.0,
+    "total_hits": 8771
+  },
+  "tier2_secondary_metrics": {
+    "global_band_switch_rate": 0.1909454727363682
+  },
+  "tier3_diagnostic_metrics": {
+    "global_ir_step": 0.43855,
+    "h_mode": 0.7888849609037736,
+    "h_tau": 5.7262220032859976e-11,
+    "tau_distribution": {
+      "0.25": 0.0,
+      "1.0": 1.0,
+      "2.5": 0.0
+    },
+    "short_pct": 0.0,
+    "normal_pct": 4.515000000000001,
+    "long_pct": 0.0,
+    "revisit_pct": 64.06500000000001,
+    "preemptive_pct": 31.419999999999998,
+    "q_max": 58.952640533447266,
+    "q_mean": 0.7642344236373901,
+    "q_std": 29.240402221679688,
+    "probe_d_flips": 512,
+    "probe_d_flip_rate": 1.0,
+    "probe_flips_vs_gate27": 183,
+    "probe_flip_rate_vs_gate27_pct": 35.7421875,
+    "probe_spearman_rho_vs_gate27": 0.8924093693955029,
+    "probe_normalized_coupling_cd": {
+      "cd_within_top_band_mean": 0.3509847031785192,
+      "cd_within_top_band_median": 0.3435539507433951,
+      "cd_global_top2_mean": 0.4283704573025252,
+      "cd_global_top2_median": 0.16545487225415778
+    },
+    "config_29_long_rate": 0.0,
+    "config_29_mean_delta_q_long": -1.0797543955594302
+  },
+  "thrashing_audit": {
+    "thrashing_failed": true,
+    "max_cycle_length": 6,
+    "cycle_occupancy_fraction": 0.82075,
+    "distinct_bands_scheduled": 36,
+    "top_band_concentration": 0.29115
+  },
+  "scenario_results": {
+    "config_117": {
+      "pd": 100.0,
+      "steps": 2000,
+      "hits": 1816,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 1.816,
+      "ir_step": 0.908,
+      "first_hit_latency_us": 3500.0,
+      "band_switch_rate": 0.0030015007503751876,
+      "distinct_bands": 7,
+      "top_band_concentration": 0.997,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.997,
+        "cycle_steps": 1994,
+        "total_steps": 2000
+      }
+    },
+    "config_119": {
+      "pd": 97.60479041916167,
+      "steps": 2000,
+      "hits": 163,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 0.163,
+      "ir_step": 0.0815,
+      "first_hit_latency_us": 914000.0,
+      "band_switch_rate": 0.36518259129564784,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.6035,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.666,
+        "cycle_steps": 1332,
+        "total_steps": 2000
+      }
+    },
+    "config_143": {
+      "pd": 75.77639751552795,
+      "steps": 2000,
+      "hits": 122,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 0.122,
+      "ir_step": 0.061,
+      "first_hit_latency_us": 1500.0,
+      "band_switch_rate": 0.3046523261630815,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.76,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.71,
+        "cycle_steps": 1420,
+        "total_steps": 2000
+      }
+    },
+    "config_194": {
+      "pd": 100.0,
+      "steps": 2000,
+      "hits": 1999,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 1.999,
+      "ir_step": 0.9995,
+      "first_hit_latency_us": 1000.0,
+      "band_switch_rate": 0.0005002501250625312,
+      "distinct_bands": 2,
+      "top_band_concentration": 0.9995,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.9995,
+        "cycle_steps": 1999,
+        "total_steps": 2000
+      }
+    },
+    "config_195": {
+      "pd": 98.82666666666667,
+      "steps": 2000,
+      "hits": 1853,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 1.853,
+      "ir_step": 0.9265,
+      "first_hit_latency_us": 19000.0,
+      "band_switch_rate": 0.018509254627313655,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.982,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.9815,
+        "cycle_steps": 1963,
+        "total_steps": 2000
+      }
+    },
+    "config_241": {
+      "pd": 65.5,
+      "steps": 2000,
+      "hits": 131,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 0.131,
+      "ir_step": 0.0655,
+      "first_hit_latency_us": 24000.0,
+      "band_switch_rate": 0.31015507753876936,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.6315,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.697,
+        "cycle_steps": 1394,
+        "total_steps": 2000
+      }
+    },
+    "config_29": {
+      "pd": 0.0,
+      "steps": 2000,
+      "hits": 0,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 0.0,
+      "ir_step": 0.0,
+      "first_hit_latency_us": 1000000.0,
+      "band_switch_rate": 0.37718859429714857,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.6835,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.657,
+        "cycle_steps": 1314,
+        "total_steps": 2000
+      }
+    },
+    "config_42": {
+      "pd": 55.172413793103445,
+      "steps": 2000,
+      "hits": 32,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 0.032,
+      "ir_step": 0.016,
+      "first_hit_latency_us": 914000.0,
+      "band_switch_rate": 0.36518259129564784,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.6035,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.666,
+        "cycle_steps": 1332,
+        "total_steps": 2000
+      }
+    },
+    "config_64": {
+      "pd": 91.42394822006472,
+      "steps": 2000,
+      "hits": 1130,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 1.13,
+      "ir_step": 0.565,
+      "first_hit_latency_us": 75000.0,
+      "band_switch_rate": 0.07453726863431716,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.9275,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.9255,
+        "cycle_steps": 1851,
+        "total_steps": 2000
+      }
+    },
+    "config_96": {
+      "pd": 96.27525252525253,
+      "steps": 2000,
+      "hits": 1525,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 1.525,
+      "ir_step": 0.7625,
+      "first_hit_latency_us": 91000.0,
+      "band_switch_rate": 0.09054527263631816,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.912,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.908,
+        "cycle_steps": 1816,
+        "total_steps": 2000
+      }
+    }
+  },
+  "scenario_dwell_breakdown": {
+    "config_117": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 0.7467908765696758,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.3365,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.0255,
+        "PREEMPTIVE_INTERCEPT": 0.638
+      }
+    },
+    "config_119": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 0.18352113687149785,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.045,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.955,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_143": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 1.1452421802089798e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 1.0,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_194": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 0.11690684922655381,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.025,
+        "PREEMPTIVE_INTERCEPT": 0.975
+      }
+    },
+    "config_195": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 0.2391739603188486,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.0645,
+        "PREEMPTIVE_INTERCEPT": 0.9355
+      }
+    },
+    "config_241": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 1.1452421802089798e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 1.0,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_29": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 1.1452421802089798e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 1.0,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_42": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 1.1452421802089798e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 1.0,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_64": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 1.1452421802089798e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 1.0,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_96": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 0.8622892483903629,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.07,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.3365,
+        "PREEMPTIVE_INTERCEPT": 0.5935
+      }
+    }
+  },
+  "observation_step": 28000,
+  "gate_28000_disposition": "FAILED",
+  "gate_28000_failure_reasons": [
+    "Mean Pd 78.06% < 80.0% floor",
+    "Agile Pd 54.57% < 65.0% floor",
+    "config_29 Pd 0.00% < 85.0% floor",
+    "Total blackouts 1 > 0 floor",
+    "Q_max 58.95 > 35.0 ceiling",
+    "Pathological thrashing failure detected"
+  ]
+}

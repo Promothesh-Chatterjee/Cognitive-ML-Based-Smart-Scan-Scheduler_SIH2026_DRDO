@@ -1,0 +1,97 @@
+{
+  "mean_pd": 56.615814187709155,
+  "agile_pd": 0.0,
+  "sparse_pd": 40.0,
+  "dense_pd": 97.23162837541831,
+  "blackout_count": 4,
+  "h_mode": 0.14069627717596164,
+  "short_pct": 97.36,
+  "normal_pct": 0.65,
+  "long_pct": 1.8900000000000001,
+  "q_max": 1.1197824478149414,
+  "q_mean": -9.377824783325195,
+  "q_std": 3.1306419372558594,
+  "greedy_action_margin": 0.0505392886698246,
+  "distinct_bands": 36,
+  "top_band_fraction": 0.1487,
+  "film_flip_pct": 0.13999999999999999,
+  "film_delta_q": 0.0011946621753333602,
+  "film_rho": 0.00038160294255194587,
+  "scenarios": {
+    "config_117": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 410,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_119": {
+      "pd": 0.0,
+      "steps": 1000,
+      "hits": 0,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_143": {
+      "pd": 80.0,
+      "steps": 1000,
+      "hits": 4,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_194": {
+      "pd": 99.89858012170384,
+      "steps": 1000,
+      "hits": 985,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_195": {
+      "pd": 98.64406779661017,
+      "steps": 1000,
+      "hits": 582,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_241": {
+      "pd": 0.0,
+      "steps": 1000,
+      "hits": 0,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_29": {
+      "pd": 0.0,
+      "steps": 1000,
+      "hits": 0,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_42": {
+      "pd": 0.0,
+      "steps": 1000,
+      "hits": 0,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_64": {
+      "pd": 98.80952380952381,
+      "steps": 1000,
+      "hits": 249,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_96": {
+      "pd": 88.80597014925374,
+      "steps": 1000,
+      "hits": 119,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    }
+  },
+  "halted_by_guard": false,
+  "eval_step": 26250,
+  "arm": "B",
+  "arm_name": "Arm B (No Explicit Immediate Dwell Penalty)",
+  "checkpoint_path": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_2_arm_b\\checkpoint_gate_26250.pt"
+}

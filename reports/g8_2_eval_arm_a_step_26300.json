@@ -1,0 +1,97 @@
+{
+  "mean_pd": 48.48489515746328,
+  "agile_pd": 0.0,
+  "sparse_pd": 0.0,
+  "dense_pd": 96.96979031492656,
+  "blackout_count": 5,
+  "h_mode": 0.13948348340158218,
+  "short_pct": 97.46000000000001,
+  "normal_pct": 1.26,
+  "long_pct": 1.18,
+  "q_max": 3.254967451095581,
+  "q_mean": -9.065465927124023,
+  "q_std": 3.6910560131073,
+  "greedy_action_margin": 0.060162365436553955,
+  "distinct_bands": 36,
+  "top_band_fraction": 0.151,
+  "film_flip_pct": 0.61,
+  "film_delta_q": 0.0015468810774735176,
+  "film_rho": 0.00041908902817524093,
+  "scenarios": {
+    "config_117": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 423,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_119": {
+      "pd": 0.0,
+      "steps": 1000,
+      "hits": 0,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_143": {
+      "pd": 0.0,
+      "steps": 1000,
+      "hits": 0,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_194": {
+      "pd": 99.89858012170384,
+      "steps": 1000,
+      "hits": 985,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_195": {
+      "pd": 98.73188405797102,
+      "steps": 1000,
+      "hits": 545,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_241": {
+      "pd": 0.0,
+      "steps": 1000,
+      "hits": 0,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_29": {
+      "pd": 0.0,
+      "steps": 1000,
+      "hits": 0,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_42": {
+      "pd": 0.0,
+      "steps": 1000,
+      "hits": 0,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_64": {
+      "pd": 98.57142857142858,
+      "steps": 1000,
+      "hits": 207,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_96": {
+      "pd": 87.6470588235294,
+      "steps": 1000,
+      "hits": 149,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    }
+  },
+  "halted_by_guard": false,
+  "eval_step": 26300,
+  "arm": "A",
+  "arm_name": "Arm A (Exact Canonical G3-D Control)",
+  "checkpoint_path": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_2_arm_a\\checkpoint_gate_26300.pt"
+}

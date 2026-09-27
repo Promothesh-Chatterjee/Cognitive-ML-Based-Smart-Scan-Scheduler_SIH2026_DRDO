@@ -121,6 +121,24 @@ export default function SystemConnection() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "var(--muted, #908f9e)" }}>Active Model:</span>
+              <strong style={{ color: "#49df9d" }}>
+                {healthData?.active_model || "Gate-27 Operational Baseline"}
+              </strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "var(--muted, #908f9e)" }}>Checkpoint SHA:</span>
+              <span style={{ color: "#bdc2ff", fontFamily: "monospace", fontSize: 9.5 }}>
+                {healthData?.checkpoint_sha256 ? `${healthData.checkpoint_sha256.slice(0, 16)}...` : "fac0577454fe0a89..."}
+              </span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "var(--muted, #908f9e)" }}>Training Step:</span>
+              <strong style={{ color: "#e2e2e8" }}>
+                27,000 (Frozen)
+              </strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ color: "var(--muted, #908f9e)" }}>Scheduler:</span>
               <strong style={{ color: healthData?.models_loaded?.scheduler ? "#49df9d" : "#f87171" }}>
                 {healthData?.models_loaded?.scheduler ? "LOADED (DRQN+MoE)" : "UNAVAILABLE"}

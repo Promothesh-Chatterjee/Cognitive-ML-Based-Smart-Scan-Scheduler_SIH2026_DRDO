@@ -1,0 +1,83 @@
+{
+  "phase": "Phase G8.4: Step-Based Bellman Diagnostic Objective",
+  "timestamp": "2026-09-27T14:30:00+05:30",
+  "parent_film_checkpoint": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_2\\parent_film_gate_26000.pt",
+  "initial_checkpoint": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_3b_targeted_replay\\initial_g8_3b_gate_26000.pt",
+  "replay_buffer": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_3a_preloaded_buffer.pkl",
+  "deterministic_probe": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_3a_probe_batch.pt",
+  "check_4_initial_preservation": {
+    "initial_sha256": "5bbf15b09caabe3e76331714d68b0ca52774ae88d5d8a6e9dcfc09fa1e7d4ad2",
+    "parent_sha256": "a96564846225dc6b56d5392c49012e15e8395ab2f17e724a42290a89f4384a21",
+    "probe_action_flips": 0,
+    "probe_total_steps": 512,
+    "mean_abs_delta_q": 1.5543385245564423e-08,
+    "max_abs_delta_q": 9.5367431640625e-07,
+    "passed": true
+  },
+  "check_3_physical_time_horizon": {
+    "statement": "With step-based discounting, a 1250 us LONG action receives the identical gamma=0.99 discount as a 500 us REVISIT action. Phase G8.4 tests what happens when all macro-actions receive equal per-decision discount (eliminating duration-dependent geometric contraction on empty transitions), not what happens when elapsed physical time is modeled. This distinction is preserved frozen.",
+    "acknowledged": true
+  },
+  "check_1_target_equivalence_audit": {
+    "mode_SHORT_DWELL": {
+      "count": 4000,
+      "mean_delta_y": -0.07583602865624343,
+      "max_abs_delta_y": 0.09741481998336532
+    },
+    "mode_NORMAL_DWELL": {
+      "count": 4000,
+      "mean_delta_y": 0.0,
+      "max_abs_delta_y": 0.0
+    },
+    "mode_LONG_DWELL": {
+      "count": 8000,
+      "mean_delta_y": 0.14454323512785996,
+      "max_abs_delta_y": 0.19443948624310536
+    },
+    "mode_REVISIT": {
+      "count": 4000,
+      "mean_delta_y": 0.0,
+      "max_abs_delta_y": 0.0
+    },
+    "mode_PREEMPTIVE_INTERCEPT": {
+      "count": 4000,
+      "mean_delta_y": 0.0,
+      "max_abs_delta_y": 0.0
+    },
+    "transitions_hit": {
+      "count": 11161,
+      "mean_delta_y": 0.006219474033840855,
+      "max_abs_delta_y": 0.18059794767989246
+    },
+    "transitions_empty": {
+      "count": 12839,
+      "mean_delta_y": 0.06103171716692952,
+      "max_abs_delta_y": 0.19443948624310536
+    },
+    "scenario_config_29": {
+      "count": 6000,
+      "mean_delta_y": 0.08930178939992311,
+      "max_abs_delta_y": 0.1936421668571704
+    },
+    "scenario_other_strata": {
+      "count": 18000,
+      "mean_delta_y": 0.017621723888798176,
+      "max_abs_delta_y": 0.19443948624310536
+    },
+    "passed": true
+  },
+  "check_2_long_contraction_quantification": {
+    "long_transitions_count": 8000,
+    "mean_delta_y_discount": 0.14454323512785996,
+    "median_delta_y_discount": 0.16475648527681397,
+    "p10_delta_y_discount": 0.03841538228233079,
+    "p90_delta_y_discount": 0.19113270929778672,
+    "min_delta_y_discount": -0.12815208639525544,
+    "max_delta_y_discount": 0.19443948624310536,
+    "config_29_empty_mean_delta_y": 0.15857128337379497,
+    "config_29_empty_count": 3414,
+    "mean_q_target": -9.757986965990625,
+    "predicted_deficit_from_mean_q": 0.14454323512785994,
+    "passed": true
+  }
+}

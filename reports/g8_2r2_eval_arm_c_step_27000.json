@@ -1,0 +1,105 @@
+{
+  "mean_pd": 74.80780592234312,
+  "agile_pd": 40.588827917345455,
+  "sparse_pd": 46.42857142857143,
+  "dense_pd": 98.57312093938131,
+  "blackout_count": 2,
+  "h_mode": 0.29882029426867446,
+  "h_tau": 0.29882029418175704,
+  "tau_dist": {
+    "0.25": 0.0884,
+    "1.0": 0.9116,
+    "2.5": 0.0
+  },
+  "short_pct": 8.84,
+  "normal_pct": 0.0,
+  "long_pct": 0.0,
+  "revisit_pct": 91.16,
+  "preemptive_pct": 0.0,
+  "q_max": 32.73340606689453,
+  "q_mean": -8.097090721130371,
+  "q_std": 15.076353073120117,
+  "greedy_action_margin": 0.09137717634439468,
+  "distinct_bands": 36,
+  "top_band_fraction": 0.2081,
+  "film_flip_pct": 0.75,
+  "film_delta_q": 0.002574282085080631,
+  "film_rho": 0.00017074965494608653,
+  "scenarios": {
+    "config_117": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 882,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_119": {
+      "pd": 0.0,
+      "steps": 1000,
+      "hits": 0,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_143": {
+      "pd": 92.85714285714286,
+      "steps": 1000,
+      "hits": 13,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_194": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 994,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_195": {
+      "pd": 99.77349943374858,
+      "steps": 1000,
+      "hits": 881,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_241": {
+      "pd": 88.9908256880734,
+      "steps": 1000,
+      "hits": 97,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_29": {
+      "pd": 0.0,
+      "steps": 1000,
+      "hits": 0,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_42": {
+      "pd": 73.36448598130842,
+      "steps": 1000,
+      "hits": 157,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_64": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 801,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_96": {
+      "pd": 93.0921052631579,
+      "steps": 1000,
+      "hits": 566,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    }
+  },
+  "halted_by_guard": false,
+  "eval_step": 27000,
+  "arm": "C",
+  "arm_name": "Arm C2 (Fixed-Reference Centered Dwell Term)",
+  "checkpoint_path": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_2r2_arm_c\\checkpoint_gate_27000.pt"
+}

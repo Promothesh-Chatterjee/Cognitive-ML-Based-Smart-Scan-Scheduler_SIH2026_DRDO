@@ -30,6 +30,11 @@ experiments/checkpoints/production_baseline/*
 !experiments/checkpoints/production_baseline/benchmark_v2_multiseed_summary.json
 !experiments/checkpoints/production_baseline/SHA256SUMS
 !experiments/checkpoints/production_baseline/BASELINE_MANIFEST.json
+!experiments/checkpoints/scheduler_v2_operational_candidate/
+experiments/checkpoints/scheduler_v2_operational_candidate/*
+!experiments/checkpoints/scheduler_v2_operational_candidate/ACTIVE_CHECKPOINT.json
+!experiments/checkpoints/scheduler_v2_operational_candidate/GATE27_OPERATIONAL_MANIFEST.json
+!experiments/checkpoints/scheduler_v2_operational_candidate/CHECKPOINT_LOCATION.md
 
 # CI / Test artefacts & patch scripts
 *_output.txt

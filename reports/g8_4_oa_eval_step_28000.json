@@ -1,0 +1,388 @@
+{
+  "checkpoint": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_4_oa_candidate_objective\\checkpoint_gate_28000.pt",
+  "tier1_primary_metrics": {
+    "mean_pd": 79.17047998560315,
+    "agile_pd": 57.06333943461556,
+    "sparse_pd": 74.62225274725276,
+    "dense_pd": 97.30567303889848,
+    "worst_case_scenario": "config_42",
+    "worst_case_pd": 36.492890995260666,
+    "total_blackouts": 0,
+    "config_29_pd": 53.69318181818182,
+    "global_ir_time_gross_hits_per_ms": 0.9149715571669688,
+    "total_mission_time_ms": 9998.125,
+    "total_hits": 9148
+  },
+  "tier2_secondary_metrics": {
+    "global_band_switch_rate": 0.22331165582791396
+  },
+  "tier3_diagnostic_metrics": {
+    "global_ir_step": 0.4574,
+    "h_mode": 0.7167762610992233,
+    "h_tau": 0.0023234811574209873,
+    "tau_distribution": {
+      "0.25": 0.00025,
+      "1.0": 0.99975,
+      "2.5": 0.0
+    },
+    "short_pct": 0.025,
+    "normal_pct": 34.01,
+    "long_pct": 0.0,
+    "revisit_pct": 64.415,
+    "preemptive_pct": 1.55,
+    "q_max": 62.40159225463867,
+    "q_mean": 2.1042394638061523,
+    "q_std": 31.021448135375977,
+    "probe_d_flips": 512,
+    "probe_d_flip_rate": 1.0,
+    "probe_normalized_coupling_cd": {
+      "cd_within_top_band_mean": 0.9999616300524183,
+      "cd_within_top_band_median": 0.9999948130802502,
+      "cd_global_top2_mean": 0.6331807904231751,
+      "cd_global_top2_median": 0.9999074600106228
+    },
+    "config_29_long_rate": 0.0,
+    "config_29_mean_delta_q_long": -0.9974132285565138
+  },
+  "thrashing_audit": {
+    "thrashing_failed": false,
+    "max_cycle_length": 4,
+    "cycle_occupancy_fraction": 0.0002,
+    "distinct_bands_scheduled": 36,
+    "top_band_concentration": 0.27095
+  },
+  "scenario_results": {
+    "config_117": {
+      "pd": 100.0,
+      "steps": 2000,
+      "hits": 1816,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 1.816,
+      "ir_step": 0.908,
+      "first_hit_latency_us": 3500.0,
+      "band_switch_rate": 0.0030015007503751876,
+      "distinct_bands": 7,
+      "top_band_concentration": 0.997,
+      "thrashing": {
+        "max_cycle_length": 0,
+        "cycle_occupancy_fraction": 0.0,
+        "cycle_steps": 0,
+        "total_steps": 2000
+      }
+    },
+    "config_119": {
+      "pd": 72.32142857142857,
+      "steps": 2000,
+      "hits": 162,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 0.162,
+      "ir_step": 0.081,
+      "first_hit_latency_us": 375500.0,
+      "band_switch_rate": 0.4747373686843422,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.412,
+      "thrashing": {
+        "max_cycle_length": 0,
+        "cycle_occupancy_fraction": 0.0,
+        "cycle_steps": 0,
+        "total_steps": 2000
+      }
+    },
+    "config_143": {
+      "pd": 76.92307692307693,
+      "steps": 2000,
+      "hits": 120,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 0.12,
+      "ir_step": 0.06,
+      "first_hit_latency_us": 1500.0,
+      "band_switch_rate": 0.3246623311655828,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.7505,
+      "thrashing": {
+        "max_cycle_length": 0,
+        "cycle_occupancy_fraction": 0.0,
+        "cycle_steps": 0,
+        "total_steps": 2000
+      }
+    },
+    "config_194": {
+      "pd": 100.0,
+      "steps": 2000,
+      "hits": 1999,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 1.999,
+      "ir_step": 0.9995,
+      "first_hit_latency_us": 1000.0,
+      "band_switch_rate": 0.0005002501250625312,
+      "distinct_bands": 2,
+      "top_band_concentration": 0.9995,
+      "thrashing": {
+        "max_cycle_length": 0,
+        "cycle_occupancy_fraction": 0.0,
+        "cycle_steps": 0,
+        "total_steps": 2000
+      }
+    },
+    "config_195": {
+      "pd": 98.8291644491751,
+      "steps": 2000,
+      "hits": 1857,
+      "dwell_ms": 998.125,
+      "gross_hits_per_ms": 1.8604884157795867,
+      "ir_step": 0.9285,
+      "first_hit_latency_us": 19000.0,
+      "band_switch_rate": 0.018509254627313655,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.982,
+      "thrashing": {
+        "max_cycle_length": 0,
+        "cycle_occupancy_fraction": 0.0,
+        "cycle_steps": 0,
+        "total_steps": 2000
+      }
+    },
+    "config_241": {
+      "pd": 65.74585635359117,
+      "steps": 2000,
+      "hits": 119,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 0.119,
+      "ir_step": 0.0595,
+      "first_hit_latency_us": 24000.0,
+      "band_switch_rate": 0.39619809904952474,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.599,
+      "thrashing": {
+        "max_cycle_length": 0,
+        "cycle_occupancy_fraction": 0.0,
+        "cycle_steps": 0,
+        "total_steps": 2000
+      }
+    },
+    "config_29": {
+      "pd": 53.69318181818182,
+      "steps": 2000,
+      "hits": 189,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 0.189,
+      "ir_step": 0.0945,
+      "first_hit_latency_us": 358500.0,
+      "band_switch_rate": 0.5227613806903452,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.3515,
+      "thrashing": {
+        "max_cycle_length": 4,
+        "cycle_occupancy_fraction": 0.002,
+        "cycle_steps": 4,
+        "total_steps": 2000
+      }
+    },
+    "config_42": {
+      "pd": 36.492890995260666,
+      "steps": 2000,
+      "hits": 231,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 0.231,
+      "ir_step": 0.1155,
+      "first_hit_latency_us": 307500.0,
+      "band_switch_rate": 0.327663831915958,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.5355,
+      "thrashing": {
+        "max_cycle_length": 0,
+        "cycle_occupancy_fraction": 0.0,
+        "cycle_steps": 0,
+        "total_steps": 2000
+      }
+    },
+    "config_64": {
+      "pd": 91.42394822006472,
+      "steps": 2000,
+      "hits": 1130,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 1.13,
+      "ir_step": 0.565,
+      "first_hit_latency_us": 75000.0,
+      "band_switch_rate": 0.07453726863431716,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.9275,
+      "thrashing": {
+        "max_cycle_length": 0,
+        "cycle_occupancy_fraction": 0.0,
+        "cycle_steps": 0,
+        "total_steps": 2000
+      }
+    },
+    "config_96": {
+      "pd": 96.27525252525253,
+      "steps": 2000,
+      "hits": 1525,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 1.525,
+      "ir_step": 0.7625,
+      "first_hit_latency_us": 91000.0,
+      "band_switch_rate": 0.09054527263631816,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.912,
+      "thrashing": {
+        "max_cycle_length": 0,
+        "cycle_occupancy_fraction": 0.0,
+        "cycle_steps": 0,
+        "total_steps": 2000
+      }
+    }
+  },
+  "scenario_dwell_breakdown": {
+    "config_117": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 0.24031960439930658,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.948,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.0275,
+        "PREEMPTIVE_INTERCEPT": 0.0245
+      }
+    },
+    "config_119": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 1.1452421802089798e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 1.0,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_143": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 1.1452421802089798e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 1.0,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_194": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 0.22585478206769727,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.952,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.024,
+        "PREEMPTIVE_INTERCEPT": 0.024
+      }
+    },
+    "config_195": {
+      "p_short": 0.0025,
+      "p_tau_1_0": 0.9975,
+      "p_long": 0.0,
+      "h_tau": 0.017475533760343134,
+      "h_mode": 0.4783892774509593,
+      "modes": {
+        "SHORT_DWELL": 0.0025,
+        "NORMAL_DWELL": 0.873,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.055,
+        "PREEMPTIVE_INTERCEPT": 0.0695
+      }
+    },
+    "config_241": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 1.1452421802089798e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 1.0,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_29": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 1.1452421802089798e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 1.0,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_42": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 1.1452421802089798e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 1.0,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_64": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 1.1452421802089798e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 1.0,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_96": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 0.78050236356909,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.628,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.335,
+        "PREEMPTIVE_INTERCEPT": 0.037
+      }
+    }
+  },
+  "gate_evaluation": {
+    "gate_step": 28000,
+    "passed": false,
+    "failure_reasons": [
+      "Mean Pd 79.17% < 80.0% floor",
+      "Agile Pd 57.06% < 65.0% floor",
+      "config_29 Pd 53.69% < 85.0% floor",
+      "Q_max 62.40 > 35.0 ceiling"
+    ]
+  }
+}

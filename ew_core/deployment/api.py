@@ -748,6 +748,7 @@ async def lifespan(app: FastAPI):  # type: ignore
                         logger.warning("ONNX scheduler load failed: %s", exc)
                 else:
                     from ..models.drqn_scheduler import DRQNScheduler
+                    from ..models.band_conditioned_drqn import BandConditionedFactorizedDRQN
                     from ..models.smartscan_moe import SmartScanMoE
 
                     d_cfg = STATE["model_cfg"].get("drqn_scheduler", {})
@@ -755,27 +756,38 @@ async def lifespan(app: FastAPI):  # type: ignore
                     n_bands_api = int(d_cfg.get("n_bands", CANONICAL_N_BANDS))
                     n_modes_api = int(d_cfg.get("n_modes", CANONICAL_N_MODES))
                     n_actions_api = int(d_cfg.get("n_actions", n_bands_api * n_modes_api if n_modes_api else CANONICAL_N_ACTIONS))
-                    drqn = DRQNScheduler(
-                        obs_dim=int(d_cfg.get("obs_dim", CANONICAL_OBS_DIM)),
-                        n_bands=n_bands_api,
-                        n_actions=n_actions_api,
-                        n_modes=n_modes_api,
-                        lstm_hidden=int(d_cfg.get("lstm_hidden", 256)),
-                        lstm_layers=int(d_cfg.get("lstm_layers", 2)),
-                    )
                     state, metadata = _checkpoint_state(ckpt)
+                    if isinstance(state, dict) and "band_head.0.weight" in state:
+                        drqn = BandConditionedFactorizedDRQN(
+                            obs_dim=int(d_cfg.get("obs_dim", CANONICAL_OBS_DIM)),
+                            n_bands=n_bands_api,
+                            n_modes=n_modes_api,
+                            lstm_hidden=int(d_cfg.get("lstm_hidden", 256)),
+                            lstm_layers=int(d_cfg.get("lstm_layers", 2)),
+                        )
+                    else:
+                        drqn = DRQNScheduler(
+                            obs_dim=int(d_cfg.get("obs_dim", CANONICAL_OBS_DIM)),
+                            n_bands=n_bands_api,
+                            n_actions=n_actions_api,
+                            n_modes=n_modes_api,
+                            lstm_hidden=int(d_cfg.get("lstm_hidden", 256)),
+                            lstm_layers=int(d_cfg.get("lstm_layers", 2)),
+                        )
                     _validate_scheduler_dimensions(drqn, metadata, d_cfg)
                     drqn.load_state_dict(state, strict=True)
                     drqn.to(torch.device(STATE["device"] if STATE["device"] != "cuda" else "cpu"))
                     drqn.eval()
+                    active_model_name = "Gate-27 Operational Baseline" if "checkpoint_gate_27000" in str(ckpt) else ("Gate-25k-R4.2-alpha020" if "checkpoint_gate_25000" in str(ckpt) else str(ckpt.name))
                     moe = SmartScanMoE(
                         drqn,
-                        {**moe_cfg, "n_bands": n_bands_api, "n_modes": n_modes_api, "n_actions": n_actions_api, "device": STATE["device"], "enable_t0": True, "tau": float(moe_cfg.get("tau", 0.0))},
+                        {**moe_cfg, "n_bands": n_bands_api, "n_modes": n_modes_api, "n_actions": n_actions_api, "device": STATE["device"], "enable_t0": True, "tau": float(moe_cfg.get("tau", 0.0)), "operational_checkpoint": active_model_name},
                     )
                     STATE["scheduler"] = drqn
                     STATE["moe"] = moe
                     STATE["dimension_check_passed"] = True
                     STATE["scheduler_ckpt_path"] = str(ckpt)
+                    STATE["active_model"] = active_model_name
                     try:
                         import hashlib
                         STATE["scheduler_ckpt_sha256"] = hashlib.sha256(ckpt.read_bytes()).hexdigest()
@@ -1458,8 +1470,11 @@ def health(response: Response = Response()) -> HealthResponse:
 
     # Resolve active model name and SHA-256
     active_mdl = STATE.get("active_model") or (
-        "Gate-25k-R4.2-alpha020" if "checkpoint_gate_25000_frozen" in str(STATE.get("scheduler_ckpt_path", ""))
-        else STATE.get("scheduler_ckpt_path", "")
+        "Gate-27 Operational Baseline" if "checkpoint_gate_27000" in str(STATE.get("scheduler_ckpt_path", ""))
+        else (
+            "Gate-25k-R4.2-alpha020" if "checkpoint_gate_25000_frozen" in str(STATE.get("scheduler_ckpt_path", ""))
+            else STATE.get("scheduler_ckpt_path", "")
+        )
     )
     ckpt_sha = STATE.get("scheduler_ckpt_sha256")
     if not ckpt_sha and scheduler_loaded:
@@ -1578,17 +1593,35 @@ def get_metrics() -> dict[str, Any]:
         })
 
     # Official frozen candidate benchmark metrics for reference
-    out["frozen_candidate"] = {
-        "designation": "Gate-25k-R4.2-alpha020",
-        "mean_ir_pct": 60.45,
-        "median_ir_pct": 64.55,
-        "agile_ir_pct": 46.70,
-        "sparse_ir_pct": 17.60,
-        "worst_case_ir_pct": 12.40,
-        "pd_pct": 99.85,
-        "pfa": 0.0,
-        "distinct_bands": 29.9,
-    }
+    if "gate_27000" in str(STATE.get("scheduler_ckpt_path", "")).lower() or STATE.get("active_model") == "Gate-27 Operational Baseline":
+        out["frozen_candidate"] = {
+            "designation": "Gate-27 Operational Baseline",
+            "benchmark_label": "Validated Gate-27 Training Benchmark",
+            "training_step": 27000,
+            "mean_pd_pct": 85.09,
+            "agile_pd_pct": 71.92,
+            "sparse_pd_pct": 77.50,
+            "dense_pd_pct": 97.33,
+            "config29_pd_pct": 95.87,
+            "worst_case_pd_pct": 47.81,
+            "blackouts": 0,
+            "ir_time_gross_hits_per_ms": 0.9108,
+            "thrashing_cycle_occupancy_pct": 0.02,
+            "q_max": 30.32,
+            "sha256": "fac0577454fe0a89687c27ebdffa568229e2d03435eebd9e82b50fca14292094",
+        }
+    else:
+        out["frozen_candidate"] = {
+            "designation": "Gate-25k-R4.2-alpha020",
+            "mean_ir_pct": 60.45,
+            "median_ir_pct": 64.55,
+            "agile_ir_pct": 46.70,
+            "sparse_ir_pct": 17.60,
+            "worst_case_ir_pct": 12.40,
+            "pd_pct": 99.85,
+            "pfa": 0.0,
+            "distinct_bands": 29.9,
+        }
     return out
 
 

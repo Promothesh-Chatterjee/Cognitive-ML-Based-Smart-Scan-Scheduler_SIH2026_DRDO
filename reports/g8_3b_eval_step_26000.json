@@ -1,0 +1,260 @@
+{
+  "checkpoint": "experiments\\checkpoints\\g8_3b_targeted_replay\\initial_g8_3b_gate_26000.pt",
+  "mean_pd": 84.43838171550114,
+  "agile_pd": 72.3745670640563,
+  "sparse_pd": 71.79152148664345,
+  "dense_pd": 98.35806216070962,
+  "blackout_count": 0,
+  "h_mode": 1.0292575588967232,
+  "h_tau": 0.9732112071548543,
+  "tau_dist": {
+    "0.25": 0.5315,
+    "1.0": 0.1358,
+    "2.5": 0.3327
+  },
+  "short_pct": 53.15,
+  "normal_pct": 0.51,
+  "long_pct": 33.269999999999996,
+  "revisit_pct": 0.96,
+  "preemptive_pct": 12.11,
+  "q_max": 11.688708305358887,
+  "q_mean": -8.538947105407715,
+  "q_std": 6.146055698394775,
+  "greedy_action_margin": 0.014179729856550694,
+  "distinct_bands": 36,
+  "top_band_fraction": 0.2058,
+  "config_29_diagnostics": {
+    "pd": 72.0,
+    "p_long": 0.502,
+    "p_tau_2_5": 0.502,
+    "mean_delta_q_long": 0.010415745794773102,
+    "pref_fraction_long": 0.502,
+    "ceiling_ratio": 0.7280080889787663,
+    "forced_long_ceiling_pd": 98.9
+  },
+  "dwell_branch_activity": {
+    "probe_action_flips_pct": 54.8828125,
+    "eval_action_flips_pct": 46.85,
+    "mean_delta_q_d": 0.09776862436244264,
+    "mean_abs_d_global": 0.03334689915268682,
+    "mean_abs_d_c29": 0.03417974184406921,
+    "c29_mode_changes_fraction": 0.526,
+    "p_long_c29_full": 0.502,
+    "p_long_c29_ablated": 0.0,
+    "dwell_param_displacement": 0.0
+  },
+  "scenario_dwell_breakdown": {
+    "config_117": {
+      "p_short": 0.556,
+      "p_tau_1_0": 0.006,
+      "p_long": 0.438,
+      "h_tau": 0.7186456678185615,
+      "h_mode": 0.7238510472065804,
+      "modes": {
+        "SHORT_DWELL": 0.556,
+        "NORMAL_DWELL": 0.004,
+        "LONG_DWELL": 0.438,
+        "REVISIT": 0.001,
+        "PREEMPTIVE_INTERCEPT": 0.001
+      }
+    },
+    "config_119": {
+      "p_short": 0.49,
+      "p_tau_1_0": 0.01,
+      "p_long": 0.5,
+      "h_tau": 0.7421667371998113,
+      "h_mode": 0.7490982090422995,
+      "modes": {
+        "SHORT_DWELL": 0.49,
+        "NORMAL_DWELL": 0.005,
+        "LONG_DWELL": 0.5,
+        "REVISIT": 0.005,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_143": {
+      "p_short": 0.515,
+      "p_tau_1_0": 0.012,
+      "p_long": 0.473,
+      "h_tau": 0.7489383265861727,
+      "h_mode": 0.7570886458145889,
+      "modes": {
+        "SHORT_DWELL": 0.515,
+        "NORMAL_DWELL": 0.007,
+        "LONG_DWELL": 0.473,
+        "REVISIT": 0.005,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_194": {
+      "p_short": 0.975,
+      "p_tau_1_0": 0.009,
+      "p_long": 0.016,
+      "h_tau": 0.1332423040073736,
+      "h_mode": 0.14167429879669208,
+      "modes": {
+        "SHORT_DWELL": 0.975,
+        "NORMAL_DWELL": 0.005,
+        "LONG_DWELL": 0.016,
+        "REVISIT": 0.003,
+        "PREEMPTIVE_INTERCEPT": 0.001
+      }
+    },
+    "config_195": {
+      "p_short": 0.281,
+      "p_tau_1_0": 0.646,
+      "p_long": 0.073,
+      "h_tau": 0.8300375982519612,
+      "h_mode": 1.0445821803872017,
+      "modes": {
+        "SHORT_DWELL": 0.281,
+        "NORMAL_DWELL": 0.005,
+        "LONG_DWELL": 0.073,
+        "REVISIT": 0.054,
+        "PREEMPTIVE_INTERCEPT": 0.587
+      }
+    },
+    "config_241": {
+      "p_short": 0.554,
+      "p_tau_1_0": 0.01,
+      "p_long": 0.436,
+      "h_tau": 0.7351681734940223,
+      "h_mode": 0.7420996453365597,
+      "modes": {
+        "SHORT_DWELL": 0.554,
+        "NORMAL_DWELL": 0.005,
+        "LONG_DWELL": 0.436,
+        "REVISIT": 0.005,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_29": {
+      "p_short": 0.474,
+      "p_tau_1_0": 0.024,
+      "p_long": 0.502,
+      "h_tau": 0.7893324564850721,
+      "h_mode": 0.8134636604010095,
+      "modes": {
+        "SHORT_DWELL": 0.474,
+        "NORMAL_DWELL": 0.005,
+        "LONG_DWELL": 0.502,
+        "REVISIT": 0.006,
+        "PREEMPTIVE_INTERCEPT": 0.013
+      }
+    },
+    "config_42": {
+      "p_short": 0.679,
+      "p_tau_1_0": 0.013,
+      "p_long": 0.308,
+      "h_tau": 0.6820384585669215,
+      "h_mode": 0.6937142396236279,
+      "modes": {
+        "SHORT_DWELL": 0.679,
+        "NORMAL_DWELL": 0.005,
+        "LONG_DWELL": 0.308,
+        "REVISIT": 0.007,
+        "PREEMPTIVE_INTERCEPT": 0.001
+      }
+    },
+    "config_64": {
+      "p_short": 0.333,
+      "p_tau_1_0": 0.618,
+      "p_long": 0.049,
+      "h_tau": 0.8113747685023757,
+      "h_mode": 0.8694639278623205,
+      "modes": {
+        "SHORT_DWELL": 0.333,
+        "NORMAL_DWELL": 0.005,
+        "LONG_DWELL": 0.049,
+        "REVISIT": 0.005,
+        "PREEMPTIVE_INTERCEPT": 0.608
+      }
+    },
+    "config_96": {
+      "p_short": 0.458,
+      "p_tau_1_0": 0.01,
+      "p_long": 0.532,
+      "h_tau": 0.7394490053981451,
+      "h_mode": 0.7463804772406524,
+      "modes": {
+        "SHORT_DWELL": 0.458,
+        "NORMAL_DWELL": 0.005,
+        "LONG_DWELL": 0.532,
+        "REVISIT": 0.005,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    }
+  },
+  "scenarios": {
+    "config_117": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 652,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_119": {
+      "pd": 80.48780487804879,
+      "steps": 1000,
+      "hits": 33,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_143": {
+      "pd": 63.095238095238095,
+      "steps": 1000,
+      "hits": 53,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_194": {
+      "pd": 99.89858012170384,
+      "steps": 1000,
+      "hits": 985,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_195": {
+      "pd": 99.1701244813278,
+      "steps": 1000,
+      "hits": 717,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_241": {
+      "pd": 73.33333333333333,
+      "steps": 1000,
+      "hits": 22,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_29": {
+      "pd": 72.0,
+      "steps": 1000,
+      "hits": 18,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_42": {
+      "pd": 63.67713004484305,
+      "steps": 1000,
+      "hits": 142,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_64": {
+      "pd": 98.13242784380306,
+      "steps": 1000,
+      "hits": 578,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_96": {
+      "pd": 94.58917835671342,
+      "steps": 1000,
+      "hits": 472,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    }
+  }
+}

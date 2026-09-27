@@ -1,0 +1,153 @@
+{
+  "checkpoint": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8a_stabilization\\checkpoint_gate_27000.pt",
+  "step": 27000,
+  "action_flips": 3406,
+  "total_decisions": 10000,
+  "action_flip_rate_pct": 34.06,
+  "delta_q_stats": {
+    "mean_abs_delta_q": 0.005489841569215059,
+    "p95_abs_delta_q": 0.017175674438476562,
+    "max_abs_delta_q": 0.06277656555175781
+  },
+  "condition_a_full_film": {
+    "mean_pd": 55.31331864726921,
+    "agile_pd": 24.892703862660944,
+    "sparse_pd": 40.625,
+    "hmode": 0.8409330162004809,
+    "short_pct": 54.190000000000005,
+    "long_pct": 41.120000000000005,
+    "normal_pct": 4.6899999999999995,
+    "q_max": 39.392860412597656
+  },
+  "condition_b_ablated_film": {
+    "mean_pd": 56.17447258671939,
+    "agile_pd": 24.94192799070848,
+    "sparse_pd": 42.857142857142854,
+    "hmode": 0.44095229074010067,
+    "short_pct": 88.25,
+    "long_pct": 7.06,
+    "normal_pct": 4.6899999999999995,
+    "q_max": 39.35751724243164
+  },
+  "deltas": {
+    "delta_mean_pd": -0.8611539394501762,
+    "delta_agile_pd": -0.049224128047534066,
+    "delta_sparse_pd": -2.232142857142854,
+    "delta_hmode": 0.3999807254603802,
+    "delta_short_pct": -34.059999999999995
+  },
+  "per_scenario_flips": {
+    "config_117": {
+      "flips": 908,
+      "steps": 1000,
+      "flip_pct": 90.8
+    },
+    "config_119": {
+      "flips": 20,
+      "steps": 1000,
+      "flip_pct": 2.0
+    },
+    "config_143": {
+      "flips": 24,
+      "steps": 1000,
+      "flip_pct": 2.4
+    },
+    "config_194": {
+      "flips": 858,
+      "steps": 1000,
+      "flip_pct": 85.8
+    },
+    "config_195": {
+      "flips": 904,
+      "steps": 1000,
+      "flip_pct": 90.4
+    },
+    "config_241": {
+      "flips": 20,
+      "steps": 1000,
+      "flip_pct": 2.0
+    },
+    "config_29": {
+      "flips": 20,
+      "steps": 1000,
+      "flip_pct": 2.0
+    },
+    "config_42": {
+      "flips": 20,
+      "steps": 1000,
+      "flip_pct": 2.0
+    },
+    "config_64": {
+      "flips": 586,
+      "steps": 1000,
+      "flip_pct": 58.599999999999994
+    },
+    "config_96": {
+      "flips": 46,
+      "steps": 1000,
+      "flip_pct": 4.6
+    }
+  },
+  "scenario_pd_comparison": {
+    "config_117": {
+      "pd_full": 100.0,
+      "pd_ablated": 100.0,
+      "delta_pd": 0.0,
+      "flips": 908
+    },
+    "config_119": {
+      "pd_full": 0.0,
+      "pd_ablated": 0.0,
+      "delta_pd": 0.0,
+      "flips": 20
+    },
+    "config_143": {
+      "pd_full": 81.25,
+      "pd_ablated": 85.71428571428571,
+      "delta_pd": -4.464285714285708,
+      "flips": 24
+    },
+    "config_194": {
+      "pd_full": 100.0,
+      "pd_ablated": 99.89909182643795,
+      "delta_pd": 0.10090817356204695,
+      "flips": 858
+    },
+    "config_195": {
+      "pd_full": 99.57081545064378,
+      "pd_ablated": 99.76771196283391,
+      "delta_pd": -0.19689651219013626,
+      "flips": 904
+    },
+    "config_241": {
+      "pd_full": 0.0,
+      "pd_ablated": 0.0,
+      "delta_pd": 0.0,
+      "flips": 20
+    },
+    "config_29": {
+      "pd_full": 0.0,
+      "pd_ablated": 0.0,
+      "delta_pd": 0.0,
+      "flips": 20
+    },
+    "config_42": {
+      "pd_full": 0.0,
+      "pd_ablated": 0.0,
+      "delta_pd": 0.0,
+      "flips": 20
+    },
+    "config_64": {
+      "pd_full": 93.60269360269359,
+      "pd_ablated": 99.0909090909091,
+      "delta_pd": -5.488215488215502,
+      "flips": 586
+    },
+    "config_96": {
+      "pd_full": 78.70967741935485,
+      "pd_ablated": 77.27272727272727,
+      "delta_pd": 1.4369501466275807,
+      "flips": 46
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "status": "APPROVED_FOR_EXECUTION",
+  "continuation_contract": "EXACT-CONTINUATION STATE + OBJECTIVE SWITCH",
+  "starting_checkpoint": {
+    "path": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_4_step_based_objective\\checkpoint_gate_27000.pt",
+    "sha256": "fac0577454fe0a89687c27ebdffa568229e2d03435eebd9e82b50fca14292094",
+    "global_step": 27000,
+    "optimizer_step_count": 125,
+    "adam_m_l2_norm": 0.2464532859145038,
+    "adam_v_l2_norm": 0.0016760252760195046,
+    "epsilon": 0.05
+  },
+  "network_alignment": {
+    "max_online_target_q_gap": 0.0,
+    "mean_online_target_q_gap": 0.0,
+    "probe_action_flips_on_vs_tgt": 0
+  },
+  "predicted_target_delta": {
+    "formula": "Delta y = (0.95 - 0.99) * max_a' Q_tgt(s', a') = -0.04 * Q_tgt_max",
+    "overall": {
+      "mean": 0.029688849620406695,
+      "median": 0.3830718040466309,
+      "std": 0.6482714586214452,
+      "min": -1.2590184783935547,
+      "max": 0.6348038864135742
+    },
+    "by_stratum": {
+      "agile": {
+        "count": 8991,
+        "mean_delta_y": 0.4597392057775192,
+        "median_delta_y": 0.6223662185668946
+      },
+      "dense": {
+        "count": 4995,
+        "mean_delta_y": 0.07490989511715879,
+        "median_delta_y": 0.5383353805541993
+      },
+      "sparse": {
+        "count": 4995,
+        "mean_delta_y": -0.20016405637617468,
+        "median_delta_y": 0.16518043518066405
+      },
+      "mixed": {
+        "count": 4995,
+        "mean_delta_y": -0.5597699309625664,
+        "median_delta_y": -0.7213505554199219
+      }
+    }
+  },
+  "replay_buffer_provenance": {
+    "path": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_3a_preloaded_buffer.pkl",
+    "sha256": "3fde244db33c05f214a0ce21f8cd6b9d06c5bf393db48b507fb407ab20c01d55",
+    "episodes": 24,
+    "transitions": 24000,
+    "targeted_quota_pct": 15.625,
+    "non_targeted_quota_pct": 84.375
+  },
+  "frozen_controls": {
+    "architecture": "BandConditionedFactorizedDRQN",
+    "objective_mode": "step_based",
+    "gamma": 0.95,
+    "c_dwell": 0.0,
+    "tau_ref": 1.0,
+    "learning_rate": 2.5e-05,
+    "epsilon": 0.05,
+    "q_reg": 0.0,
+    "fresh_optimizer": false
+  }
+}

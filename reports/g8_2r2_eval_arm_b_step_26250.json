@@ -1,0 +1,102 @@
+{
+  "arm": "B",
+  "checkpoint": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_2r2_arm_b\\checkpoint_gate_26250.pt",
+  "mean_pd": 73.58807885873733,
+  "agile_pd": 39.43550930305897,
+  "sparse_pd": 49.735449735449734,
+  "dense_pd": 98.59071323799046,
+  "blackout_count": 1,
+  "h_mode": 0.7018876845201691,
+  "h_tau": 0.011252309693388649,
+  "tau_dist": {
+    "0.25": 0.0015,
+    "1.0": 0.9985,
+    "2.5": 0.0
+  },
+  "short_pct": 0.15,
+  "normal_pct": 0.11,
+  "long_pct": 0.0,
+  "revisit_pct": 56.67,
+  "preemptive_pct": 43.07,
+  "q_max": 8.67422866821289,
+  "q_mean": -7.95921516418457,
+  "q_std": 5.357785701751709,
+  "greedy_action_margin": 0.012841382063925266,
+  "distinct_bands": 36,
+  "top_band_fraction": 0.2069,
+  "film_flip_pct": 2.45,
+  "film_delta_q": 0.0011762958249833901,
+  "film_rho": 0.00021954887531220303,
+  "scenarios": {
+    "config_117": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 882,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_119": {
+      "pd": 14.285714285714285,
+      "steps": 1000,
+      "hits": 1,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_143": {
+      "pd": 85.18518518518519,
+      "steps": 1000,
+      "hits": 23,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_194": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 995,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_195": {
+      "pd": 99.88425925925925,
+      "steps": 1000,
+      "hits": 863,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_241": {
+      "pd": 90.47619047619048,
+      "steps": 1000,
+      "hits": 95,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_29": {
+      "pd": 0.0,
+      "steps": 1000,
+      "hits": 0,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_42": {
+      "pd": 52.980132450331126,
+      "steps": 1000,
+      "hits": 160,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_64": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 801,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_96": {
+      "pd": 93.06930693069307,
+      "steps": 1000,
+      "hits": 564,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    }
+  }
+}

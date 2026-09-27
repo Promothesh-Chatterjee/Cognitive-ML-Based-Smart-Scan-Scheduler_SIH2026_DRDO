@@ -1,0 +1,115 @@
+{
+  "suite": "Phase G8.2 Preflight Verification",
+  "all_passed": true,
+  "n_checks": 9,
+  "n_passed": 9,
+  "checks": [
+    {
+      "invariant": "P1_parent_sha",
+      "passed": true,
+      "expected_sha": "a96564846225dc6b56d5392c49012e15e8395ab2f17e724a42290a89f4384a21",
+      "actual_sha": "a96564846225dc6b56d5392c49012e15e8395ab2f17e724a42290a89f4384a21"
+    },
+    {
+      "invariant": "P2_zero_step_parity",
+      "passed": true,
+      "max_abs_q_diff": 0.0,
+      "greedy_action_flips": 0
+    },
+    {
+      "invariant": "P3_buffer_preload",
+      "passed": true,
+      "total_episodes_loaded": 24,
+      "strata_counts": {
+        "agile": 6,
+        "sparse": 6,
+        "dense": 6,
+        "mixed": 6
+      },
+      "strata_scenarios": {
+        "agile": [
+          "config_119",
+          "config_241",
+          "config_29"
+        ],
+        "sparse": [
+          "config_1000",
+          "config_143"
+        ],
+        "dense": [
+          "config_194",
+          "config_195"
+        ],
+        "mixed": [
+          "config_117",
+          "config_64",
+          "config_96"
+        ]
+      }
+    },
+    {
+      "invariant": "P4_sampler_fail_closed",
+      "passed": true,
+      "normal_sample_ok": true,
+      "empty_buffer_raised_runtime_error": true
+    },
+    {
+      "invariant": "P5_objective_contracts",
+      "passed": true,
+      "arm_a_short_vs_long_delta": 4.5,
+      "arm_b_short_vs_long_delta": 0.0,
+      "arm_c_short_vs_long_delta": 2.25,
+      "smdp_discount_gamma_tau": {
+        "0.25": 0.9974905699336811,
+        "1.0": 0.99,
+        "2.5": 0.9751871871081982
+      },
+      "short_vs_long_discount_difference": 0.022303382825482942
+    },
+    {
+      "invariant": "P6_optimizer_contract",
+      "passed": true,
+      "total_params": 38,
+      "trainable_params": 38,
+      "film_trainable": true,
+      "lr": 0.0001,
+      "weight_decay": 0.0001
+    },
+    {
+      "invariant": "P7_guard_invariants",
+      "passed": true,
+      "warmup_suppression_ok": true,
+      "post_warmup_trigger_ok": true,
+      "trigger_details": {
+        "triggered": true,
+        "short_frac": 1.0,
+        "entropy": -0.0,
+        "window_size": 210,
+        "mode_counts": [
+          210,
+          0,
+          0,
+          0,
+          0
+        ],
+        "reason": "absolute_collapse"
+      }
+    },
+    {
+      "invariant": "P8_validation_provenance",
+      "passed": true,
+      "n_val_files": 250,
+      "all_canonical_present": true
+    },
+    {
+      "invariant": "P9_output_writable",
+      "passed": true,
+      "verified_directories": [
+        "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_2_arm_a",
+        "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_2_arm_b",
+        "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_2_arm_c",
+        "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\reports"
+      ]
+    }
+  ]
+}

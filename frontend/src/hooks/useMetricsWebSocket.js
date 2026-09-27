@@ -20,6 +20,7 @@ export function useMetricsWebSocket() {
   });
   const [history, setHistory] = useState([]); // last 100 steps
   const wsRef = useRef(null);
+  const connectRef = useRef(null);
 
   const connect = useCallback(() => {
     try {
@@ -38,7 +39,7 @@ export function useMetricsWebSocket() {
       };
       ws.onclose = () => {
         setMetrics(m => ({ ...m, connected: false }));
-        setTimeout(connect, 3000); // auto-reconnect
+        setTimeout(() => connectRef.current?.(), 3000); // auto-reconnect
       };
       ws.onerror = (err) => {
         console.warn('WS error:', err);
@@ -46,9 +47,13 @@ export function useMetricsWebSocket() {
       wsRef.current = ws;
     } catch (e) {
       console.warn('WS connection setup error:', e);
-      setTimeout(connect, 3000);
+      setTimeout(() => connectRef.current?.(), 3000);
     }
   }, []);
+
+  useEffect(() => {
+    connectRef.current = connect;
+  }, [connect]);
 
   useEffect(() => {
     connect();

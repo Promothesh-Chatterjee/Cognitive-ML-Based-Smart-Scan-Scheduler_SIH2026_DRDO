@@ -1,0 +1,164 @@
+{
+  "title": "Phase G8.1 Reward Attribution Diagnostic on G7-A Parent States",
+  "parent_checkpoint": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g7a_targeted_replay\\checkpoint_gate_26000.pt",
+  "validation_scenarios": [
+    "config_117",
+    "config_119",
+    "config_143",
+    "config_194",
+    "config_195",
+    "config_241",
+    "config_29",
+    "config_42",
+    "config_64",
+    "config_96"
+  ],
+  "summary": {
+    "SHORT": {
+      "mode_index": 0,
+      "multiplier": 0.25,
+      "dwell_us": 125.0,
+      "total_steps": 10000,
+      "overall_e_r_raw": 2.2224767616485694,
+      "overall_e_r_shaped": 2.2224767616485694,
+      "classes": {
+        "empty": {
+          "count": 7905,
+          "fraction_pct": 79.05,
+          "e_r_raw": -1.0742140235509876,
+          "e_r_shaped": -1.0742140235509874,
+          "std_r_raw": 0.21335060429526442,
+          "std_r_shaped": 0.21335060429526442
+        },
+        "active_miss": {
+          "count": 0,
+          "fraction_pct": 0.0,
+          "e_r_raw": 0.0,
+          "e_r_shaped": 0.0,
+          "std_r_raw": 0.0,
+          "std_r_shaped": 0.0
+        },
+        "repeat_hit": {
+          "count": 2085,
+          "fraction_pct": 20.849999999999998,
+          "e_r_raw": 14.659559699115707,
+          "e_r_shaped": 14.659559699115707,
+          "std_r_raw": 0.3238989764400493,
+          "std_r_shaped": 0.3238989764400493
+        },
+        "novel_hit": {
+          "count": 10,
+          "fraction_pct": 0.1,
+          "e_r_raw": 15.12475,
+          "e_r_shaped": 15.12475,
+          "std_r_raw": 0.9606139140852605,
+          "std_r_shaped": 0.9606139140852605
+        }
+      }
+    },
+    "NORMAL": {
+      "mode_index": 1,
+      "multiplier": 1.0,
+      "dwell_us": 500.0,
+      "total_steps": 10000,
+      "overall_e_r_raw": 5.558009616909951,
+      "overall_e_r_shaped": 5.558009616909951,
+      "classes": {
+        "empty": {
+          "count": 5611,
+          "fraction_pct": 56.11000000000001,
+          "e_r_raw": -1.170534333863258,
+          "e_r_shaped": -1.170534333863258,
+          "std_r_raw": 0.4807038859270304,
+          "std_r_shaped": 0.4807038859270304
+        },
+        "active_miss": {
+          "count": 0,
+          "fraction_pct": 0.0,
+          "e_r_raw": 0.0,
+          "e_r_shaped": 0.0,
+          "std_r_raw": 0.0,
+          "std_r_shaped": 0.0
+        },
+        "repeat_hit": {
+          "count": 4372,
+          "fraction_pct": 43.72,
+          "e_r_raw": 14.15816875321649,
+          "e_r_shaped": 14.15816875321649,
+          "std_r_raw": 1.0629659970886212,
+          "std_r_shaped": 1.0629659970886212
+        },
+        "novel_hit": {
+          "count": 17,
+          "fraction_pct": 0.16999999999999998,
+          "e_r_raw": 14.614736902573531,
+          "e_r_shaped": 14.614736902573531,
+          "std_r_raw": 2.0823798681662606,
+          "std_r_shaped": 2.0823798681662606
+        }
+      }
+    },
+    "LONG": {
+      "mode_index": 2,
+      "multiplier": 2.5,
+      "dwell_us": 1250.0,
+      "total_steps": 10000,
+      "overall_e_r_raw": 6.166098583017326,
+      "overall_e_r_shaped": 6.166098583017326,
+      "classes": {
+        "empty": {
+          "count": 4876,
+          "fraction_pct": 48.76,
+          "e_r_raw": -1.4471710910868025,
+          "e_r_shaped": -1.447171091086803,
+          "std_r_raw": 0.7751401691479638,
+          "std_r_shaped": 0.7751401691479637
+        },
+        "active_miss": {
+          "count": 0,
+          "fraction_pct": 0.0,
+          "e_r_raw": 0.0,
+          "e_r_shaped": 0.0,
+          "std_r_raw": 0.0,
+          "std_r_shaped": 0.0
+        },
+        "repeat_hit": {
+          "count": 5093,
+          "fraction_pct": 50.93,
+          "e_r_raw": 13.412177989397213,
+          "e_r_shaped": 13.412177989397213,
+          "std_r_raw": 1.8067580416159505,
+          "std_r_shaped": 1.8067580416159505
+        },
+        "novel_hit": {
+          "count": 31,
+          "fraction_pct": 0.31,
+          "e_r_raw": 13.19901839717742,
+          "e_r_shaped": 13.19901839717742,
+          "std_r_raw": 2.444789993539652,
+          "std_r_shaped": 2.444789993539652
+        }
+      }
+    }
+  },
+  "deltas_short_vs_long": {
+    "empty": {
+      "raw_delta": 0.3729570675358149,
+      "shaped_delta": 0.3729570675358156
+    },
+    "active_miss": {
+      "raw_delta": 0.0,
+      "shaped_delta": 0.0
+    },
+    "repeat_hit": {
+      "raw_delta": 1.2473817097184945,
+      "shaped_delta": 1.2473817097184945
+    },
+    "novel_hit": {
+      "raw_delta": 1.9257316028225802,
+      "shaped_delta": 1.9257316028225802
+    }
+  },
+  "overall_raw_delta_short_vs_long": -3.9436218213687564,
+  "overall_shaped_delta_short_vs_long": -3.9436218213687564
+}

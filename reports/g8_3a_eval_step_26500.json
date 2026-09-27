@@ -1,0 +1,252 @@
+{
+  "checkpoint": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_3a_targeted_replay\\checkpoint_gate_26500.pt",
+  "mean_pd": 75.55541880331876,
+  "agile_pd": 47.56774802944434,
+  "sparse_pd": 36.0,
+  "dense_pd": 98.65663918308208,
+  "blackout_count": 1,
+  "h_mode": 0.5907679137255036,
+  "h_tau": -0.0,
+  "tau_dist": {
+    "0.25": 0.0,
+    "1.0": 1.0,
+    "2.5": 0.0
+  },
+  "short_pct": 0.0,
+  "normal_pct": 0.0,
+  "long_pct": 0.0,
+  "revisit_pct": 72.23,
+  "preemptive_pct": 27.77,
+  "q_max": 13.318255424499512,
+  "q_mean": -8.610298156738281,
+  "q_std": 8.276631355285645,
+  "greedy_action_margin": 0.016592560335993767,
+  "distinct_bands": 36,
+  "top_band_fraction": 0.2043,
+  "film_flip_pct": 7.13,
+  "film_delta_q": 0.0015340974274440668,
+  "film_rho": 0.00018535287625977897,
+  "config_29_diagnostics": {
+    "pd": 32.35294117647059,
+    "p_long": 0.0,
+    "p_tau_2_5": 0.0,
+    "mean_delta_q_long": -0.19158805852662772,
+    "pref_fraction_long": 0.0,
+    "ceiling_ratio": 0.3271278177600666,
+    "forced_long_ceiling_pd": 98.9
+  },
+  "scenario_dwell_breakdown": {
+    "config_117": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 0.6396999683627691,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.338,
+        "PREEMPTIVE_INTERCEPT": 0.662
+      }
+    },
+    "config_119": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 0.007907255204994398,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.999,
+        "PREEMPTIVE_INTERCEPT": 0.001
+      }
+    },
+    "config_143": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 0.007907255204994398,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.999,
+        "PREEMPTIVE_INTERCEPT": 0.001
+      }
+    },
+    "config_194": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 0.2613307845860362,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.073,
+        "PREEMPTIVE_INTERCEPT": 0.927
+      }
+    },
+    "config_195": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 0.6174910646232002,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.308,
+        "PREEMPTIVE_INTERCEPT": 0.692
+      }
+    },
+    "config_241": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 0.007907255204994398,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.999,
+        "PREEMPTIVE_INTERCEPT": 0.001
+      }
+    },
+    "config_29": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 0.007907255204994398,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.999,
+        "PREEMPTIVE_INTERCEPT": 0.001
+      }
+    },
+    "config_42": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 0.3527419562454752,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.887,
+        "PREEMPTIVE_INTERCEPT": 0.113
+      }
+    },
+    "config_64": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 0.007907255204994398,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.999,
+        "PREEMPTIVE_INTERCEPT": 0.001
+      }
+    },
+    "config_96": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": -0.0,
+      "h_mode": 0.6630765354381887,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.622,
+        "PREEMPTIVE_INTERCEPT": 0.378
+      }
+    }
+  },
+  "scenarios": {
+    "config_117": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 882,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_119": {
+      "pd": 0.0,
+      "steps": 1000,
+      "hits": 0,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_143": {
+      "pd": 72.0,
+      "steps": 1000,
+      "hits": 18,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_194": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 995,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_195": {
+      "pd": 99.88385598141696,
+      "steps": 1000,
+      "hits": 860,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_241": {
+      "pd": 90.47619047619048,
+      "steps": 1000,
+      "hits": 95,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_29": {
+      "pd": 32.35294117647059,
+      "steps": 1000,
+      "hits": 11,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_42": {
+      "pd": 67.44186046511628,
+      "steps": 1000,
+      "hits": 174,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_64": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 801,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_96": {
+      "pd": 93.3993399339934,
+      "steps": 1000,
+      "hits": 566,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    }
+  }
+}

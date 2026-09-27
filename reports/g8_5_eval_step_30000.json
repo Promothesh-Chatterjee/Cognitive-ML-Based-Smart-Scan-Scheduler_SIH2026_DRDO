@@ -1,0 +1,410 @@
+{
+  "checkpoint": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_5_final_trial\\checkpoint_gate_30000.pt",
+  "tier1_primary_operational_metrics": {
+    "mean_pd": 55.043638845512625,
+    "agile_pd": 0.0,
+    "sparse_pd": 32.69230769230769,
+    "dense_pd": 97.01035461410218,
+    "worst_case_scenario": "config_119",
+    "worst_case_pd": 0.0,
+    "total_blackouts": 4,
+    "config_29_pd": 0.0,
+    "global_ir_time_gross_hits_per_ms": 0.8355,
+    "total_mission_time_ms": 10000.0,
+    "total_hits": 8355,
+    "global_band_switch_rate": 2207.0,
+    "thrashing_cycle_occupancy": 0.90115,
+    "thrashing_failed": true
+  },
+  "tier2_value_function_health": {
+    "q_scale_distribution": {
+      "q_max": 92.25376892089844,
+      "q_min": -35.701908111572266,
+      "q_mean": -9.363348960876465,
+      "q_std": 43.954063415527344,
+      "p95": 87.95020294189453,
+      "p99": 88.92115783691406
+    },
+    "action_margins": {
+      "mean_delta_q": 0.1686264634102583,
+      "median_delta_q": 0.07032012939453125,
+      "p10_delta_q": 0.0,
+      "p1_delta_q": 0.0,
+      "fraction_near_zero": 0.49865
+    },
+    "td_error_distribution": {
+      "mean_abs_td": 8.179729461669922,
+      "std_abs_td": 8.18600082397461,
+      "p95_abs_td": 22.41527557373047,
+      "p99_abs_td": 33.725650787353516,
+      "max_abs_td": 80.39767456054688,
+      "fraction_extreme_td": 0.44408333333333333
+    },
+    "online_target_divergence": {
+      "mean_gap": 0.0,
+      "p95_gap": 0.0,
+      "max_gap": 0.0
+    },
+    "return_calibration": {
+      "mean_pred_q": 16.723421096801758,
+      "mean_realized_g": 498.3175964355469,
+      "calibration_bias": -481.59417724609375,
+      "calibration_slope": 7.771119594573975,
+      "calibration_intercept": 368.35791015625,
+      "calibration_r_squared": 0.5340967178344727,
+      "mean_absolute_error": 535.058349609375,
+      "p95_absolute_error": 1381.80419921875
+    }
+  },
+  "tier3_policy_stability_diagnostics": {
+    "probe_spearman_rho_vs_gate27": 0.8236456812968861,
+    "probe_flips_vs_gate27": 350,
+    "probe_flip_rate_vs_gate27_pct": 68.359375,
+    "probe_band_flips": 59,
+    "probe_mode_flips": 350,
+    "probe_d_flips": 512,
+    "probe_d_flip_rate": 1.0,
+    "short_pct": 0.0,
+    "normal_pct": 0.0,
+    "long_pct": 0.0,
+    "revisit_pct": 0.0,
+    "preemptive_pct": 100.0,
+    "config_29_long_rate": 0.0,
+    "config_29_mean_delta_q_long": -2.5852818079702558
+  },
+  "scenario_results": {
+    "config_117": {
+      "pd": 100.0,
+      "steps": 2000,
+      "hits": 1816,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 1.816,
+      "ir_step": 0.908,
+      "first_hit_latency_us": 3500.0,
+      "band_switch_rate": 0.0030015007503751876,
+      "distinct_bands": 7,
+      "top_band_concentration": 0.997,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.997,
+        "cycle_steps": 1994,
+        "total_steps": 2000
+      }
+    },
+    "config_119": {
+      "pd": 0.0,
+      "steps": 2000,
+      "hits": 0,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 0.0,
+      "ir_step": 0.0,
+      "first_hit_latency_us": 1000000.0,
+      "band_switch_rate": 0.1520760380190095,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.8555,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.8515,
+        "cycle_steps": 1703,
+        "total_steps": 2000
+      }
+    },
+    "config_143": {
+      "pd": 65.38461538461539,
+      "steps": 2000,
+      "hits": 51,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 0.051,
+      "ir_step": 0.0255,
+      "first_hit_latency_us": 1500.0,
+      "band_switch_rate": 0.30865432716358177,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.54,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.79,
+        "cycle_steps": 1580,
+        "total_steps": 2000
+      }
+    },
+    "config_194": {
+      "pd": 100.0,
+      "steps": 2000,
+      "hits": 1999,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 1.999,
+      "ir_step": 0.9995,
+      "first_hit_latency_us": 1000.0,
+      "band_switch_rate": 0.0005002501250625312,
+      "distinct_bands": 2,
+      "top_band_concentration": 0.9995,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.9995,
+        "cycle_steps": 1999,
+        "total_steps": 2000
+      }
+    },
+    "config_195": {
+      "pd": 98.77333333333334,
+      "steps": 2000,
+      "hits": 1852,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 1.852,
+      "ir_step": 0.926,
+      "first_hit_latency_us": 19000.0,
+      "band_switch_rate": 0.018509254627313655,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.982,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.9815,
+        "cycle_steps": 1963,
+        "total_steps": 2000
+      }
+    },
+    "config_241": {
+      "pd": 0.0,
+      "steps": 2000,
+      "hits": 0,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 0.0,
+      "ir_step": 0.0,
+      "first_hit_latency_us": 1000000.0,
+      "band_switch_rate": 0.1520760380190095,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.8555,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.8515,
+        "cycle_steps": 1703,
+        "total_steps": 2000
+      }
+    },
+    "config_29": {
+      "pd": 0.0,
+      "steps": 2000,
+      "hits": 0,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 0.0,
+      "ir_step": 0.0,
+      "first_hit_latency_us": 1000000.0,
+      "band_switch_rate": 0.1520760380190095,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.8555,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.8515,
+        "cycle_steps": 1703,
+        "total_steps": 2000
+      }
+    },
+    "config_42": {
+      "pd": 0.0,
+      "steps": 2000,
+      "hits": 0,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 0.0,
+      "ir_step": 0.0,
+      "first_hit_latency_us": 1000000.0,
+      "band_switch_rate": 0.1520760380190095,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.8555,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.8515,
+        "cycle_steps": 1703,
+        "total_steps": 2000
+      }
+    },
+    "config_64": {
+      "pd": 90.1294498381877,
+      "steps": 2000,
+      "hits": 1114,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 1.114,
+      "ir_step": 0.557,
+      "first_hit_latency_us": 75000.0,
+      "band_switch_rate": 0.07453726863431716,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.9275,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.9255,
+        "cycle_steps": 1851,
+        "total_steps": 2000
+      }
+    },
+    "config_96": {
+      "pd": 96.1489898989899,
+      "steps": 2000,
+      "hits": 1523,
+      "dwell_ms": 1000.0,
+      "gross_hits_per_ms": 1.523,
+      "ir_step": 0.7615,
+      "first_hit_latency_us": 91000.0,
+      "band_switch_rate": 0.09054527263631816,
+      "distinct_bands": 36,
+      "top_band_concentration": 0.912,
+      "thrashing": {
+        "max_cycle_length": 6,
+        "cycle_occupancy_fraction": 0.9095,
+        "cycle_steps": 1819,
+        "total_steps": 2000
+      }
+    }
+  },
+  "scenario_dwell_breakdown": {
+    "config_117": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 1.1452399597629308e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.0,
+        "PREEMPTIVE_INTERCEPT": 1.0
+      }
+    },
+    "config_119": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 1.1452399597629308e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.0,
+        "PREEMPTIVE_INTERCEPT": 1.0
+      }
+    },
+    "config_143": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 1.1452399597629308e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.0,
+        "PREEMPTIVE_INTERCEPT": 1.0
+      }
+    },
+    "config_194": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 1.1452399597629308e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.0,
+        "PREEMPTIVE_INTERCEPT": 1.0
+      }
+    },
+    "config_195": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 1.1452399597629308e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.0,
+        "PREEMPTIVE_INTERCEPT": 1.0
+      }
+    },
+    "config_241": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 1.1452399597629308e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.0,
+        "PREEMPTIVE_INTERCEPT": 1.0
+      }
+    },
+    "config_29": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 1.1452399597629308e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.0,
+        "PREEMPTIVE_INTERCEPT": 1.0
+      }
+    },
+    "config_42": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 1.1452399597629308e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.0,
+        "PREEMPTIVE_INTERCEPT": 1.0
+      }
+    },
+    "config_64": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 1.1452399597629308e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.0,
+        "PREEMPTIVE_INTERCEPT": 1.0
+      }
+    },
+    "config_96": {
+      "p_short": 0.0,
+      "p_tau_1_0": 1.0,
+      "p_long": 0.0,
+      "h_tau": 5.7262220032859976e-11,
+      "h_mode": 1.1452399597629308e-10,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.0,
+        "REVISIT": 0.0,
+        "PREEMPTIVE_INTERCEPT": 1.0
+      }
+    }
+  },
+  "gate_step": 30000,
+  "operational_disposition": "HALT_TRIGGERED",
+  "operational_stop_reasons": [
+    "Mean Pd 55.04% < 80.0% floor",
+    "Agile Pd 0.00% < 65.0% floor",
+    "config_29 Pd 0.00% < 85.0% floor",
+    "Worst-case Pd 0.00% < 30.0% floor (config_119)",
+    "Total blackouts 4 > 0 floor",
+    "Gross hits/ms 0.8355 < 0.85 floor",
+    "Thrashing cycle occupancy 90.11% >= 5.0% ceiling"
+  ]
+}

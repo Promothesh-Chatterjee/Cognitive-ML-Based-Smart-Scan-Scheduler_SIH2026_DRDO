@@ -1,0 +1,27 @@
+{
+  "status": "PREFLIGHT_PASSED",
+  "checkpoint": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_4_step_based_objective\\checkpoint_gate_27000.pt",
+  "sha256": "fac0577454fe0a89687c27ebdffa568229e2d03435eebd9e82b50fca14292094",
+  "optimizer": {
+    "norm_m": 0.24645037975151843,
+    "norm_v": 0.0016760166477508178,
+    "step_count": 125
+  },
+  "target_network_sync_gap": 0.0,
+  "replay_buffer": {
+    "episodes": 24,
+    "total_steps": 24000
+  },
+  "objective_configuration": {
+    "objective_mode": "step_based",
+    "gamma": 0.99,
+    "c_dwell": 0.0,
+    "tau_ref": 1.0,
+    "q_reg_coef": 0.005
+  },
+  "test_step": {
+    "l_td": 8.246826171875,
+    "l_reg": 2.1406517028808594,
+    "total_loss": 10.38747787475586
+  }
+}

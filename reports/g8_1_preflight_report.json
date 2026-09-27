@@ -1,0 +1,160 @@
+{
+  "suite": "Phase G8.1 Preflight Verification",
+  "overall_status": "PASS",
+  "checks": [
+    {
+      "invariant": "P1_parent_checkpoint_sha",
+      "passed": true,
+      "actual_sha": "c84e22deb1309611f183336a83d5b5e2593af3e13a4acb691c95fcb3e8a580a7",
+      "expected_sha": "c84e22deb1309611f183336a83d5b5e2593af3e13a4acb691c95fcb3e8a580a7",
+      "path": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g7a_targeted_replay\\checkpoint_gate_26000.pt"
+    },
+    {
+      "invariant": "P2_zero_step_parity",
+      "passed": true,
+      "gamma_mean": 1.0,
+      "beta_mean": 0.0,
+      "max_q_diff": 0.0
+    },
+    {
+      "invariant": "P3_dataset_provenance",
+      "passed": true,
+      "train_stare_count": 2500,
+      "train_scan_count": 2500,
+      "val_stare_count": 250,
+      "root": "D:\\TSRD"
+    },
+    {
+      "invariant": "P4_agile_scenario_cache",
+      "passed": true,
+      "scenarios": {
+        "config_29.h5": {
+          "exists": true,
+          "size_bytes": 1792945
+        },
+        "config_119.h5": {
+          "exists": true,
+          "size_bytes": 314392
+        },
+        "config_241.h5": {
+          "exists": true,
+          "size_bytes": 2778907
+        }
+      }
+    },
+    {
+      "invariant": "P5_preloaded_buffer_invariants",
+      "passed": true,
+      "total_episodes": 24,
+      "total_transitions": 24000,
+      "stratum_episodes": {
+        "agile": 6,
+        "sparse": 6,
+        "dense": 6,
+        "mixed": 6
+      },
+      "stratum_scenario_counts": {
+        "agile": 3,
+        "sparse": 2,
+        "dense": 2,
+        "mixed": 3
+      },
+      "stratum_scenarios": {
+        "agile": [
+          "config_119",
+          "config_241",
+          "config_29"
+        ],
+        "sparse": [
+          "config_1000",
+          "config_143"
+        ],
+        "dense": [
+          "config_194",
+          "config_195"
+        ],
+        "mixed": [
+          "config_117",
+          "config_64",
+          "config_96"
+        ]
+      },
+      "mode_distribution": {
+        "SHORT_DWELL": 14970,
+        "NORMAL_DWELL": 360,
+        "LONG_DWELL": 7613,
+        "REVISIT": 334,
+        "PREEMPTIVE_INTERCEPT": 723
+      }
+    },
+    {
+      "invariant": "P6_stratified_sampler_fail_closed",
+      "passed": true,
+      "sample_shape_ok": true,
+      "fail_closed_verified": true
+    },
+    {
+      "invariant": "P7_training_config",
+      "passed": true,
+      "checks": {
+        "data_dir_is_d_tsrd": true,
+        "preloaded_buffer_path_correct": true,
+        "use_g8_film_true": true,
+        "use_g8_1_stratified_replay_true": true,
+        "staged_gates_includes_26250_26500_27000": true,
+        "fresh_optimizer_true": true,
+        "weights_only_false": true,
+        "exploration_slower": true,
+        "eps_start_0_15": true,
+        "eps_end_0_05": true
+      }
+    },
+    {
+      "invariant": "P8_dwell_shaper_math",
+      "passed": true,
+      "r1_short": 10.0,
+      "r2_long": 5.725,
+      "expected_r2": 5.725,
+      "note": "Relative mode cost preserved; EMA shifts common baseline only."
+    },
+    {
+      "invariant": "P9_optimizer_freshness",
+      "passed": true,
+      "total_params": 38,
+      "trainable_params": 38,
+      "film_trainable": true
+    },
+    {
+      "invariant": "P10_validation_isolation",
+      "passed": true,
+      "n_val_files_chosen": 10,
+      "all_in_val_dir": true,
+      "hash_overlap_with_train": 0,
+      "val_files": [
+        "config_117.h5",
+        "config_119.h5",
+        "config_143.h5",
+        "config_194.h5",
+        "config_195.h5",
+        "config_241.h5",
+        "config_29.h5",
+        "config_42.h5",
+        "config_64.h5",
+        "config_96.h5"
+      ]
+    },
+    {
+      "invariant": "P11_sentinel_readiness",
+      "passed": true,
+      "staged_gates": [
+        26250,
+        26500,
+        27000
+      ],
+      "canary_gate": 26250,
+      "diagnostic_gate": 26500,
+      "qualification_gate": 27000,
+      "agile_collapse_sentinel": "halt_if_config_29_119_241_all_zero_at_26500"
+    }
+  ]
+}

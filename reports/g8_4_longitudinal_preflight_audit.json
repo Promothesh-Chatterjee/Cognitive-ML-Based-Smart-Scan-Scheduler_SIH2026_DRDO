@@ -1,0 +1,45 @@
+{
+  "status": "APPROVED_FOR_EXECUTION",
+  "continuation_mode": "EXACT_CONTINUATION",
+  "gate_26500_checkpoint": {
+    "path": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_4_step_based_objective\\checkpoint_gate_26500.pt",
+    "sha256": "caeceba6e3cedbf130c41f18fc76bbf14b7e63d4183d15e38ca9d5dff64d0aa9",
+    "global_step": 26500,
+    "optimizer_step_count": 125,
+    "epsilon": 0.05,
+    "target_state_dict_present": true,
+    "optimizer_state_dict_present": true,
+    "rng_states_present": true
+  },
+  "preloaded_buffer": {
+    "path": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_3a_preloaded_buffer.pkl",
+    "sha256": "3fde244db33c05f214a0ce21f8cd6b9d06c5bf393db48b507fb407ab20c01d55",
+    "episodes": 24,
+    "transitions": 24000,
+    "targeted_quota_pct": 15.625,
+    "non_targeted_quota_pct": 84.375
+  },
+  "probe_batch_invariants": {
+    "path": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_3a_probe_batch.pt",
+    "probe_sequences": 64,
+    "active_probe_steps": 512,
+    "probe_d_flips": 512,
+    "probe_d_flip_rate": 1.0,
+    "normalized_coupling_cd": {
+      "cd_within_top_band_mean": 0.999616223480678,
+      "cd_within_top_band_median": 0.9999678760705184,
+      "cd_global_top2_mean": 0.7321798359726313,
+      "cd_global_top2_median": 0.9999108000171277
+    }
+  },
+  "frozen_controls": {
+    "architecture": "BandConditionedFactorizedDRQN",
+    "objective_mode": "step_based",
+    "gamma": 0.99,
+    "c_dwell": 0.0,
+    "tau_ref": 1.0,
+    "learning_rate": 2.5e-05,
+    "epsilon": 0.05,
+    "fresh_optimizer": false
+  }
+}

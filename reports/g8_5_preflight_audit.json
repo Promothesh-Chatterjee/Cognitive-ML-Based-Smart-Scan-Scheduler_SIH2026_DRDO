@@ -1,0 +1,45 @@
+{
+  "status": "PREFLIGHT_PASSED",
+  "checkpoint": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_4_step_based_objective\\checkpoint_gate_27000.pt",
+  "sha256": "fac0577454fe0a89687c27ebdffa568229e2d03435eebd9e82b50fca14292094",
+  "optimizer": {
+    "norm_m": 0.24645037975151843,
+    "norm_v": 0.0016760166477508178,
+    "step_count": 125
+  },
+  "target_network_sync_gap": 0.0,
+  "replay_buffer": {
+    "episodes": 24,
+    "total_steps": 24000
+  },
+  "objective_configuration": {
+    "objective_mode": "step_based",
+    "gamma": 0.99,
+    "c_dwell": 0.0,
+    "tau_ref": 1.0,
+    "q_reg_coef": 0.0,
+    "fresh_optimizer": false
+  },
+  "baseline_probe_action_margins": {
+    "mean_delta_q": 0.033808961510658264,
+    "median_delta_q": 0.019559860229492188,
+    "p10_delta_q": 0.0028443217743188143,
+    "p1_delta_q": 0.0,
+    "fraction_near_zero_delta_q": 0.802734375,
+    "q_max": 35.926719665527344,
+    "q_min": -16.424571990966797,
+    "q_mean": 4.414913654327393,
+    "q_std": 19.665246963500977
+  },
+  "baseline_return_calibration": {
+    "mean_pred_q": -0.9399215579032898,
+    "mean_realized_g": 498.3175964355469,
+    "calibration_bias": -499.2575378417969,
+    "calibration_slope": 23.978944778442383,
+    "calibration_intercept": 520.8558959960938,
+    "calibration_r_squared": 0.4473334550857544,
+    "mean_absolute_error": 563.5656127929688,
+    "p95_absolute_error": 1431.1766357421875
+  },
+  "test_step_loss": 8.246826171875
+}

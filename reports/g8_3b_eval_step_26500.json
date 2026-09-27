@@ -1,0 +1,264 @@
+{
+  "mean_pd": 73.70652148274115,
+  "agile_pd": 49.496042073302974,
+  "sparse_pd": 25.0,
+  "dense_pd": 97.81620930683992,
+  "blackout_count": 1,
+  "h_mode": 0.7287909579504888,
+  "h_tau": 0.007907255112232087,
+  "tau_dist": {
+    "0.25": 0.0,
+    "1.0": 0.999,
+    "2.5": 0.001
+  },
+  "short_pct": 0.0,
+  "normal_pct": 2.37,
+  "long_pct": 0.1,
+  "revisit_pct": 66.66,
+  "preemptive_pct": 30.869999999999997,
+  "q_max": 12.815546989440918,
+  "q_mean": -6.941059112548828,
+  "q_std": 8.88818645477295,
+  "greedy_action_margin": 0.015070960856974125,
+  "distinct_bands": 36,
+  "top_band_fraction": 0.1862,
+  "config_29_diagnostics": {
+    "pd": 31.03448275862069,
+    "p_long": 0.001,
+    "p_tau_2_5": 0.001,
+    "mean_delta_q_long": -0.1890465005990118,
+    "pref_fraction_long": 0.001,
+    "ceiling_ratio": 0.31379659007705446,
+    "forced_long_ceiling_pd": 98.9
+  },
+  "dwell_branch_activity": {
+    "probe_action_flips_pct": 100.0,
+    "eval_action_flips_pct": 100.0,
+    "mean_delta_q_d": 0.08393402264919132,
+    "mean_abs_d_global": 0.0627643701990135,
+    "mean_abs_d_c29": 0.07038864333834499,
+    "c29_mode_changes_fraction": 1.0,
+    "p_long_c29_full": 0.001,
+    "p_long_c29_ablated": 0.0,
+    "dwell_param_displacement": 0.11013584863809855
+  },
+  "scenario_dwell_breakdown": {
+    "config_117": {
+      "p_short": 0.0,
+      "p_tau_1_0": 0.999,
+      "p_long": 0.001,
+      "h_tau": 0.007907255112232087,
+      "h_mode": 0.36984283935697077,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.011,
+        "LONG_DWELL": 0.001,
+        "REVISIT": 0.09,
+        "PREEMPTIVE_INTERCEPT": 0.898
+      }
+    },
+    "config_119": {
+      "p_short": 0.0,
+      "p_tau_1_0": 0.999,
+      "p_long": 0.001,
+      "h_tau": 0.007907255112232087,
+      "h_mode": 0.007907255204994398,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.001,
+        "REVISIT": 0.999,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_143": {
+      "p_short": 0.0,
+      "p_tau_1_0": 0.999,
+      "p_long": 0.001,
+      "h_tau": 0.007907255112232087,
+      "h_mode": 0.007907255204994398,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.001,
+        "REVISIT": 0.999,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_194": {
+      "p_short": 0.0,
+      "p_tau_1_0": 0.999,
+      "p_long": 0.001,
+      "h_tau": 0.007907255112232087,
+      "h_mode": 0.2792075654456428,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.001,
+        "REVISIT": 0.077,
+        "PREEMPTIVE_INTERCEPT": 0.922
+      }
+    },
+    "config_195": {
+      "p_short": 0.0,
+      "p_tau_1_0": 0.999,
+      "p_long": 0.001,
+      "h_tau": 0.007907255112232087,
+      "h_mode": 0.6808094758319188,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.001,
+        "REVISIT": 0.401,
+        "PREEMPTIVE_INTERCEPT": 0.598
+      }
+    },
+    "config_241": {
+      "p_short": 0.0,
+      "p_tau_1_0": 0.999,
+      "p_long": 0.001,
+      "h_tau": 0.007907255112232087,
+      "h_mode": 0.007907255204994398,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.001,
+        "REVISIT": 0.999,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_29": {
+      "p_short": 0.0,
+      "p_tau_1_0": 0.999,
+      "p_long": 0.001,
+      "h_tau": 0.007907255112232087,
+      "h_mode": 0.007907255204994398,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.001,
+        "REVISIT": 0.999,
+        "PREEMPTIVE_INTERCEPT": 0.0
+      }
+    },
+    "config_42": {
+      "p_short": 0.0,
+      "p_tau_1_0": 0.999,
+      "p_long": 0.001,
+      "h_tau": 0.007907255112232087,
+      "h_mode": 0.28168329717460605,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.001,
+        "REVISIT": 0.921,
+        "PREEMPTIVE_INTERCEPT": 0.078
+      }
+    },
+    "config_64": {
+      "p_short": 0.0,
+      "p_tau_1_0": 0.999,
+      "p_long": 0.001,
+      "h_tau": 0.007907255112232087,
+      "h_mode": 0.6958374388352329,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.0,
+        "LONG_DWELL": 0.001,
+        "REVISIT": 0.452,
+        "PREEMPTIVE_INTERCEPT": 0.547
+      }
+    },
+    "config_96": {
+      "p_short": 0.0,
+      "p_tau_1_0": 0.999,
+      "p_long": 0.001,
+      "h_tau": 0.007907255112232087,
+      "h_mode": 0.7108798746567964,
+      "modes": {
+        "SHORT_DWELL": 0.0,
+        "NORMAL_DWELL": 0.226,
+        "LONG_DWELL": 0.001,
+        "REVISIT": 0.729,
+        "PREEMPTIVE_INTERCEPT": 0.044
+      }
+    }
+  },
+  "scenarios": {
+    "config_117": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 894,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_119": {
+      "pd": 0.0,
+      "steps": 1000,
+      "hits": 0,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_143": {
+      "pd": 50.0,
+      "steps": 1000,
+      "hits": 1,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_194": {
+      "pd": 100.0,
+      "steps": 1000,
+      "hits": 995,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_195": {
+      "pd": 99.33920704845815,
+      "steps": 1000,
+      "hits": 902,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_241": {
+      "pd": 96.66666666666667,
+      "steps": 1000,
+      "hits": 29,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_29": {
+      "pd": 31.03448275862069,
+      "steps": 1000,
+      "hits": 9,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_42": {
+      "pd": 70.28301886792453,
+      "steps": 1000,
+      "hits": 149,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_64": {
+      "pd": 96.4332892998679,
+      "steps": 1000,
+      "hits": 730,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    },
+    "config_96": {
+      "pd": 93.3085501858736,
+      "steps": 1000,
+      "hits": 502,
+      "gross_hits_per_ms": 0.0,
+      "novel_hits_per_ms": 0.0
+    }
+  },
+  "halted_by_guard": false,
+  "eval_step": 26500,
+  "arm": "G8.3-B",
+  "arm_name": "Phase G8.3-B Band-Conditioned Dwell Architecture",
+  "checkpoint_path": "C:\\Users\\PromotheshChatterjee\\Documents\\GitHub\\SIH2026_Try2\\experiments\\checkpoints\\g8_3b_targeted_replay\\checkpoint_gate_26500.pt"
+}

@@ -1,0 +1,40 @@
+{
+  "checkpoint_path": "checkpoint_gate_27000_operational.pt",
+  "checkpoint_sha256": "fac0577454fe0a89687c27ebdffa568229e2d03435eebd9e82b50fca14292094",
+  "cloud_artifact_sha256": "fac0577454fe0a89687c27ebdffa568229e2d03435eebd9e82b50fca14292094",
+  "baseline_checkpoint_sha256": "7a99c659affda277fa63fd612a3564d08a8d2e3cf7d033fe892d778871c186b0",
+  "training_step": 27000,
+  "architecture": {
+    "name": "BandConditionedFactorizedDRQN",
+    "obs_dim": 360,
+    "n_bands": 36,
+    "n_modes": 5,
+    "n_actions": 180,
+    "lstm_hidden": 256,
+    "lstm_layers": 2,
+    "band_features": 10
+  },
+  "objective_mode": "step_based",
+  "gamma": 0.99,
+  "qreg_coef": 0.0,
+  "cdwell": 0.0,
+  "tau_ref": 1.0,
+  "evaluation_seed": 42,
+  "performance_metrics": {
+    "mean_pd": 85.09,
+    "agile_pd": 71.92,
+    "sparse_pd": 77.5,
+    "dense_pd": 97.33,
+    "config29_pd": 95.87,
+    "worst_case_pd": 47.81,
+    "blackouts": 0,
+    "gross_hits_per_ms": 0.9108,
+    "thrashing_cycle_occupancy": 0.0002,
+    "q_max": 30.32
+  },
+  "research_status": "CLOSED",
+  "training_status": "FROZEN",
+  "production_status": "APPROVED",
+  "demonstration_status": "APPROVED",
+  "cloud_status": "NOT_DEPLOYED"
+}
