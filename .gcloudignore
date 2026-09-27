@@ -1,0 +1,34 @@
+.gcloudignore
+.git
+.github
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+frontend/node_modules/
+frontend/dist/
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+*.log
+*.tmp
+
+# Exclude massive local training artifacts
+experiments/data/
+experiments/logs/
+experiments/wandb/
+experiments/eval_outputs/
+experiments/checkpoints/scheduler_g*/
+experiments/checkpoints/g7a*/
+experiments/checkpoints/ablations/
+experiments/checkpoints/production_baseline/
+experiments/checkpoints/scheduler_v2_operational_candidate/
+
+# Include required operational checkpoints and deinterleaver
+!experiments/checkpoints/deinterleaver/best.pt
+!experiments/checkpoints/deinterleaver/normalization_stats.json

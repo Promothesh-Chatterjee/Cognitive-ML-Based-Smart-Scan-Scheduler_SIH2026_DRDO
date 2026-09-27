@@ -121,6 +121,7 @@ from ew_core.deployment.dataset_service import (
     resolve_scenario_path,
     download_from_blob,
     ensure_operational_checkpoint,
+    ensure_deinterleaver_checkpoint,
 )
 hidden_lock = Lock()
 try:
@@ -588,6 +589,11 @@ async def lifespan(app: FastAPI):  # type: ignore
 
     # Try to load PyTorch models (ONNX preferred if available, else PT)
     # Deinterleaver
+    try:
+        ensure_deinterleaver_checkpoint()
+    except Exception as exc:
+        logger.warning("Failed ensuring deinterleaver checkpoint: %s", exc)
+
     deinterleaver_ckpts = [
         PACKAGE_ROOT / "experiments/checkpoints/deinterleaver/best.pt",
         PACKAGE_ROOT / "experiments/checkpoints/deint_full_s2/best.pt",

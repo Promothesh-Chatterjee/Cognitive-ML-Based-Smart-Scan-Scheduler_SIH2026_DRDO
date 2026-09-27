@@ -501,3 +501,66 @@ def ensure_operational_checkpoint() -> Optional[Path]:
 
     return None
 
+
+DEINTERLEAVER_AUTHORITATIVE_SHA256: str = "b7cc3727b3b1940ac8c06e61f127644c484de69ec16080110dd4ea8c0c44b116"
+
+
+def ensure_deinterleaver_checkpoint() -> Optional[Path]:
+    """Ensure deinterleaver checkpoint exists and passes SHA-256 integrity check.
+
+    In local dev: uses existing experiments/checkpoints/deinterleaver/best.pt.
+    In Cloud Run: downloads from gs://${GCS_TSRD_BUCKET}/checkpoints/ if not present.
+    """
+    import hashlib
+
+    repo_root = Path(__file__).resolve().parents[2]
+    cand_dir = repo_root / "experiments" / "checkpoints" / "deinterleaver"
+    cand_file = cand_dir / "best.pt"
+
+    if cand_file.is_file():
+        hasher = hashlib.sha256()
+        with open(cand_file, "rb") as f:
+            while chunk := f.read(65536):
+                hasher.update(chunk)
+        if hasher.hexdigest().lower() == DEINTERLEAVER_AUTHORITATIVE_SHA256.lower():
+            return cand_file
+        logger.warning(
+            "Deinterleaver checkpoint SHA-256 mismatch: %s != %s, attempting redownload",
+            hasher.hexdigest(),
+            DEINTERLEAVER_AUTHORITATIVE_SHA256,
+        )
+
+    # Attempt on-demand download from Google Cloud Storage
+    gcs_bucket = os.environ.get("GCS_TSRD_BUCKET", os.environ.get("GCS_BUCKET", GCS_TSRD_BUCKET))
+    if gcs_bucket:
+        try:
+            cand_dir.mkdir(parents=True, exist_ok=True)
+            for gcs_obj in [
+                f"gs://{gcs_bucket}/checkpoints/best.pt",
+                f"gs://{gcs_bucket}/checkpoints/deinterleaver/best.pt",
+            ]:
+                try:
+                    download_from_gcs(gcs_obj, target_dir=str(cand_dir))
+                    if cand_file.is_file():
+                        break
+                except Exception:
+                    continue
+
+            if cand_file.is_file():
+                hasher = hashlib.sha256()
+                with open(cand_file, "rb") as f:
+                    while chunk := f.read(65536):
+                        hasher.update(chunk)
+                if hasher.hexdigest().lower() == DEINTERLEAVER_AUTHORITATIVE_SHA256.lower():
+                    logger.info("Successfully downloaded and verified deinterleaver checkpoint from GCS.")
+                    return cand_file
+                logger.error(
+                    "GCS Deinterleaver checkpoint SHA-256 mismatch: %s != %s",
+                    hasher.hexdigest(),
+                    DEINTERLEAVER_AUTHORITATIVE_SHA256,
+                )
+        except Exception as exc:
+            logger.error("Failed to download or verify deinterleaver checkpoint from GCS: %s", exc)
+
+    return None
+
