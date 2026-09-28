@@ -283,8 +283,6 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 41.66%;
-  width: 11.11%;
   background: rgba(48, 151, 224, 0.15);
   border-left: 1px solid var(--secondary, #96ccff);
   border-right: 1px solid var(--secondary, #96ccff);

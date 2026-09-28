@@ -91,16 +91,24 @@ export function PipelineFlow() {
 
 
 export function BandMatrix({
+  currentBand,
   tuneBand = 16,
   dwellUs = 120,
-  freqMHz = 8250,
+  freqMHz = null,
+  bandHeights = null,
+  bandStates = null,
 }) {
   const N = 36;
-  const safeTune = Math.max(0, Math.min(N - 1, Number(tuneBand) || 0));
+  const safeTune = Math.max(0, Math.min(N - 1, Number(currentBand != null ? currentBand : tuneBand) || 0));
+  const activeFreqMHz = freqMHz != null ? freqMHz : (safeTune * 500 + 250);
 
-  // Each time show ONLY the band the receiver is tuned into
-  const heights = Array.from({ length: N }, (_, i) => (i === safeTune ? 94 : 3));
-  const states = Array.from({ length: N }, (_, i) => (i === safeTune ? "active" : "quiet"));
+  // Display real channel occupancy activity from telemetry; tuned receiver aperture is separately indicated by the IBW frame
+  const heights = Array.isArray(bandHeights) && bandHeights.length === N
+    ? bandHeights.map((h) => Math.max(3, Math.round(Number(h) * 100)))
+    : Array.from({ length: N }, () => 3);
+  const states = Array.isArray(bandStates) && bandStates.length === N
+    ? bandStates.map((s, i) => (i === safeTune ? "active" : s))
+    : Array.from({ length: N }, (_, i) => (i === safeTune ? "active" : "quiet"));
 
   // 1 GHz IBW aperture covers 2 adjacent 500 MHz channels around the tune window
   const ibwLo = Math.max(0, safeTune - 1);
@@ -108,11 +116,11 @@ export function BandMatrix({
   const ibwLoGHz = (ibwLo * 0.5).toFixed(1);
   const ibwHiGHz = (ibwHi * 0.5).toFixed(1);
 
-  const tuneGHz = (freqMHz / 1000).toFixed(3);
+  const tuneGHz = (activeFreqMHz / 1000).toFixed(3);
 
-  // Position aperture overlay centered around tuned band
+  // Position aperture overlay centered around tuned band (1 GHz IBW = 2 bands)
   const centerPct = ((safeTune + 0.5) / N) * 100;
-  const boxWidthPct = (4 / N) * 100; // ~11.11% aperture frame
+  const boxWidthPct = (2 / N) * 100; // 1 GHz / 18 GHz = ~5.56% aperture frame
   const leftPct = Math.max(0, Math.min(100 - boxWidthPct, centerPct - boxWidthPct / 2));
 
   return (

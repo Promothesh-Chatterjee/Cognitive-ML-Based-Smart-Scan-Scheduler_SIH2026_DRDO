@@ -59,10 +59,14 @@ export default function Receiver() {
   } = t;
 
   const [manualBand, setManualBand] = useState(null);
-  const activeBand = manualBand !== null ? manualBand : (live && currentBand != null ? currentBand : 0);
+  const activeBand = manualBand !== null ? manualBand : (currentBand != null ? currentBand : 0);
   const centerFrequencyMHz = activeBand * 500 + 250;
-  const dwellTimeUs = live ? currentDwellUs : 0.0;
-  const thresholdDb = live ? -140.0 : 0.0;
+  const dwellTimeUs = live ? currentDwellUs : (currentDwellUs || 500.0);
+  const thresholdDb = -140.0;
+
+  const centerPct = ((activeBand + 0.5) / NUM_BANDS) * 100;
+  const boxWidthPct = (2 / NUM_BANDS) * 100; // 1 GHz = 2 x 500 MHz channels = ~5.56% aperture frame
+  const leftPct = Math.max(0, Math.min(100 - boxWidthPct, centerPct - boxWidthPct / 2));
 
   const windowStart = useMemo(
     () => Math.max(FREQUENCY_RANGE.min, centerFrequencyMHz - 500),
@@ -223,8 +227,8 @@ export default function Receiver() {
                         background: isTuned
                           ? "var(--accent, #bdc2ff)"
                           : isThreat
-                          ? "#3097e0"
-                          : "#282a2e",
+                          ? "var(--secondary-deep, #3097e0)"
+                          : "var(--panel-3, #282a2e)",
                         boxShadow: isTuned ? "0 0 12px rgba(189,194,255,0.85)" : "none",
                         opacity: isTuned ? 1 : isThreat ? 0.8 : 0.35,
                         cursor: "pointer",
@@ -239,16 +243,16 @@ export default function Receiver() {
                 className="st-ibw"
                 style={{
                   position: "absolute",
-                  left: `${(windowStart / 18000) * 100}%`,
-                  width: `${((windowEnd - windowStart) / 18000) * 100}%`,
+                  left: `${leftPct}%`,
+                  width: `${boxWidthPct}%`,
                   top: 0,
                   bottom: 0,
                   transition: "left 0.25s ease, width 0.25s ease",
                 }}
               >
-                <span className="st-badge" style={{ color: "#96ccff" }}>1 GHz RECEIVER WINDOW</span>
-                <span className="st-mark" style={{ color: "#96ccff", textAlign: "center" }}>
-                  {live ? `${centerFrequencyMHz.toLocaleString()} MHz` : "0.0 MHz"}
+                <span className="st-badge" style={{ color: "var(--secondary, #96ccff)" }}>1 GHz RECEIVER WINDOW</span>
+                <span className="st-mark" style={{ color: "var(--secondary, #96ccff)", textAlign: "center" }}>
+                  {centerFrequencyMHz.toLocaleString()} MHz
                 </span>
               </div>
             </div>
@@ -290,16 +294,16 @@ export default function Receiver() {
                   display: "flex",
                   justifyContent: "space-between",
                   padding: "4px 6px",
-                  background: "#1a1c20",
-                  border: "1px solid #454653",
+                  background: "var(--panel-2, #1a1c20)",
+                  border: "1px solid var(--border, #454653)",
                 }}
               >
-                <span style={{ color: "#908f9e" }}>{label}</span>
+                <span style={{ color: "var(--muted, #908f9e)" }}>{label}</span>
                 <strong style={{
-                  color: label === "STATUS" && live ? "#49df9d"
-                    : label === "HITS" ? "#49df9d"
-                    : label === "MISSES" ? "#ff6b6b"
-                    : "#e2e2e8"
+                  color: label === "STATUS" && live ? "var(--success, #49df9d)"
+                    : label === "HITS" ? "var(--success, #49df9d)"
+                    : label === "MISSES" ? "var(--danger, #ff6b6b)"
+                    : "var(--text, #e2e2e8)"
                 }}>
                   {value}
                 </strong>

@@ -144,120 +144,18 @@ export default function Performance() {
 
   // 1. Fully Dynamic Protocol Comparison Benchmark
   const dynamicBenchmarkRows = useMemo(() => {
-    if (!isOnline) return OFFLINE_BENCHMARK_ROWS;
+    // Priority 1: Live telemetry overlay from backend
+    const sourceRows =
+      (Array.isArray(telemetry.benchmarkRows) && telemetry.benchmarkRows.length > 0
+        ? telemetry.benchmarkRows
+        : (Array.isArray(benchmarkStaticBase?.rows) && benchmarkStaticBase.rows.length > 0
+            ? benchmarkStaticBase.rows
+            : null));
 
-    // If backend provided fresh live benchmark rows, prioritize them
-    if (telemetry.benchmarkRows && telemetry.benchmarkRows.length === 5) {
-      return telemetry.benchmarkRows.map((row) => {
-        const gainVal = row[6];
-        const isPos = typeof gainVal === "string" && gainVal.startsWith("+");
-        const isLatency = row[0] === "Mean Detect Latency";
-        const isFA = row[0] === "False-Alarm Rate";
-        const goodGain = isLatency || isFA ? typeof gainVal === "string" && gainVal.startsWith("-") : isPos;
+    if (!sourceRows) return OFFLINE_BENCHMARK_ROWS;
 
-        return [
-          ...row.slice(0, 5),
-          <strong key="ss" style={{ color: "#bdc2ff" }}>{row[5]}</strong>,
-          <strong key="gain" style={{ color: goodGain ? "#49df9d" : "#ffb4ab" }}>{gainVal}</strong>,
-        ];
-      });
-    }
-
-    // Dynamic fallback calculated from live telemetry feed
-    const tDwells = telemetry.totalDwells || 0;
-    const phase = tDwells * 0.05;
-
-    // Live Intercept Rate (Pd)
-    const ol_ir = 10.0;
-    const rr_ir = 10.0;
-    const rd_ir = Math.max(4.0, Math.min(8.0, 6.0 + 0.4 * Math.sin(phase * 0.6)));
-    const hu_ir = Math.max(8.0, Math.min(12.5, 10.0 + 0.5 * Math.sin(phase * 0.8)));
-    const ss_ir = telemetry.rollingPd > 0 ? telemetry.rollingPd * 100.0 : 74.5;
-    const gain_ir = ss_ir - ol_ir;
-
-    // Live Latency
-    const ol_lat = 213.0;
-    const rr_lat = 213.0;
-    const rd_lat = Math.max(195.0, 204.0 + 3.5 * Math.cos(phase * 0.7));
-    const hu_lat = Math.max(202.0, 213.0 - 2.5 * Math.sin(phase * 0.5));
-    const ss_lat = telemetry.rollingMedianLatencyUs > 0 ? telemetry.rollingMedianLatencyUs : 48.0;
-    const gain_lat = ss_lat - ol_lat;
-
-    // Live False-Alarm Rate
-    const ol_fa = 9.9;
-    const rr_fa = 9.9;
-    const rd_fa = Math.max(11.5, 13.2 + 0.5 * Math.sin(phase * 0.8));
-    const hu_fa = Math.max(7.8, 9.0 - 0.4 * Math.cos(phase * 0.6));
-    const ss_fa = Math.max(0.4, (1.0 - (ss_ir / 100.0)) * 7.5);
-    const gain_fa = ss_fa - ol_fa;
-
-    // Live Revisit Compliance
-    const ol_rc = 65.9;
-    const rr_rc = 65.9;
-    const rd_rc = Math.max(26.0, 30.0 + 1.5 * Math.sin(phase * 0.9));
-    const hu_rc = Math.max(73.0, 76.3 + 1.0 * Math.cos(phase * 0.7));
-    const missedPct = telemetry.fomMetrics?.missed_revisits_pct || 14.0;
-    const ss_rc = Math.max(60.0, Math.min(99.0, 100.0 - missedPct * 0.7));
-    const gain_rc = ss_rc - ol_rc;
-
-    // Live Agile Track Continuity
-    const ol_tc = 35.0;
-    const rr_tc = 35.0;
-    const rd_tc = Math.max(16.0, 20.0 + 1.8 * Math.cos(phase * 0.6));
-    const hu_tc = Math.max(41.0, 45.0 + 1.2 * Math.sin(phase * 0.7));
-    const ss_tc = Math.min(99.8, Math.max(85.0, 92.0 + (ss_ir / 100.0) * 7.5));
-    const gain_tc = ss_tc - ol_tc;
-
-    const rawRows = [
-      [
-        "Intercept Rate",
-        `${ol_ir.toFixed(1)}%`,
-        `${rr_ir.toFixed(1)}%`,
-        `${rd_ir.toFixed(1)}%`,
-        `${hu_ir.toFixed(1)}%`,
-        `${ss_ir.toFixed(1)}%`,
-        `${gain_ir >= 0 ? "+" : ""}${gain_ir.toFixed(1)} pp`,
-      ],
-      [
-        "Mean Detect Latency",
-        `${ol_lat.toFixed(0)} µs`,
-        `${rr_lat.toFixed(0)} µs`,
-        `${rd_lat.toFixed(0)} µs`,
-        `${hu_lat.toFixed(0)} µs`,
-        `${ss_lat.toFixed(0)} µs`,
-        `${gain_lat >= 0 ? "+" : ""}${gain_lat.toFixed(0)} µs`,
-      ],
-      [
-        "False-Alarm Rate",
-        `${ol_fa.toFixed(1)}%`,
-        `${rr_fa.toFixed(1)}%`,
-        `${rd_fa.toFixed(1)}%`,
-        `${hu_fa.toFixed(1)}%`,
-        `${ss_fa.toFixed(1)}%`,
-        `${gain_fa >= 0 ? "+" : ""}${gain_fa.toFixed(1)} pp`,
-      ],
-      [
-        "Revisit Compliance",
-        `${ol_rc.toFixed(1)}%`,
-        `${rr_rc.toFixed(1)}%`,
-        `${rd_rc.toFixed(1)}%`,
-        `${hu_rc.toFixed(1)}%`,
-        `${ss_rc.toFixed(1)}%`,
-        `${gain_rc >= 0 ? "+" : ""}${gain_rc.toFixed(1)} pp`,
-      ],
-      [
-        "Agile Track Continuity",
-        `${ol_tc.toFixed(1)}%`,
-        `${rr_tc.toFixed(1)}%`,
-        `${rd_tc.toFixed(1)}%`,
-        `${hu_tc.toFixed(1)}%`,
-        `${ss_tc.toFixed(1)}%`,
-        `${gain_tc >= 0 ? "+" : ""}${gain_tc.toFixed(1)} pp`,
-      ],
-    ];
-
-    return rawRows.map((row) => {
-      const gainVal = row[6];
+    return sourceRows.map((row) => {
+      const gainVal = row[6] ?? "-";
       const isPos = typeof gainVal === "string" && gainVal.startsWith("+");
       const isLatency = row[0] === "Mean Detect Latency";
       const isFA = row[0] === "False-Alarm Rate";
@@ -265,123 +163,37 @@ export default function Performance() {
 
       return [
         ...row.slice(0, 5),
-        <strong key="ss" style={{ color: "#bdc2ff" }}>{row[5]}</strong>,
-        <strong key="gain" style={{ color: goodGain ? "#49df9d" : "#ffb4ab" }}>{gainVal}</strong>,
+        <strong key="ss" style={{ color: "var(--accent, #bdc2ff)" }}>{row[5]}</strong>,
+        <strong key="gain" style={{ color: goodGain ? "var(--success, #49df9d)" : "var(--danger, #ffb4ab)" }}>{gainVal}</strong>,
       ];
     });
-  }, [isOnline, telemetry.benchmarkRows, telemetry.rollingPd, telemetry.rollingMedianLatencyUs, telemetry.totalDwells, telemetry.fomMetrics]);
+  }, [telemetry.benchmarkRows, benchmarkStaticBase]);
 
   // 2. Fully Dynamic Performance by Scan Mode
   const dynamicModeRows = useMemo(() => {
-    if (!isOnline) return OFFLINE_MODE_ROWS;
+    const sourceRows =
+      (Array.isArray(telemetry.modeRows) && telemetry.modeRows.length > 0
+        ? telemetry.modeRows
+        : (Array.isArray(benchmarkStaticBase?.mode_rows) && benchmarkStaticBase.mode_rows.length > 0
+            ? benchmarkStaticBase.mode_rows
+            : null));
 
-    if (telemetry.modeRows && telemetry.modeRows.length === 5) {
-      return telemetry.modeRows;
-    }
-
-    // Dynamic fallback computed from recent dwells or telemetry state
-    const dwellList = telemetry.recentDwells || [];
-    const modeNames = ["SHORT_DWELL", "NORMAL_DWELL", "LONG_DWELL", "REVISIT", "PREEMPTIVE_INTERCEPT"];
-    const modeDurations = {
-      SHORT_DWELL: "50 µs",
-      NORMAL_DWELL: "100 µs",
-      LONG_DWELL: "200 µs",
-      REVISIT: "120 µs",
-      PREEMPTIVE_INTERCEPT: "80 µs",
-    };
-    const modeRoles = {
-      SHORT_DWELL: "Rapid confirmation",
-      NORMAL_DWELL: "Standard surveillance",
-      LONG_DWELL: "Extended observation",
-      REVISIT: "Overdue-band return",
-      PREEMPTIVE_INTERCEPT: "Predicted transmission",
-    };
-
-    const counts = { SHORT_DWELL: 0, NORMAL_DWELL: 0, LONG_DWELL: 0, REVISIT: 0, PREEMPTIVE_INTERCEPT: 0 };
-    const hits = { SHORT_DWELL: 0, NORMAL_DWELL: 0, LONG_DWELL: 0, REVISIT: 0, PREEMPTIVE_INTERCEPT: 0 };
-
-    dwellList.forEach((d) => {
-      const m = d.mode;
-      if (counts[m] !== undefined) {
-        counts[m] += 1;
-        if (d.type === "HIT" || d.type === "INTERCEPTION") {
-          hits[m] += 1;
-        }
-      }
-    });
-
-    const tot = Object.values(counts).reduce((a, b) => a + b, 0);
-    const baseAlloc = { SHORT_DWELL: 18.0, NORMAL_DWELL: 34.0, LONG_DWELL: 16.0, REVISIT: 22.0, PREEMPTIVE_INTERCEPT: 10.0 };
-    const baseYield = { SHORT_DWELL: 78.4, NORMAL_DWELL: 82.1, LONG_DWELL: 86.5, REVISIT: 89.2, PREEMPTIVE_INTERCEPT: 91.5 };
-    const baseLats = { SHORT_DWELL: 35.0, NORMAL_DWELL: 48.0, LONG_DWELL: 62.0, REVISIT: 42.0, PREEMPTIVE_INTERCEPT: 31.0 };
-    const tDwells = telemetry.totalDwells || 0;
-
-    return modeNames.map((m, idx) => {
-      let allocPct;
-      let yieldPct;
-      let latVal;
-
-      if (tot >= 5 && counts[m] > 0) {
-        allocPct = (counts[m] / tot) * 100.0;
-        yieldPct = (hits[m] / counts[m]) * 100.0;
-        latVal = baseLats[m];
-      } else {
-        const delta = 1.2 * Math.sin(tDwells * 0.08 + idx);
-        allocPct = Math.max(5.0, baseAlloc[m] + delta);
-        yieldPct = Math.min(99.5, Math.max(60.0, baseYield[m] + (telemetry.rollingPd * 10.0 - 5.0) + delta));
-        latVal = Math.max(20.0, baseLats[m] + delta * 2.0);
-      }
-
-      return [
-        m,
-        modeDurations[m],
-        "1,000 MHz",
-        modeRoles[m],
-        `${allocPct.toFixed(1)}%`,
-        `${yieldPct.toFixed(1)}%`,
-        `${latVal.toFixed(0)} µs`,
-      ];
-    });
-  }, [isOnline, telemetry.modeRows, telemetry.recentDwells, telemetry.totalDwells, telemetry.rollingPd]);
+    if (!sourceRows) return OFFLINE_MODE_ROWS;
+    return sourceRows;
+  }, [telemetry.modeRows, benchmarkStaticBase]);
 
   // 3. Fully Dynamic Performance by Emitter Archetype
   const dynamicArchetypeRows = useMemo(() => {
-    if (!isOnline) return OFFLINE_ARCHETYPE_ROWS;
+    const sourceRows =
+      (Array.isArray(telemetry.archetypeRows) && telemetry.archetypeRows.length > 0
+        ? telemetry.archetypeRows
+        : (Array.isArray(benchmarkStaticBase?.archetype_rows) && benchmarkStaticBase.archetype_rows.length > 0
+            ? benchmarkStaticBase.archetype_rows
+            : null));
 
-    if (telemetry.archetypeRows && telemetry.archetypeRows.length === 4) {
-      return telemetry.archetypeRows;
-    }
-
-    const tDwells = telemetry.totalDwells || 0;
-    const phase = tDwells * 0.05;
-    const ss_ir = telemetry.rollingPd > 0 ? telemetry.rollingPd * 100.0 : 74.5;
-    const ss_lat = telemetry.rollingMedianLatencyUs > 0 ? telemetry.rollingMedianLatencyUs : 48.0;
-
-    const cw_pd = Math.min(99.9, Math.max(97.0, 98.9 + 0.3 * Math.sin(phase)));
-    const cw_lat = Math.max(28.0, 38.0 - 1.2 * Math.cos(phase));
-    const cw_fa = Math.max(0.1, 100.0 - cw_pd);
-    const cw_cont = Math.min(99.9, Math.max(98.5, 99.2 + 0.2 * Math.sin(phase * 0.5)));
-
-    const agile_fa = Math.max(0.4, (100.0 - ss_ir) * 0.12);
-    const agile_cont = Math.min(99.8, Math.max(85.0, 92.0 + (ss_ir / 100.0) * 7.5));
-
-    const per_pd = Math.min(98.5, Math.max(90.0, 94.3 + 0.8 * Math.sin(phase * 1.2)));
-    const per_lat = Math.max(32.0, 42.0 + 1.8 * Math.cos(phase * 1.1));
-    const per_fa = Math.max(0.5, (100.0 - per_pd) * 0.22);
-    const per_cont = Math.min(99.0, Math.max(93.0, 96.0 + 0.5 * Math.sin(phase)));
-
-    const lpi_pd = Math.min(88.0, Math.max(75.0, 82.5 + 1.5 * Math.sin(phase * 0.7)));
-    const lpi_lat = Math.max(60.0, 78.0 - 2.8 * Math.sin(phase * 0.9));
-    const lpi_fa = Math.max(1.5, (100.0 - lpi_pd) * 0.28);
-    const lpi_cont = Math.min(92.0, Math.max(84.0, 88.3 + 1.0 * Math.cos(phase * 0.8)));
-
-    return [
-      ["Stable narrowband (CW/Strobe)", "TIER 3", `${cw_pd.toFixed(1)}%`, `${cw_lat.toFixed(0)} µs`, `${cw_fa.toFixed(1)}%`, `${cw_cont.toFixed(1)}%`],
-      ["Agile hopper (Fast Hopping)", "TIER 1", `${ss_ir.toFixed(1)}%`, `${ss_lat.toFixed(0)} µs`, `${agile_fa.toFixed(1)}%`, `${agile_cont.toFixed(1)}%`],
-      ["Periodic burst (Target Radar)", "TIER 2", `${per_pd.toFixed(1)}%`, `${per_lat.toFixed(0)} µs`, `${per_fa.toFixed(1)}%`, `${per_cont.toFixed(1)}%`],
-      ["Intermittent (LPI Jitter)", "TIER 2", `${lpi_pd.toFixed(1)}%`, `${lpi_lat.toFixed(0)} µs`, `${lpi_fa.toFixed(1)}%`, `${lpi_cont.toFixed(1)}%`],
-    ];
-  }, [isOnline, telemetry.archetypeRows, telemetry.totalDwells, telemetry.rollingPd, telemetry.rollingMedianLatencyUs]);
+    if (!sourceRows) return OFFLINE_ARCHETYPE_ROWS;
+    return sourceRows;
+  }, [telemetry.archetypeRows, benchmarkStaticBase]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -391,16 +203,16 @@ export default function Performance() {
           icon="assessment"
           title="SMART SCAN EVALUATION & BENCHMARK COMPARISON ENGINE"
           badge={isOnline ? "LIVE STREAM ACTIVE" : "BACKEND OFFLINE · NO DATA"}
-          badgeColor={isOnline ? "#49df9d" : "#ef4444"}
+          badgeColor={isOnline ? "var(--success, #49df9d)" : "var(--danger, #ef4444)"}
         />
-        <div className="st-body" style={{ color: "#c6c5d5" }}>
+        <div className="st-body" style={{ color: "var(--text-muted, #c6c5d5)" }}>
           Dynamic multi-scheduler comparative evaluation engine: Baseline Open-Loop Sweep vs. DRQN+MoE Adaptive Reinforcement Policy.
           {isOnline ? (
-            <span style={{ color: "#49df9d", marginLeft: 6 }}>
+            <span style={{ color: "var(--success, #49df9d)", marginLeft: 6 }}>
               ● Live telemetry streaming from Cognitive EW backend.
             </span>
           ) : (
-            <span style={{ color: "#ef4444", marginLeft: 6 }}>
+            <span style={{ color: "var(--danger, #ef4444)", marginLeft: 6 }}>
               ● Backend servers are offline. No data displayed (values masked with -).
             </span>
           )}
@@ -414,31 +226,31 @@ export default function Performance() {
               flexWrap: "wrap",
               gap: 10,
               padding: "6px 12px",
-              background: "#16181d",
-              border: "1px solid #282a2e",
+              background: "var(--panel-2, #1e2024)",
+              border: "1px solid var(--border-subtle, #333539)",
               alignItems: "center",
               fontSize: 11,
-              fontFamily: "JetBrains Mono, monospace",
+              fontFamily: "var(--font-mono, monospace)",
             }}
           >
-            <span style={{ color: "#908f9e" }}>LIVE TELEMETRY:</span>
-            <span style={{ color: "#49df9d", fontWeight: 700 }}>
+            <span style={{ color: "var(--muted, #908f9e)" }}>LIVE TELEMETRY:</span>
+            <span style={{ color: "var(--success, #49df9d)", fontWeight: 700 }}>
               DWELL CYCLES: {telemetry.totalDwells.toLocaleString()}
             </span>
-            <span style={{ color: "#bdc2ff" }}>|</span>
-            <span style={{ color: "#96ccff" }}>
+            <span style={{ color: "var(--accent, #bdc2ff)" }}>|</span>
+            <span style={{ color: "var(--secondary, #96ccff)" }}>
               MISSION CLOCK: {Math.round(telemetry.missionClockUs).toLocaleString()} µs
             </span>
-            <span style={{ color: "#bdc2ff" }}>|</span>
-            <span style={{ color: "#bdc2ff" }}>
+            <span style={{ color: "var(--accent, #bdc2ff)" }}>|</span>
+            <span style={{ color: "var(--accent, #bdc2ff)" }}>
               INTERCEPT RATE (Pd): {(telemetry.rollingPd * 100).toFixed(1)}%
             </span>
-            <span style={{ color: "#bdc2ff" }}>|</span>
-            <span style={{ color: "#f59e0b" }}>
+            <span style={{ color: "var(--accent, #bdc2ff)" }}>|</span>
+            <span style={{ color: "var(--warning, #f59e0b)" }}>
               MEDIAN LATENCY: {(telemetry.rollingMedianLatencyUs || 48.0).toFixed(0)} µs
             </span>
-            <span style={{ color: "#bdc2ff" }}>|</span>
-            <span style={{ color: "#49df9d" }}>
+            <span style={{ color: "var(--accent, #bdc2ff)" }}>|</span>
+            <span style={{ color: "var(--success, #49df9d)" }}>
               CADENCE: 15.0 Hz [DYNAMIC]
             </span>
           </div>
@@ -453,13 +265,13 @@ export default function Performance() {
             justifyContent: "space-between",
             gap: 8,
             padding: "8px 12px",
-            background: "#1a1c20",
-            border: "1px solid #454653",
+            background: "var(--panel-2, #1e2024)",
+            border: "1px solid var(--border, #454653)",
             marginTop: 6,
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 280 }}>
-            <span className="st-tsm" style={{ color: "#908f9e", textTransform: "uppercase" }}>
+            <span className="st-tsm" style={{ color: "var(--muted, #908f9e)", textTransform: "uppercase" }}>
               TARGET SCENARIO:
             </span>
             <select
@@ -469,11 +281,11 @@ export default function Performance() {
               style={{
                 flex: 1,
                 maxWidth: 440,
-                background: "#282a2e",
-                color: "#e2e2e8",
-                border: "1px solid #454653",
+                background: "var(--panel-3, #282a2e)",
+                color: "var(--text, #e2e2e8)",
+                border: "1px solid var(--border, #454653)",
                 padding: "4px 8px",
-                fontFamily: "JetBrains Mono, monospace",
+                fontFamily: "var(--font-mono, monospace)",
                 fontSize: 11,
                 cursor: isOnline ? "pointer" : "not-allowed",
               }}
@@ -488,19 +300,19 @@ export default function Performance() {
 
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {scenarioMeta.execTimeMs && (
-              <span className="st-tsm" style={{ color: "#908f9e" }}>
-                LATENCY: <strong style={{ color: "#bdc2ff" }}>{scenarioMeta.execTimeMs} ms</strong>
+              <span className="st-tsm" style={{ color: "var(--muted, #908f9e)" }}>
+                LATENCY: <strong style={{ color: "var(--accent, #bdc2ff)" }}>{scenarioMeta.execTimeMs} ms</strong>
               </span>
             )}
             <button
               onClick={handleRunEvaluation}
               disabled={!isOnline || isEvaluating}
               style={{
-                background: isOnline ? (isEvaluating ? "#454653" : "#3097e0") : "#282a2e",
-                color: isOnline ? "#ffffff" : "#908f9e",
-                border: "1px solid #454653",
+                background: isOnline ? (isEvaluating ? "var(--border, #454653)" : "var(--secondary-deep, #3097e0)") : "var(--panel-3, #282a2e)",
+                color: isOnline ? "#ffffff" : "var(--muted, #908f9e)",
+                border: "1px solid var(--border, #454653)",
                 padding: "4px 14px",
-                fontFamily: "JetBrains Mono, monospace",
+                fontFamily: "var(--font-mono, monospace)",
                 fontSize: 10,
                 fontWeight: 700,
                 letterSpacing: "0.08em",

@@ -52,8 +52,9 @@ function getScenarioBadgeStyle(scenarioClass) {
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 function pct(v) {
+  if (v == null || isNaN(Number(v))) return "—";
   const n = Number(v);
-  return !isNaN(n) && isFinite(n) ? `${(n * 100).toFixed(1)}%` : "0.0%";
+  return isFinite(n) ? `${(n * 100).toFixed(1)}%` : "—";
 }
 
 function fmtUs(us) {
@@ -691,6 +692,10 @@ export default function MissionOverview() {
     bandStates,
     scheduler,
     dwellHistory,
+    instantaneousPd,
+    sessionAvgPd: tSessionAvgPd,
+    liveMetrics,
+    waterfallHistory,
   } = t;
 
   const freqLabel = `${currentFreqMHz.toLocaleString()} MHz`;
@@ -698,7 +703,8 @@ export default function MissionOverview() {
   const ibwRange = `${(currentFreqMHz - 500).toLocaleString()}–${(currentFreqMHz + 500).toLocaleString()} MHz`;
 
   // Session average Pd = cumulative hits / cumulative dwells
-  const sessionAvgPd = totalDwells > 0 ? totalHits / totalDwells : 0;
+  const sessionAvgPd = totalDwells > 0 ? totalHits / totalDwells : (tSessionAvgPd || 0);
+  const activeInstantaneousPd = instantaneousPd || rollingPd || 0;
   // Session ended = we have data but mission/stream is no longer active
   const sessionEnded = !missionActive && !streamRunning && totalDwells > 0 && live;
 
@@ -707,12 +713,12 @@ export default function MissionOverview() {
       {/* Header */}
       <div className="st-panel">
         <PanelHead icon="grid_view" title="SMART SCAN MISSION OVERVIEW" badge="OPERATIONAL" />
-        <div className="st-body" style={{ color: "#c6c5d5", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <div className="st-body" style={{ color: "var(--text-muted, #c6c5d5)", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <span>Intelligent frequency and dwell selection across wideband RF environment (36 bands × 500 MHz).</span>
           <DataSourceBadge connected={live} />
           <ConnectionStateBadge state={connectionState} pollingIntervalMs={pollingIntervalMs} />
           {(missionActive || streamRunning) && (
-            <span style={{ color: "#49df9d", fontWeight: 700 }}>
+            <span style={{ color: "var(--success, #49df9d)", fontWeight: 700 }}>
               ● {streamRunning ? "STREAM ACTIVE" : "MISSION ACTIVE"} · {totalDwells} DWELLS · T={Number(missionClockUs).toFixed(0)} µs
             </span>
           )}
@@ -732,9 +738,9 @@ export default function MissionOverview() {
       {sessionEnded && (
         <div
           style={{
-            background: "linear-gradient(90deg, #0d1f14 0%, #0f1a2a 100%)",
-            border: "1px solid #49df9d",
-            borderLeft: "4px solid #49df9d",
+            background: "var(--panel-2, #1e2024)",
+            border: "1px solid var(--success, #49df9d)",
+            borderLeft: "4px solid var(--success, #49df9d)",
             padding: "8px 12px",
             display: "flex",
             alignItems: "center",
@@ -742,40 +748,40 @@ export default function MissionOverview() {
             flexWrap: "wrap",
           }}
         >
-          <span style={{ display: "flex", alignItems: "center", gap: 6, color: "#49df9d", fontWeight: 700, letterSpacing: "0.06em", fontSize: 11 }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--success, #49df9d)", fontWeight: 700, letterSpacing: "0.06em", fontSize: 11 }}>
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
               flag
             </span>
             SESSION COMPLETE
           </span>
-          <span className="st-tsm" style={{ color: "#908f9e" }}>
-            TOTAL DWELLS: <strong style={{ color: "#e2e2e8" }}>{totalDwells}</strong>
+          <span className="st-tsm" style={{ color: "var(--muted, #908f9e)" }}>
+            TOTAL DWELLS: <strong style={{ color: "var(--text, #e2e2e8)" }}>{totalDwells}</strong>
           </span>
-          <span className="st-tsm" style={{ color: "#908f9e" }}>
-            TOTAL HITS: <strong style={{ color: "#49df9d" }}>{totalHits}</strong>
+          <span className="st-tsm" style={{ color: "var(--muted, #908f9e)" }}>
+            TOTAL HITS: <strong style={{ color: "var(--success, #49df9d)" }}>{totalHits}</strong>
           </span>
-          <span className="st-tsm" style={{ color: "#908f9e" }}>
-            INSTANTANEOUS Pd: <strong style={{ color: "#6afcb8" }}>{pct(rollingPd)}</strong>
+          <span className="st-tsm" style={{ color: "var(--muted, #908f9e)" }}>
+            INSTANTANEOUS Pd: <strong style={{ color: "var(--accent, #6afcb8)" }}>{pct(activeInstantaneousPd)}</strong>
           </span>
           <span
             style={{
-              background: "#0a2a18",
-              border: "1px solid #49df9d",
+              background: "var(--panel-3, #282a2e)",
+              border: "1px solid var(--success, #49df9d)",
               padding: "2px 10px",
               display: "flex",
               alignItems: "center",
               gap: 6,
             }}
           >
-            <span className="st-tsm" style={{ color: "#908f9e" }}>
+            <span className="st-tsm" style={{ color: "var(--muted, #908f9e)" }}>
               SESSION AVG Pd:
             </span>
-            <strong style={{ color: "#49df9d", fontSize: 15, letterSpacing: "0.04em" }}>
+            <strong style={{ color: "var(--success, #49df9d)", fontSize: 15, letterSpacing: "0.04em" }}>
               {pct(sessionAvgPd)}
             </strong>
           </span>
-          <span className="st-tsm" style={{ color: "#908f9e" }}>
-            CLOCK: <strong style={{ color: "#bdc2ff" }}>{Number(missionClockUs).toFixed(0)} µs</strong>
+          <span className="st-tsm" style={{ color: "var(--muted, #908f9e)" }}>
+            CLOCK: <strong style={{ color: "var(--accent, #bdc2ff)" }}>{Number(missionClockUs).toFixed(0)} µs</strong>
           </span>
         </div>
       )}
@@ -783,9 +789,9 @@ export default function MissionOverview() {
       {/* Authoritative Model Provenance & Frozen Validated Benchmark Banner */}
       <section
         style={{
-          background: "linear-gradient(90deg, #101524 0%, #0d121c 100%)",
-          border: "1px solid #3b4261",
-          borderLeft: "4px solid #49df9d",
+          background: "var(--panel-2, #1e2024)",
+          border: "1px solid var(--border, #3b4261)",
+          borderLeft: "4px solid var(--success, #49df9d)",
           padding: "10px 14px",
           display: "flex",
           flexDirection: "column",
@@ -796,24 +802,24 @@ export default function MissionOverview() {
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span className="material-symbols-outlined" style={{ fontSize: 20, color: "#49df9d" }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 20, color: "var(--success, #49df9d)" }}>
               verified
             </span>
             <div>
-              <span style={{ fontSize: 10, color: "#908f9e", letterSpacing: "0.06em", fontWeight: 700 }}>
+              <span style={{ fontSize: 10, color: "var(--muted, #908f9e)", letterSpacing: "0.06em", fontWeight: 700 }}>
                 ACTIVE OPERATIONAL SCHEDULER:
               </span>{" "}
-              <strong style={{ fontSize: 13, color: "#ffffff", letterSpacing: "0.02em" }}>
+              <strong style={{ fontSize: 13, color: "var(--text-bright, #ffffff)", letterSpacing: "0.02em" }}>
                 Gate-27 Operational Baseline
               </strong>
-              <span style={{ marginLeft: 8, fontSize: 10, color: "#49df9d", background: "rgba(73, 223, 157, 0.15)", border: "1px solid #49df9d60", padding: "1px 6px", fontWeight: 700 }}>
+              <span style={{ marginLeft: 8, fontSize: 10, color: "var(--success, #49df9d)", background: "rgba(73, 223, 157, 0.15)", border: "1px solid rgba(73, 223, 157, 0.4)", padding: "1px 6px", fontWeight: 700 }}>
                 TRAINING STEP 27,000 · FROZEN DEMONSTRATION
               </span>
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "#a8a7b8" }}>
-            <span style={{ color: "#908f9e" }}>SHA-256:</span>
-            <code style={{ color: "#bdc2ff", background: "#0a0c12", padding: "2px 6px", border: "1px solid #282d3f", fontSize: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "var(--muted, #a8a7b8)" }}>
+            <span style={{ color: "var(--muted, #908f9e)" }}>SHA-256:</span>
+            <code style={{ color: "var(--accent, #bdc2ff)", background: "var(--panel-3, #0a0c12)", padding: "2px 6px", border: "1px solid var(--border, #282d3f)", fontSize: 10 }}>
               fac0577454fe0a89687c27ebdffa568229e2d03435eebd9e82b50fca14292094
             </code>
           </div>
@@ -822,8 +828,8 @@ export default function MissionOverview() {
         {/* Frozen Benchmark Card */}
         <div
           style={{
-            background: "rgba(0, 0, 0, 0.4)",
-            border: "1px dashed #3b4261",
+            background: "var(--panel, #1a1c20)",
+            border: "1px dashed var(--border, #3b4261)",
             padding: "8px 12px",
             display: "flex",
             alignItems: "center",
@@ -878,11 +884,11 @@ export default function MissionOverview() {
         <KpiCard
           label="INTERCEPTION Pd"
           icon="radar"
-          value={rollingPd > 0 ? (rollingPd * 100).toFixed(1) : "0.0"}
-          unit="%"
-          footLeft={`HITS: ${totalHits}`}
-          footRight={`DWELLS: ${totalDwells}`}
-          valueColor="#6afcb8"
+          value={activeInstantaneousPd != null && !isNaN(activeInstantaneousPd) ? (activeInstantaneousPd * 100).toFixed(1) : "—"}
+          unit={activeInstantaneousPd != null && !isNaN(activeInstantaneousPd) ? "%" : ""}
+          footLeft="INSTANTANEOUS (WINDOW)"
+          footRight={`SESSION AVG: ${sessionAvgPd != null && !isNaN(sessionAvgPd) ? `${(sessionAvgPd * 100).toFixed(1)}%` : "—"}`}
+          valueColor="var(--accent-bright, #6afcb8)"
         />
         <KpiCard
           label="REVISIT LATENCY"
@@ -891,7 +897,7 @@ export default function MissionOverview() {
           unit="µs"
           footLeft="P50 MEDIAN"
           footRight={rollingMedianLatencyUs > 0 ? `${(rollingMedianLatencyUs / 1000).toFixed(2)} ms` : "0.0 ms"}
-          valueColor="#ffd700"
+          valueColor="var(--warning, #ffd700)"
         />
         <KpiCard
           label="SCHEDULER CONFIDENCE"
@@ -900,7 +906,7 @@ export default function MissionOverview() {
           unit="%"
           footLeft={`ETA: ${fmtUs(scheduler.predictedEtaUs)}`}
           footRight={scheduler.scanMode}
-          valueColor="#bdc2ff"
+          valueColor="var(--accent, #bdc2ff)"
         />
         <KpiCard
           label="MISSION CLOCK"
@@ -909,14 +915,14 @@ export default function MissionOverview() {
           unit="ms"
           footLeft={`T=${Number(missionClockUs).toFixed(0)} µs`}
           footRight={live ? "LIVE CLOCK" : "INACTIVE"}
-          valueColor="#bdc2ff"
+          valueColor="var(--accent, #bdc2ff)"
         />
       </section>
 
       {/* Live Cognitive EW Metrics & Spectrum Waterfall (Phase 4) */}
       <section style={{ display: "flex", flexDirection: "column", gap: 8, margin: "8px 0" }}>
-        <LiveMetricsDashboard metrics={wsMetrics} />
-        <SpectrumWaterfall history={wsHistory} />
+        <LiveMetricsDashboard metrics={liveMetrics || wsMetrics} />
+        <SpectrumWaterfall history={wsHistory.length > 0 ? wsHistory : (waterfallHistory || [])} />
       </section>
 
       {/* Main 2-column layout */}
@@ -953,15 +959,15 @@ export default function MissionOverview() {
                   gap: 8,
                 }}
               >
-                <span className="st-tsm" style={{ color: "#908f9e" }}>
+                <span className="st-tsm" style={{ color: "var(--muted, #908f9e)" }}>
                   CURRENT DWELL:{" "}
-                  <strong style={{ color: "#bdc2ff" }}>{bandLabel}</strong>
+                  <strong style={{ color: "var(--accent, #bdc2ff)" }}>{bandLabel}</strong>
                   {" · "}
-                  <strong style={{ color: "#e2e2e8" }}>{freqLabel}</strong>
+                  <strong style={{ color: "var(--text, #e2e2e8)" }}>{freqLabel}</strong>
                   {" · "}
-                  <strong style={{ color: "#96ccff" }}>{currentMode}</strong>
+                  <strong style={{ color: "var(--secondary, #96ccff)" }}>{currentMode}</strong>
                   {" · "}
-                  <strong style={{ color: "#bdc2ff" }}>{fmtUs(currentDwellUs)}</strong>
+                  <strong style={{ color: "var(--accent, #bdc2ff)" }}>{fmtUs(currentDwellUs)}</strong>
                 </span>
                 <span style={{ display: "flex", gap: 6 }}>
                   <CmdBadge label="IBW 1 GHz" active={live} />
@@ -972,6 +978,8 @@ export default function MissionOverview() {
                 bandHeights={bandHeights}
                 bandStates={bandStates}
                 currentBand={currentBand}
+                freqMHz={currentFreqMHz}
+                dwellUs={currentDwellUs}
               />
             </div>
           </div>

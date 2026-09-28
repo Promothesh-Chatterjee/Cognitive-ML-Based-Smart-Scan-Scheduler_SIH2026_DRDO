@@ -131,7 +131,20 @@ export default function DatasetAudit() {
     rollingPd = 0.0,
     totalHits = 0,
     totalDwells = 0,
+    scheduler = {},
+    sessionAvgPd = 0.0,
+    bandHeights = [],
   } = telemetry;
+
+  const groundTruthEmitters = useMemo(() => {
+    if (Array.isArray(telemetry.groundTruthEmitters) && telemetry.groundTruthEmitters.length > 0) {
+      return telemetry.groundTruthEmitters;
+    }
+    if (Array.isArray(telemetry.truth_emitters) && telemetry.truth_emitters.length > 0) {
+      return telemetry.truth_emitters;
+    }
+    return [];
+  }, [telemetry.groundTruthEmitters, telemetry.truth_emitters]);
 
   const isOnline = Boolean(
     live ||
@@ -841,20 +854,272 @@ export default function DatasetAudit() {
         </div>
       </div>
 
-      <div className="st-grid-12">
-        <div className="st-span-6 st-panel">
-          <PanelHead title="PANEL A: SCHEDULER OBSERVATION DATA" badge="360-D" />
-          <div className="st-body" style={{ color: "#c6c5d5" }}>
-            Receiver-derived spectrum state only: 36 bands × 10 features per
-            dwell. Emitter identity, true RF, and scenario metadata never
-            enter this panel.
+      {/* 4. DECOUPLED ARCHITECTURE: OBSERVATION DATA (PANEL A) VS ISOLATED GROUND TRUTH STORE (PANEL B) */}
+      <div className="st-grid-12" style={{ gap: 8, marginTop: 4 }}>
+        {/* PANEL A: SCHEDULER OBSERVATION DATA */}
+        <div className="st-span-6 st-panel" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <PanelHead
+            icon="psychology"
+            title="PANEL A: SCHEDULER OBSERVATION VECTOR"
+            badge="360-D (36 × 10)"
+            badgeColor="var(--accent, #bdc2ff)"
+          />
+          <div className="st-body" style={{ color: "var(--text-muted, #c6c5d5)" }}>
+            Receiver-derived spectrum state only: 36 bands × 10 features per dwell. Emitter identities, true RF parameters, and scenario metadata never enter this observation space.
+          </div>
+
+          {/* Decision linkage bar */}
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 8,
+              padding: "6px 10px",
+              background: "var(--panel-2, #1e2024)",
+              border: "1px solid var(--border-subtle, #333539)",
+              fontSize: 11,
+              fontFamily: "var(--font-mono, monospace)",
+              alignItems: "center",
+            }}
+          >
+            <span style={{ color: "var(--muted, #908f9e)" }}>CURRENT TARGET:</span>
+            <strong style={{ color: "var(--accent, #bdc2ff)" }}>
+              BAND {Number(currentBand) + 1} ({((Number(currentBand) * 500 + 250)).toLocaleString()} MHz)
+            </strong>
+            <span style={{ color: "var(--border, #454653)" }}>|</span>
+            <span style={{ color: "var(--muted, #908f9e)" }}>MODE:</span>
+            <strong style={{ color: "var(--secondary, #96ccff)" }}>{currentMode}</strong>
+            <span style={{ color: "var(--border, #454653)" }}>|</span>
+            <span style={{ color: "var(--muted, #908f9e)" }}>REASON:</span>
+            <span style={{ color: "var(--text, #e2e2e8)" }}>{scheduler.decisionReason || "DRQN Policy"}</span>
+          </div>
+
+          {/* 36-band observation inspector table */}
+          <div style={{ maxHeight: 280, overflowY: "auto", border: "1px solid var(--border, #454653)" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, fontFamily: "var(--font-mono, monospace)" }}>
+              <thead>
+                <tr style={{ background: "var(--panel-3, #282a2e)", borderBottom: "1px solid var(--border, #454653)", textAlign: "left" }}>
+                  <th style={{ padding: "4px 8px", color: "var(--muted, #908f9e)" }}>BAND</th>
+                  <th style={{ padding: "4px 8px", color: "var(--muted, #908f9e)" }}>FREQ (MHz)</th>
+                  <th style={{ padding: "4px 8px", color: "var(--muted, #908f9e)" }}>ACTIVITY</th>
+                  <th style={{ padding: "4px 8px", color: "var(--muted, #908f9e)" }}>OCCUPANCY</th>
+                  <th style={{ padding: "4px 8px", color: "var(--muted, #908f9e)" }}>LINKAGE</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 36 }, (_, bIdx) => {
+                  const isTuned = bIdx === Number(currentBand);
+                  const actVal = bandHeights?.[bIdx] != null ? Number(bandHeights[bIdx]) : null;
+                  const isAct = actVal != null ? actVal > 0.15 : false;
+                  return (
+                    <tr
+                      key={bIdx}
+                      style={{
+                        background: isTuned
+                          ? "rgba(189,194,255,0.12)"
+                          : bIdx % 2 === 0
+                          ? "var(--panel, #1a1c20)"
+                          : "var(--panel-2, #1e2024)",
+                        borderBottom: "1px solid var(--border-subtle, rgba(69,70,83,0.3))",
+                      }}
+                    >
+                      <td style={{ padding: "3px 8px", color: isTuned ? "var(--accent, #bdc2ff)" : "var(--text, #e2e2e8)", fontWeight: isTuned ? 700 : 500 }}>
+                        B{String(bIdx + 1).padStart(2, "0")}
+                      </td>
+                      <td style={{ padding: "3px 8px", color: "var(--text, #e2e2e8)" }}>
+                        {bIdx * 500 + 250}
+                      </td>
+                      <td style={{ padding: "3px 8px" }}>
+                        <span
+                          style={{
+                            color: isAct ? "var(--success, #49df9d)" : "var(--muted, #908f9e)",
+                            fontWeight: isAct ? 600 : 400,
+                          }}
+                        >
+                          {actVal != null ? (isAct ? "ACTIVE" : "QUIET") : "—"}
+                        </span>
+                      </td>
+                      <td style={{ padding: "3px 8px", color: "var(--text, #e2e2e8)" }}>
+                        {actVal != null ? actVal.toFixed(3) : "—"}
+                      </td>
+                      <td style={{ padding: "3px 8px" }}>
+                        {isTuned ? (
+                          <span style={{ color: "var(--accent, #bdc2ff)", fontWeight: 700 }}>
+                            TUNED TARGET ↑
+                          </span>
+                        ) : (
+                          <span style={{ color: "var(--muted, #908f9e)" }}>MONITORED</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div
+            style={{
+              padding: "6px 8px",
+              background: "rgba(48,151,224,0.08)",
+              border: "1px solid var(--secondary, #3097e0)",
+              fontSize: 10,
+              color: "var(--secondary, #96ccff)",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+              shield
+            </span>
+            <span>
+              ZERO LEAKAGE PROVENANCE: 360-D observation vector strictly formed from receiver RF features.
+            </span>
           </div>
         </div>
-        <div className="st-span-6 st-panel">
-          <PanelHead title="PANEL B: ISOLATED GROUND TRUTH STORE" badge="TRUTH" />
-          <div className="st-body" style={{ color: "#c6c5d5" }}>
-            Operator-view simulation truth, physically isolated from Panel A.
-            Used for audit and scoring only — never for inference.
+
+        {/* PANEL B: ISOLATED GROUND TRUTH STORE */}
+        <div className="st-span-6 st-panel" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <PanelHead
+            icon="visibility"
+            title="PANEL B: ISOLATED GROUND TRUTH STORE"
+            badge="TRUTH (AUDIT ONLY)"
+            badgeColor="var(--warning, #f59e0b)"
+          />
+          <div className="st-body" style={{ color: "var(--text-muted, #c6c5d5)" }}>
+            Operator-view simulation truth, physically isolated from Panel A. Used exclusively for post-hoc validation, scoring, and telemetry auditing.
+          </div>
+
+          {/* Truth metrics strip */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: 6,
+              background: "var(--panel-2, #1e2024)",
+              padding: "6px 8px",
+              border: "1px solid var(--border-subtle, #333539)",
+            }}
+          >
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <span className="st-tsm" style={{ color: "var(--muted, #908f9e)" }}>INCIDENT PULSES</span>
+              <strong style={{ fontSize: 13, color: "var(--text, #e2e2e8)" }}>
+                {allIncidentPdws?.length || incidentHistory?.length || 0}
+              </strong>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <span className="st-tsm" style={{ color: "var(--muted, #908f9e)" }}>INTERCEPTED HITS</span>
+              <strong style={{ fontSize: 13, color: "var(--success, #49df9d)" }}>
+                {totalHits || pdwHistory?.filter(p => p.isHit).length || 0}
+              </strong>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <span className="st-tsm" style={{ color: "var(--muted, #908f9e)" }}>TRACKED EMITTERS</span>
+              <strong style={{ fontSize: 13, color: "var(--warning, #f59e0b)" }}>
+                {groundTruthEmitters.length > 0 ? groundTruthEmitters.length : "—"}
+              </strong>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <span className="st-tsm" style={{ color: "var(--muted, #908f9e)" }}>INCIDENT IR</span>
+              <strong style={{ fontSize: 13, color: "var(--accent, #bdc2ff)" }}>
+                {totalDwells > 0
+                  ? `${((totalHits / totalDwells) * 100).toFixed(1)}%`
+                  : sessionAvgPd > 0
+                  ? `${(sessionAvgPd * 100).toFixed(1)}%`
+                  : "—"}
+              </strong>
+            </div>
+          </div>
+
+          {/* True Emitter tracks table */}
+          {groundTruthEmitters.length > 0 ? (
+            <div style={{ maxHeight: 280, overflowY: "auto", border: "1px solid var(--border, #454653)" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, fontFamily: "var(--font-mono, monospace)" }}>
+                <thead>
+                  <tr style={{ background: "var(--panel-3, #282a2e)", borderBottom: "1px solid var(--border, #454653)", textAlign: "left" }}>
+                    <th style={{ padding: "4px 8px", color: "var(--muted, #908f9e)" }}>EMITTER ID</th>
+                    <th style={{ padding: "4px 8px", color: "var(--muted, #908f9e)" }}>CARRIER FREQ</th>
+                    <th style={{ padding: "4px 8px", color: "var(--muted, #908f9e)" }}>PRI</th>
+                    <th style={{ padding: "4px 8px", color: "var(--muted, #908f9e)" }}>PW</th>
+                    <th style={{ padding: "4px 8px", color: "var(--muted, #908f9e)" }}>MODULATION</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {groundTruthEmitters.map((em, idx) => {
+                    const eId = em.emitter_id != null ? em.emitter_id : (em.id ?? `E-${idx + 1}`);
+                    const freqSpan = em.freq_min_mhz != null && em.freq_max_mhz != null
+                      ? (em.freq_min_mhz === em.freq_max_mhz ? `${em.freq_min_mhz} MHz` : `${em.freq_min_mhz}–${em.freq_max_mhz} MHz`)
+                      : `${em.frequency_mhz ?? 8250} MHz`;
+                    const pri = em.mean_pri_us != null ? `${Number(em.mean_pri_us).toFixed(1)} µs` : (em.pri_us != null ? `${Number(em.pri_us).toFixed(1)} µs` : "—");
+                    const pw = em.mean_pw_us != null ? `${Number(em.mean_pw_us).toFixed(2)} µs` : (em.pw_us != null ? `${Number(em.pw_us).toFixed(2)} µs` : "—");
+                    const mod = em.classification || em.modulation_type || em.radar_type || "PULSED RADAR";
+                    return (
+                      <tr
+                        key={idx}
+                        style={{
+                          background: idx % 2 === 0 ? "var(--panel, #1a1c20)" : "var(--panel-2, #1e2024)",
+                          borderBottom: "1px solid var(--border-subtle, rgba(69,70,83,0.3))",
+                        }}
+                      >
+                        <td style={{ padding: "3px 8px", color: "var(--warning, #f59e0b)", fontWeight: 700 }}>
+                          {eId}
+                        </td>
+                        <td style={{ padding: "3px 8px", color: "var(--text, #e2e2e8)" }}>
+                          {freqSpan}
+                        </td>
+                        <td style={{ padding: "3px 8px", color: "var(--text, #e2e2e8)" }}>
+                          {pri}
+                        </td>
+                        <td style={{ padding: "3px 8px", color: "var(--text, #e2e2e8)" }}>
+                          {pw}
+                        </td>
+                        <td style={{ padding: "3px 8px", color: "var(--secondary, #96ccff)" }}>
+                          {mod}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div
+              style={{
+                padding: "24px 16px",
+                textAlign: "center",
+                color: "var(--muted, #908f9e)",
+                fontFamily: "var(--font-mono, monospace)",
+                fontSize: 11,
+                background: "var(--panel-lowest, #141619)",
+                border: "1px dashed var(--border-subtle, #333539)",
+              }}
+            >
+              <div>NO ISOLATED GROUND TRUTH EMITTER RECORDS AVAILABLE FROM ACTIVE TELEMETRY STREAM</div>
+              <div style={{ marginTop: 6, fontSize: 10, color: "var(--muted, #757785)" }}>
+                Ground truth emitter parameters are strictly air-gapped from the DRQN policy observation space.
+              </div>
+            </div>
+          )}
+
+          <div
+            style={{
+              padding: "6px 8px",
+              background: "rgba(245,158,11,0.08)",
+              border: "1px solid var(--warning, #f59e0b)",
+              fontSize: 10,
+              color: "var(--warning, #f59e0b)",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+              gavel
+            </span>
+            <span>
+              STRICT AUDIT ISOLATION: The DRQN policy network has zero observation visibility into Panel B.
+            </span>
           </div>
         </div>
       </div>

@@ -169,7 +169,8 @@ function useCanvasResize(canvasRef, containerRef) {
 }
 
 /**
- * Generate a high-resolution 360-bin frequency slice for waterfall spectrogram.
+ * Generate a 360-bin channel activity slice for waterfall history.
+ * Intensity directly reflects backend channel occupancy/activity priority vector (36 bands × 10 bins).
  */
 function createWaterfallRow({
   liveBand,
@@ -183,93 +184,42 @@ function createWaterfallRow({
   const bins = new Float32Array(WATERFALL_BINS);
   const priorBins = priorRow?.bins || (Array.isArray(priorRow) ? priorRow : null);
 
-  // 1. Subtle wideband thermal noise floor (6-12)
+  // 1. Decay of prior row signals
   for (let b = 0; b < WATERFALL_BINS; b++) {
-    bins[b] = 7 + ((b * 19 + (step % 17) * 7) % 8);
-    // Smooth decay of prior row signals
-    if (priorBins && priorBins[b] !== undefined) {
-      bins[b] = Math.max(bins[b], priorBins[b] * 0.86);
-    }
+    bins[b] = priorBins && priorBins[b] !== undefined ? priorBins[b] * 0.86 : 0.0;
   }
 
-  // 2. Background regional activity from band priorities
+  // 2. Real channel occupancy / activity priority from backend telemetry (band_priorities)
   const bandPriors = telemetry?.bandPriorities || telemetry?.metrics?.band_priorities || [];
   if (Array.isArray(bandPriors) && bandPriors.length > 0) {
     for (let bIdx = 0; bIdx < NUM_BANDS; bIdx++) {
-      const prio = bandPriors[bIdx] || 0;
+      const prio = Math.max(0.0, Math.min(1.0, Number(bandPriors[bIdx]) || 0));
       if (prio > 0) {
         const startBin = bIdx * 10;
         for (let offset = 0; offset < 10; offset++) {
-          bins[startBin + offset] = Math.max(bins[startBin + offset], prio * 24);
+          bins[startBin + offset] = Math.max(bins[startBin + offset], prio * 100);
         }
       }
     }
   }
 
   // 3. Tuned receiver aperture window (500 MHz span = 10 bins)
-  if (liveBand !== undefined && liveBand !== null) {
-    const startBin = Math.max(0, Math.min(WATERFALL_BINS - 10, liveBand * 10));
-    const apertureLevel = isHit ? 42 : 24;
+  if (liveBand !== undefined && liveBand !== null && liveBand >= 0 && liveBand < NUM_BANDS) {
+    const startBin = liveBand * 10;
+    const apertureLevel = isHit ? 75 : 35;
     for (let offset = 0; offset < 10; offset++) {
       bins[startBin + offset] = Math.max(bins[startBin + offset], apertureLevel);
     }
   }
 
-  // 4. Physical emitter and pulse carrier signals
-  const activeSignals = [];
-  const hitFrequencies = [];
-
-  if (Array.isArray(telemetry?.emitters) && telemetry.emitters.length > 0) {
-    telemetry.emitters.forEach((em) => {
-      if (em.frequency_mhz != null && em.frequency_mhz > 0) {
-        activeSignals.push({ freqMHz: em.frequency_mhz, isHit: false, power: 74 });
-      }
-    });
-  } else {
-    // Canonical default threat emitter carriers if no real tracks yet
-    [750, 1750, 4250, 8250, 10250, 14250].forEach((f) => {
-      activeSignals.push({ freqMHz: f, isHit: false, power: 68 });
-    });
-  }
-
-  // Intercepted PDWs
-  if (Array.isArray(telemetry?.pdws) && telemetry.pdws.length > 0) {
-    telemetry.pdws.slice(0, 15).forEach((p) => {
-      if (p.frequency_mhz != null && p.frequency_mhz > 0) {
-        activeSignals.push({ freqMHz: p.frequency_mhz, isHit: true, power: 96 });
-        hitFrequencies.push(p.frequency_mhz);
-      }
-    });
-  }
-
-  // Live intercept flare in tuned band
-  if (isHit && liveBand !== undefined && liveBand !== null) {
-    const centerHit = liveBand * 500 + 250;
-    activeSignals.push({ freqMHz: centerHit, isHit: true, power: 98 });
-    if (!hitFrequencies.includes(centerHit)) hitFrequencies.push(centerHit);
-  }
-
-  // Deposit Gaussian energy at exact signal frequencies
-  activeSignals.forEach((sig) => {
-    const binFloat = (sig.freqMHz / FREQ_END_MHZ) * WATERFALL_BINS;
-    const centerBin = Math.round(binFloat);
-    for (let d = -3; d <= 3; d++) {
-      const b = centerBin + d;
-      if (b >= 0 && b < WATERFALL_BINS) {
-        const falloff = Math.exp(-(d * d) / 1.8);
-        bins[b] = Math.max(bins[b], sig.power * falloff);
-      }
-    }
-  });
-
   return {
     bins,
     timeLabel: clockUs > 0 ? `T+${(clockUs / 1000).toFixed(1)}ms` : "NOW",
     timestamp: Date.now(),
+    step,
     clockUs,
     band: liveBand,
     isHit,
-    hitFreqs: hitFrequencies,
     modeName,
   };
 }
@@ -290,6 +240,7 @@ function SpectrumCanvas({
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const peakHoldRef = useRef(null);
+  const lastFrameIdRef = useRef(null);
   const [hoverInfo, setHoverInfo] = useState(null);
 
   useCanvasResize(canvasRef, containerRef);
@@ -540,8 +491,8 @@ function SpectrumCanvas({
       const fMHz = FREQ_START_MHZ + (i / ptsCount) * (FREQ_END_MHZ - FREQ_START_MHZ);
       const bIdx = Math.min(35, Math.floor(fMHz / BAND_WIDTH_MHZ));
 
-      // Thermal noise baseline (-102.5 dBm) with realistic RF grass jitter
-      const grass = Math.sin(i * 14.1) * 1.6 + Math.cos(i * 37.9) * 1.1 + ((i * 19) % 5) * 0.3;
+      // Thermal noise baseline (-102.5 dBm) with RF grass jitter
+      const grass = Math.sin(i * 14.1) * 1.6 + Math.cos(i * 37.9) * 1.1;
       let level = -102.5 + grass;
 
       // Regional band activity envelope lift
@@ -564,15 +515,30 @@ function SpectrumCanvas({
       instantaneousDBm[i] = Math.min(-20, Math.max(-110, level));
     }
 
+    // Defect 6: Authoritative telemetry frame identifier (never use object identity)
+    const frameId = liveTelemetry
+      ? (liveTelemetry.step != null
+          ? `s-${liveTelemetry.step}-${liveTelemetry.clockUs ?? 0}`
+          : (liveTelemetry.clockUs != null
+              ? `c-${liveTelemetry.clockUs}`
+              : (liveTelemetry.timestamp != null ? `t-${liveTelemetry.timestamp}` : null)))
+      : null;
+
+    const isNewFrame = frameId !== null && frameId !== lastFrameIdRef.current;
+    if (isNewFrame) {
+      lastFrameIdRef.current = frameId;
+    }
+
     // Max-Hold (Peak Hold) Persistence Decay
     if (!peakHoldRef.current || peakHoldRef.current.length !== ptsCount) {
       peakHoldRef.current = new Float32Array(ptsCount);
       for (let i = 0; i < ptsCount; i++) peakHoldRef.current[i] = instantaneousDBm[i];
-    } else {
+    } else if (isNewFrame) {
+      // ONLY decay downward on new telemetry frame arrival, NEVER on mouse move!
       for (let i = 0; i < ptsCount; i++) {
-        // Slow exponential decay: hold max peaks
-        const decayed = peakHoldRef.current[i] * 0.994 - 0.12;
-        peakHoldRef.current[i] = Math.max(instantaneousDBm[i], Math.max(-108, decayed));
+        // Attenuate downward in dBm towards noise floor (-105 dBm)
+        const decayed = peakHoldRef.current[i] - 0.45;
+        peakHoldRef.current[i] = Math.max(instantaneousDBm[i], Math.max(-105, decayed));
       }
     }
 
@@ -733,8 +699,8 @@ function SpectrumCanvas({
         position: "relative",
         width: "100%",
         height: 240,
-        background: isDark ? "#060913" : "#ffffff",
-        border: isDark ? "1px solid #454653" : "1px solid #cbd5e1",
+        background: isDark ? "var(--panel-lowest, #060913)" : "var(--panel, #ffffff)",
+        border: "1px solid var(--border, #454653)",
         cursor: "crosshair",
         transition: "background 0.15s ease, border-color 0.15s ease",
       }}
@@ -831,7 +797,7 @@ function WaterfallCanvas({
       ctx.font = '9px "JetBrains Mono", monospace';
       ctx.textAlign = "center";
       ctx.fillStyle = isDark ? "#8e919d" : "#334155";
-      ctx.fillText("INITIALIZING HIGH-RESOLUTION WATERFALL SPECTROGRAM BUFFER...", marginLeft + plotW / 2, marginTop + plotH / 2);
+      ctx.fillText("NO CHANNEL ACTIVITY FRAMES RECORDED · AWAITING ACTIVE MISSION STREAM", marginLeft + plotW / 2, marginTop + plotH / 2);
       return;
     }
 
@@ -839,7 +805,7 @@ function WaterfallCanvas({
     const rowH = plotH / rows;
     const cellW = plotW / WATERFALL_BINS;
 
-    // Render High-Resolution Spectrogram Matrix
+    // Render High-Resolution Channel Activity Matrix
     for (let r = 0; r < rows; r++) {
       const rowData = waterfall[r];
       const y = marginTop + r * rowH;
@@ -855,15 +821,13 @@ function WaterfallCanvas({
         }
       }
 
-      // Discrete pulse intercept indicator (emerald diamond / halo)
-      if (rowData?.isHit && Array.isArray(rowData?.hitFreqs) && rowData.hitFreqs.length > 0) {
-        rowData.hitFreqs.forEach((f) => {
-          const xPip = marginLeft + ((f - FREQ_START_MHZ) / (FREQ_END_MHZ - FREQ_START_MHZ)) * plotW;
-          ctx.fillStyle = "#49df9d";
-          ctx.beginPath();
-          ctx.arc(xPip, y + rowH / 2, Math.max(1.8, rowH * 0.7), 0, Math.PI * 2);
-          ctx.fill();
-        });
+      // Discrete pulse intercept indicator (emerald diamond / halo) at tuned band
+      if (rowData?.isHit && rowData?.band != null) {
+        const xPip = marginLeft + ((rowData.band + 0.5) / NUM_BANDS) * plotW;
+        ctx.fillStyle = "#49df9d";
+        ctx.beginPath();
+        ctx.arc(xPip, y + rowH / 2, Math.max(1.8, rowH * 0.7), 0, Math.PI * 2);
+        ctx.fill();
       }
     }
 
@@ -958,7 +922,7 @@ function WaterfallCanvas({
       ctx.setLineDash([]);
 
       const hitTag = isHit ? " [INTERCEPT HIT]" : "";
-      const text = `T - ${timeOffsetSec}s · ${freqMHz.toLocaleString()} MHz (B${Math.floor(freqMHz / 500)}) · INTENSITY: ${Math.round(val)}%${hitTag}`;
+      const text = `T - ${timeOffsetSec}s · ${freqMHz.toLocaleString()} MHz (B${Math.floor(freqMHz / 500)}) · OCCUPANCY PRIORITY: ${Math.round(val)}%${hitTag}`;
 
       ctx.font = '9px "JetBrains Mono", monospace';
       const textW = ctx.measureText(text).width;
@@ -987,8 +951,8 @@ function WaterfallCanvas({
         position: "relative",
         width: "100%",
         height: 380,
-        background: isDark ? "#050711" : "#f8fafc",
-        border: isDark ? "1px solid #454653" : "1px solid #cbd5e1",
+        background: isDark ? "var(--panel-lowest, #050711)" : "var(--panel-2, #f8fafc)",
+        border: "1px solid var(--border, #454653)",
         cursor: "crosshair",
         transition: "background 0.15s ease, border-color 0.15s ease",
       }}
@@ -1068,35 +1032,8 @@ export default function LiveSpectrum() {
   const [waterfallPalette, setWaterfallPalette] = useState("tactical"); // "tactical", "phosphor", "magma"
   const [waterfallGain, setWaterfallGain] = useState(1.0);
 
-  // High-Resolution Spectrogram Waterfall Buffer (140 rows x 360 bins)
-  const [waterfall, setWaterfall] = useState(() => {
-    return Array.from({ length: WATERFALL_ROWS }, (_, rowIndex) => {
-      const bins = new Float32Array(WATERFALL_BINS);
-      for (let b = 0; b < WATERFALL_BINS; b++) {
-        bins[b] = 7 + ((b * 19 + rowIndex * 7) % 8);
-      }
-      // Preset initial signals for synthetic display
-      [15, 35, 85, 165, 205, 285].forEach((centerBin) => {
-        for (let d = -2; d <= 2; d++) {
-          const b = centerBin + d;
-          if (b >= 0 && b < WATERFALL_BINS) {
-            const falloff = Math.exp(-(d * d) / 1.6);
-            bins[b] = Math.max(bins[b], (rowIndex % 3 === 0 ? 84 : 62) * falloff);
-          }
-        }
-      });
-      return {
-        bins,
-        timeLabel: `T-${(rowIndex * 0.1).toFixed(1)}s`,
-        timestamp: Date.now() - rowIndex * 100,
-        clockUs: 0,
-        band: (rowIndex * 3) % NUM_BANDS,
-        isHit: rowIndex % 5 === 0,
-        hitFreqs: rowIndex % 5 === 0 ? [((rowIndex * 3) % NUM_BANDS) * 500 + 250] : [],
-        modeName: "NORMAL_DWELL",
-      };
-    });
-  });
+  // High-Resolution Spectrogram Waterfall Buffer (populated exclusively from real telemetry)
+  const [waterfall, setWaterfall] = useState([]);
 
   const [userSelectedBand, setUserSelectedBand] = useState(false);
   const userSelectedBandRef = useRef(false);
@@ -1434,8 +1371,8 @@ export default function LiveSpectrum() {
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span className="st-headline" style={{ color: "var(--accent)" }}>WATERFALL SPECTROGRAM RECORD</span>
-                <span className="st-badge" style={{ color: "var(--success)" }}>360 BINS · 50 MHz/BIN</span>
+                <span className="st-headline" style={{ color: "var(--accent)" }}>CHANNEL ACTIVITY WATERFALL RECORD</span>
+                <span className="st-badge" style={{ color: "var(--success)" }}>36 BANDS (0–18 GHz) · OCCUPANCY HEATMAP</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 {/* Palette Selector */}
@@ -1521,6 +1458,9 @@ export default function LiveSpectrum() {
                   CLEAR
                 </button>
               </div>
+            </div>
+            <div style={{ fontSize: 9, color: "var(--muted, #908f9e)", padding: "2px 8px", background: "var(--panel-3, #222428)", borderBottom: "1px solid var(--border-subtle, #333539)" }}>
+              * Intensity represents backend channel occupancy / activity priority vector (36 bands × 500 MHz), not measured RF power in dBm.
             </div>
             <WaterfallCanvas
               waterfall={waterfall}

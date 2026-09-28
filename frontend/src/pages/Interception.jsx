@@ -56,12 +56,12 @@ export default function Interception() {
       const freq = Number(d.frequency_mhz ?? (band * 500 + 250));
       const dwellDur = Math.round(Number(d.dwell_us ?? d.dwell_time_us ?? 100));
       const numPulses = d.num_pulses != null ? Number(d.num_pulses) : (isHit ? 1 : 0);
-      const ampDb = d.amplitude_db != null ? Number(d.amplitude_db).toFixed(1) : (isHit ? "-48.5" : null);
-      const snrDb = d.snr_db != null ? Number(d.snr_db).toFixed(1) : (isHit ? "46.5" : null);
-      const pwUs = d.pulse_width_us != null ? Number(d.pulse_width_us).toFixed(2) : (isHit ? "1.50" : null);
-      const aoaDeg = d.aoa_deg != null ? Number(d.aoa_deg).toFixed(1) : (isHit ? "315.0" : null);
-      const trk = d.track_id ? String(d.track_id) : (isHit ? `TRK-0${(band % 4) + 1}` : null);
-      const emit = d.emitter_id ? String(d.emitter_id) : (isHit ? `EMIT-0${(band % 4) + 1}` : null);
+      const ampDb = d.amplitude_db != null ? Number(d.amplitude_db).toFixed(1) : null;
+      const snrDb = d.snr_db != null ? Number(d.snr_db).toFixed(1) : null;
+      const pwUs = d.pulse_width_us != null ? Number(d.pulse_width_us).toFixed(2) : null;
+      const aoaDeg = d.aoa_deg != null ? Number(d.aoa_deg).toFixed(1) : null;
+      const trk = d.track_id ? String(d.track_id) : null;
+      const emit = d.emitter_id ? String(d.emitter_id) : null;
 
       return {
         id: d.id || `${timeUs}-${band}-${idx}`,
@@ -545,7 +545,7 @@ export default function Interception() {
                 <thead style={{ position: "sticky", top: 0, zIndex: 2, background: "var(--panel-3, #282a2e)" }}>
                   <tr>
                     {["TIME (µs)", "BAND / FREQ", "DWELL MODE", "OUTCOME", "EMITTER / TRK", "TIMING DELTA", "SNR / POWER"].map((c) => (
-                      <th key={c} style={{ background: "#282a2e", whiteSpace: "nowrap" }}>{c}</th>
+                      <th key={c} style={{ background: "var(--panel-3, #282a2e)", whiteSpace: "nowrap" }}>{c}</th>
                     ))}
                   </tr>
                 </thead>
@@ -677,9 +677,9 @@ export default function Interception() {
                   disabled={filteredEvents.length <= 1}
                   title="Select Previous Event"
                   style={{
-                    background: "#282a2e",
-                    border: "1px solid #454653",
-                    color: "#bdc2ff",
+                    background: "var(--panel-3, #282a2e)",
+                    border: "1px solid var(--border, #454653)",
+                    color: "var(--accent, #bdc2ff)",
                     borderRadius: 3,
                     padding: "3px 8px",
                     cursor: filteredEvents.length <= 1 ? "not-allowed" : "pointer",
@@ -697,9 +697,9 @@ export default function Interception() {
                   disabled={filteredEvents.length <= 1}
                   title="Select Next Event"
                   style={{
-                    background: "#282a2e",
-                    border: "1px solid #454653",
-                    color: "#bdc2ff",
+                    background: "var(--panel-3, #282a2e)",
+                    border: "1px solid var(--border, #454653)",
+                    color: "var(--accent, #bdc2ff)",
                     borderRadius: 3,
                     padding: "3px 8px",
                     cursor: filteredEvents.length <= 1 ? "not-allowed" : "pointer",
@@ -810,21 +810,17 @@ export default function Interception() {
                 "PULSE WIDTH (PW)",
                 selectedEvent.pulseWidthUs != null
                   ? `${selectedEvent.pulseWidthUs} µs`
-                  : selectedEvent.type === "HIT" || selectedEvent.type === "INTERCEPTION"
-                  ? "1.50 µs"
                   : "—",
               ],
               [
                 "ANGLE OF ARRIVAL (AOA)",
                 selectedEvent.aoaDeg != null
                   ? `${selectedEvent.aoaDeg}° Azimuth`
-                  : selectedEvent.type === "HIT" || selectedEvent.type === "INTERCEPTION"
-                  ? "315.0°"
                   : "—",
               ],
               [
                 "ASSOCIATED TRACK & EMITTER",
-                `${selectedEvent.trackId || (selectedEvent.type === "HIT" ? "TRK-01" : "Unassociated")} · ${selectedEvent.emitterId || "EMIT-01"}`,
+                `${selectedEvent.trackId || "Unassociated"} · ${selectedEvent.emitterId || "—"}`,
               ],
               ["COGNITIVE REASON", selectedEvent.decisionReason],
             ].map(([label, value]) => (
@@ -836,20 +832,20 @@ export default function Interception() {
                   justifyContent: "space-between",
                   alignItems: "center",
                   padding: "5px 8px",
-                  background: "#1a1c20",
-                  border: "1px solid #454653",
+                  background: "var(--panel-2, #1a1c20)",
+                  border: "1px solid var(--border, #454653)",
                   borderRadius: 3,
                 }}
               >
-                <span style={{ color: "#908f9e", fontSize: 11 }}>{label}</span>
+                <span style={{ color: "var(--muted, #908f9e)", fontSize: 11 }}>{label}</span>
                 <strong
                   style={{
                     color:
                       label === "INTERCEPTION VERDICT" || label === "SIGNAL POWER & SNR"
                         ? selectedEvent.type === "HIT" || selectedEvent.type === "INTERCEPTION"
-                          ? "#49df9d"
-                          : "#ffb4ab"
-                        : "#e2e2e8",
+                          ? "var(--success, #49df9d)"
+                          : "var(--danger, #ffb4ab)"
+                        : "var(--text, #e2e2e8)",
                     fontFamily:
                       label.includes("TIME") || label.includes("FREQ") || label.includes("TOA") || label.includes("ERROR")
                         ? "monospace"

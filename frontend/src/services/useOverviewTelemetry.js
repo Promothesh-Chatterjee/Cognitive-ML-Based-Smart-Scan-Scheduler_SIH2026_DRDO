@@ -55,9 +55,8 @@ function buildDefault() {
     totalDwells: 0,
     rollingPd: 0.0,
     rollingMedianLatencyUs: 0.0,
-    missionClockUs: 0.0,
-    bandHeights: Array(TOTAL_BANDS).fill(0).map((_, i) => (i === 0 ? 0.94 : 0.03)),
-    bandStates: Array(TOTAL_BANDS).fill("quiet").map((_, i) => (i === 0 ? "active" : "quiet")),
+    bandHeights: Array(TOTAL_BANDS).fill(0.0),
+    bandStates: Array(TOTAL_BANDS).fill("quiet"),
     scheduler: {
       chosenBand: 0,
       chosenFreqMHz: 250,
@@ -102,6 +101,10 @@ function buildDefault() {
     modeRows: null,
     archetypeRows: null,
     lastError: null,
+    instantaneousPd: 0.0,
+    sessionAvgPd: 0.0,
+    liveMetrics: null,
+    waterfallHistory: [],
   };
 }
 
@@ -209,10 +212,18 @@ function processTelemetry({ raw, missionStat, streamStat, metrics, connectionSta
     moeGating: Math.max(0.0, 1.0 - explorationPressure),
   };
 
-  next.bandStates = Array(TOTAL_BANDS).fill("quiet").map((_, i) => (i === band ? "active" : "quiet"));
-  next.bandHeights = Array(TOTAL_BANDS).fill(0).map((_, i) => (i === band ? 0.94 : 0.03));
-  next.activeBands = 1;
-  next.quietBands = TOTAL_BANDS - 1;
+  const rawPriors = raw.band_priorities ?? m.band_priorities ?? raw.bandPriorities ?? m.bandPriorities;
+  if (Array.isArray(rawPriors) && rawPriors.length === TOTAL_BANDS) {
+    next.bandHeights = rawPriors.map((v) => Math.max(0.0, Math.min(1.0, Number(v) || 0.0)));
+    next.bandStates = next.bandHeights.map((h, i) => (i === band ? "active" : (h > 0.1 ? "active" : "quiet")));
+    next.activeBands = next.bandHeights.filter((h) => h > 0.1).length;
+    next.quietBands = TOTAL_BANDS - next.activeBands;
+  } else {
+    next.bandHeights = Array(TOTAL_BANDS).fill(0.0);
+    next.bandStates = Array(TOTAL_BANDS).fill("quiet").map((_, i) => (i === band ? "active" : "quiet"));
+    next.activeBands = 1;
+    next.quietBands = TOTAL_BANDS - 1;
+  }
 
   const rawPdws = raw.pdws ?? m.pdws ?? raw.recent_pdws ?? m.recent_pdws ?? raw.detections ?? m.detections ?? [];
   next.pdws = Array.isArray(rawPdws) ? rawPdws : [];
@@ -275,6 +286,9 @@ export function useOverviewTelemetry(options = {}) {
   const pdwsRef = useRef([]);
   const incidentPdwsRef = useRef([]);
   const recentDwellsRef = useRef([]);
+  const recentDwellsWindowRef = useRef([]);
+  const seenDwellKeysRef = useRef(new Set());
+  const waterfallHistoryRef = useRef([]);
 
   const latestTelRef = useRef(null);
   const missionStatRef = useRef(null);
@@ -348,6 +362,19 @@ export function useOverviewTelemetry(options = {}) {
             seen.add(d.id);
             newItems.push(d);
           }
+          // Defect 2: Deduplicate distinct mission dwells into recentDwellsWindowRef using authoritative ID
+          const authKey = d.id || `dwell-${d.step ?? 0}-${d.band ?? 0}-${Number(d.time_us ?? d.clock_us ?? 0).toFixed(1)}`;
+          if (!seenDwellKeysRef.current.has(authKey)) {
+            seenDwellKeysRef.current.add(authKey);
+            const isHit = d.type === "HIT" || d.type === "INTERCEPTION" || Boolean(d.hit);
+            recentDwellsWindowRef.current.push({
+              id: authKey,
+              hit: isHit,
+              band: d.band,
+              step: d.step ?? 0,
+              error_us: d.error_us != null ? Number(d.error_us) : null,
+            });
+          }
         }
         if (newItems.length > 0) {
           recentDwellsRef.current = [...newItems, ...recentDwellsRef.current].slice(0, 150);
@@ -365,9 +392,11 @@ export function useOverviewTelemetry(options = {}) {
       const dwellUs = m.dwell_time_us ?? resolved.currentDwellUs;
       const clockUs = m.clock_us ?? resolved.missionClockUs;
       const modeName = m.mode_name ?? resolved.currentMode;
+      const rawStep = latestTelRef.current?.step ?? latestTelRef.current?.metrics?.step ?? resolved.totalDwells;
 
+      const liveAuthKey = m.id || `live-${rawStep}-${band}-${Number(clockUs).toFixed(1)}`;
       const entry = {
-        id: `${clockUs}-${band}-${Date.now()}`,
+        id: liveAuthKey,
         band,
         freqMHz: bandToFreqMHz(band),
         mode: modeName,
@@ -383,8 +412,108 @@ export function useOverviewTelemetry(options = {}) {
         const updated = prev.map((e) => ({ ...e, now: false }));
         updated.push(entry);
         dwellHistoryRef.current = updated.slice(-DWELL_HISTORY_SIZE);
+
+        // Deduplicate into rolling 25-dwell window
+        if (rawStep > 0 && !seenDwellKeysRef.current.has(liveAuthKey)) {
+          seenDwellKeysRef.current.add(liveAuthKey);
+          recentDwellsWindowRef.current.push({
+            id: liveAuthKey,
+            hit: Boolean(hit),
+            band,
+            step: rawStep,
+            error_us: m.error_us != null ? Number(m.error_us) : null,
+          });
+        }
+
+        const activeBandsList = [];
+        if (Array.isArray(resolved.emitters) && resolved.emitters.length > 0) {
+          resolved.emitters.forEach((e) => {
+            const b = Math.floor((e.frequency_mhz ?? e.freq_mhz ?? 0) / 500);
+            if (b >= 0 && b < 36 && !activeBandsList.includes(b)) activeBandsList.push(b);
+          });
+        }
+        if (hit && !activeBandsList.includes(band)) activeBandsList.push(band);
+
+        // Waterfall frame records authoritative 36-channel occupancy vector from telemetry
+        const curTel = latestTelRef.current || {};
+        const rawPriors = curTel.band_priorities ?? m?.band_priorities ?? curTel.bandPriorities ?? [];
+        const channelOccupancy = Array(36).fill(0.0);
+        if (Array.isArray(rawPriors) && rawPriors.length === 36) {
+          for (let b = 0; b < 36; b++) {
+            channelOccupancy[b] = Math.max(0.0, Math.min(1.0, Number(rawPriors[b]) || 0.0));
+          }
+        } else if (Array.isArray(resolved.bandHeights) && resolved.bandHeights.length === 36) {
+          for (let b = 0; b < 36; b++) {
+            channelOccupancy[b] = Math.max(0.0, Math.min(1.0, Number(resolved.bandHeights[b]) || 0.0));
+          }
+        }
+
+        waterfallHistoryRef.current = [
+          ...waterfallHistoryRef.current,
+          {
+            step: rawStep,
+            timestamp: clockUs,
+            tuned_band: band,
+            last_band: band, // backward-compatibility alias
+            active_bands: activeBandsList,
+            channel_occupancy: channelOccupancy,
+            band_priorities: channelOccupancy, // semantic alias
+            band_powers: channelOccupancy, // backward-compatibility alias
+            is_hit: Boolean(hit),
+          },
+        ].slice(-50);
       }
     }
+
+    // Keep window strictly capped to latest 25 distinct completed dwells
+    if (recentDwellsWindowRef.current.length > 25) {
+      recentDwellsWindowRef.current = recentDwellsWindowRef.current.slice(-25);
+    }
+
+    const windowHits = recentDwellsWindowRef.current.filter((d) => d.hit).length;
+    const windowTotal = recentDwellsWindowRef.current.length;
+    const instantaneousPd = windowTotal > 0 ? windowHits / windowTotal : (resolved.rollingPd || 0.0);
+    const sessionAvgPd = resolved.totalDwells > 0 ? resolved.totalHits / resolved.totalDwells : 0.0;
+
+    resolved.instantaneousPd = instantaneousPd;
+    resolved.sessionAvgPd = sessionAvgPd;
+    if (windowTotal > 0) {
+      resolved.rollingPd = instantaneousPd;
+    }
+
+    const rawStep = latestTelRef.current?.step ?? latestTelRef.current?.metrics?.step ?? resolved.totalDwells;
+    const met = metricsRef.current || {};
+    const rawTel = latestTelRef.current || {};
+    const rawMet = rawTel.metrics || {};
+
+    // Defect 1: Never fabricate live metric fallbacks!
+    const pfaVal = met.Pfa ?? met.pfa ?? rawMet.Pfa ?? rawMet.pfa ?? rawTel.Pfa ?? rawTel.pfa ?? null;
+    const irVal = met.avg_intercept_rate ?? met.intercept_rate ?? met.mean_ir ?? (resolved.totalDwells > 0 ? (resolved.totalHits / resolved.totalDwells) : null);
+    const rewardVal = met.avg_reward ?? met.reward_per_dwell ?? rawMet.avg_reward ?? rawTel.avg_reward ?? null;
+    const correctPredVal = met.pct_correct_predictions ?? met.correct_pct ?? rawMet.pct_correct_predictions ?? rawTel.pct_correct_predictions ?? null;
+
+    let timeErrorVal = met.avg_intercept_time_error_us ?? met.avg_time_error ?? rawMet.avg_intercept_time_error_us ?? rawTel.avg_intercept_time_error_us ?? null;
+    if (timeErrorVal === null && recentDwellsWindowRef.current.length > 0) {
+      const errs = recentDwellsWindowRef.current.map((d) => d.error_us).filter((e) => e != null && !isNaN(e));
+      if (errs.length > 0) {
+        timeErrorVal = errs.reduce((sum, e) => sum + Math.abs(e), 0) / errs.length;
+      }
+    }
+
+    resolved.liveMetrics = {
+      connected: resolved.live,
+      step: rawStep,
+      pd: instantaneousPd,
+      pfa: pfaVal !== null ? floatOr(pfaVal, null) : null,
+      avg_intercept_rate: irVal !== null ? floatOr(irVal, null) : null,
+      avg_reward: rewardVal !== null ? floatOr(rewardVal, null) : null,
+      pct_correct_predictions: correctPredVal !== null ? floatOr(correctPredVal, null) : null,
+      avg_intercept_time_error_us: timeErrorVal !== null ? floatOr(timeErrorVal, null) : null,
+      last_band: resolved.currentBand != null ? `B${String(resolved.currentBand + 1).padStart(2, "0")}` : null,
+      last_mode: resolved.currentMode ?? "NORMAL_DWELL",
+      decision_reason: resolved.scheduler?.decisionReason || "DRQN Policy",
+    };
+    resolved.waterfallHistory = waterfallHistoryRef.current;
 
     resolved.dwellHistory = dwellHistoryRef.current;
     setState((prev) => ({
@@ -471,6 +600,9 @@ export function useOverviewTelemetry(options = {}) {
   const resetMission = useCallback(async () => {
     const res = await api.resetMission();
     dwellHistoryRef.current = [];
+    seenDwellKeysRef.current.clear();
+    recentDwellsWindowRef.current = [];
+    waterfallHistoryRef.current = [];
     pdwsRef.current = [];
     incidentPdwsRef.current = [];
     recentDwellsRef.current = [];

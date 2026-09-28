@@ -223,17 +223,22 @@ export default function SmartScan() {
         isLiveResponse: true,
       };
     }
-    if (liveTelemetry && liveTelemetry.band != null) {
+    if (liveTelemetry && (liveTelemetry.band != null || liveTelemetry.selected_action != null || liveTelemetry.action != null)) {
+      const act = liveTelemetry.selected_action ?? liveTelemetry.action ?? null;
+      const band = liveTelemetry.band != null ? Number(liveTelemetry.band) : (act != null ? Math.floor(Number(act) / 5) : 0);
+      const modeIdx = act != null ? (Number(act) % 5) : (liveTelemetry.modeIndex ?? 1);
+      const modeName = liveTelemetry.modeName ?? MODES[modeIdx] ?? "NORMAL_DWELL";
+      const actionId = act != null ? Number(act) : (band * 5 + modeIdx);
       return {
-        band: liveTelemetry.band,
-        mode: liveTelemetry.modeName ?? "NORMAL_DWELL",
+        band,
+        mode: modeName,
         score: Number(liveTelemetry.cognitiveExplanation?.drqn_score ?? 0.0),
         probability: Number(liveTelemetry.cognitiveExplanation?.prediction_confidence ?? 0.0),
         timeUs: Math.max(0, Number(liveTelemetry.cognitiveExplanation?.predicted_eta_us ?? 0.0)),
         dwellUs: liveTelemetry.dwellTimeUs || 500,
         latencyMs: liveTelemetry.rollingMedianLatencyUs || 0,
         attribution: liveTelemetry.cognitiveExplanation || {},
-        actionId: liveTelemetry.band * 5 + 1,
+        actionId,
         isLiveResponse: false,
       };
     }
@@ -337,38 +342,6 @@ export default function SmartScan() {
               }}
             >
               Single Carrier (Band 16)
-            </button>
-
-            <span style={{ borderLeft: "1px solid #454653", height: 18, margin: "0 4px" }} />
-
-            <span className="st-tsm" style={{ color: "#f87171" }}>VALIDATION CONTRACT TESTS:</span>
-            <button
-              onClick={() => handleCorruptLengthTest(100)}
-              title="Send 100 values to verify frontend and backend rejection"
-              style={{
-                padding: "4px 8px",
-                background: "rgba(239, 68, 68, 0.2)",
-                color: "#f87171",
-                border: "1px solid #ef4444",
-                cursor: "pointer",
-                fontSize: 11,
-              }}
-            >
-              Test Invalid Length (100 values)
-            </button>
-            <button
-              onClick={() => handleCorruptLengthTest(2)}
-              title="Send 2 values to verify Swagger legacy rejection"
-              style={{
-                padding: "4px 8px",
-                background: "rgba(239, 68, 68, 0.2)",
-                color: "#f87171",
-                border: "1px solid #ef4444",
-                cursor: "pointer",
-                fontSize: 11,
-              }}
-            >
-              Test Invalid Length (2 values)
             </button>
 
             <span style={{ flex: 1 }} />
@@ -666,6 +639,81 @@ export default function SmartScan() {
           </div>
         </aside>
       </div>
+
+      {/* Developer Diagnostics & Contract Boundary Tests (Collapsible) */}
+      <details
+        className="st-panel"
+        style={{
+          marginTop: 6,
+          background: "var(--panel-2, #1e2024)",
+          border: "1px solid var(--border-subtle, #333539)",
+          padding: "8px 12px",
+          cursor: "pointer",
+        }}
+      >
+        <summary
+          style={{
+            fontFamily: "var(--font-mono, monospace)",
+            fontSize: 11,
+            fontWeight: 700,
+            color: "var(--muted, #908f9e)",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            userSelect: "none",
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 16, color: "var(--accent, #bdc2ff)" }}>
+            bug_report
+          </span>
+          <span>DEVELOPER DIAGNOSTICS & CONTRACT BOUNDARY TESTS (CLICK TO EXPAND)</span>
+          <span style={{ fontSize: 10, color: "var(--muted, #908f9e)", marginLeft: "auto" }}>
+            obs_dim=360 Strict Validation Guard
+          </span>
+        </summary>
+        <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className="st-tsm" style={{ color: "var(--text-muted, #c6c5d5)" }}>
+            These diagnostic triggers deliberately send malformed observation vector lengths to verify that both frontend input validation and the FastAPI backend return HTTP 422 Unprocessable Entity / strict dimension validation errors rather than silently executing malformed inferences.
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            <button
+              onClick={() => handleCorruptLengthTest(100)}
+              title="Send 100 values to verify strict obs_dim=360 validation"
+              style={{
+                padding: "4px 10px",
+                background: "var(--panel-3, #282a2e)",
+                color: "var(--warning, #f59e0b)",
+                border: "1px solid var(--warning, #f59e0b)",
+                cursor: "pointer",
+                fontSize: 11,
+                fontFamily: "var(--font-mono, monospace)",
+              }}
+            >
+              Test Invalid Length (100 values)
+            </button>
+            <button
+              onClick={() => handleCorruptLengthTest(2)}
+              title="Send 2 values to verify Swagger legacy rejection"
+              style={{
+                padding: "4px 10px",
+                background: "var(--panel-3, #282a2e)",
+                color: "var(--warning, #f59e0b)",
+                border: "1px solid var(--warning, #f59e0b)",
+                cursor: "pointer",
+                fontSize: 11,
+                fontFamily: "var(--font-mono, monospace)",
+              }}
+            >
+              Test Invalid Length (2 values)
+            </button>
+            {validationError && (
+              <span className="st-tsm" style={{ color: "var(--danger, #ef4444)", fontWeight: 600 }}>
+                ● {validationError}
+              </span>
+            )}
+          </div>
+        </div>
+      </details>
     </div>
   );
 }
