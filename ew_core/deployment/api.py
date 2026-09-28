@@ -2182,6 +2182,9 @@ async def mission_start(req: MissionStartRequest, request: Request) -> dict[str,
             )
 
         controller.start_mission(initial_time_us=req.initial_time_us)
+        fom_obj = STATE.get("fom")
+        if fom_obj is not None and hasattr(fom_obj, "reset"):
+            fom_obj.reset()
         global _stream_task, _stream_running
         speed_hz = float(req.speed_hz or 15.0)
         max_dwells = req.max_dwells if req.max_dwells is not None else 4000
@@ -2210,6 +2213,72 @@ async def mission_start(req: MissionStartRequest, request: Request) -> dict[str,
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
+def _update_fom_for_dwell(frame: Any, feed_window: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+    """Authoritative scientific Figures of Merit update for a completed operational dwell."""
+    fom_obj = STATE.get("fom")
+    if fom_obj is None or not hasattr(fom_obj, "update"):
+        return {}
+
+    try:
+        from ..training.reward import receiver_reward_components_v2
+    except (ImportError, ValueError):
+        from ew_core.training.reward import receiver_reward_components_v2
+
+    # 1. Determine active bands during this dwell window
+    gt_active = np.zeros(CANONICAL_N_BANDS, dtype=np.int8)
+    if feed_window:
+        for p in feed_window:
+            t_p = float(p.get("time_us", p.get("toa_us", 0.0)))
+            if frame.dwell_start_us <= t_p <= frame.dwell_end_us:
+                b = int(float(p.get("frequency_mhz", 0.0)) // 500)
+                if 0 <= b < CANONICAL_N_BANDS:
+                    gt_active[b] = 1
+    if frame.hit:
+        gt_active[frame.selected_band] = 1
+
+    # 2. Timing error on hit
+    time_err = 0.0
+    if frame.hit and frame.intercept_time_us is not None:
+        pred_eta = getattr(frame, "predicted_eta_us", -1.0)
+        if pred_eta > 0:
+            time_err = abs(float(frame.intercept_time_us) - float(pred_eta))
+        else:
+            time_err = float(frame.intercept_time_us)
+
+    # 3. Compute reward using authoritative receiver_reward_components_v2
+    try:
+        rew_dict = receiver_reward_components_v2(
+            selected_active=bool(gt_active[frame.selected_band]),
+            detected=bool(frame.hit),
+            hit=bool(frame.hit),
+            intercept_time_us=frame.intercept_time_us,
+            running_pfa=float(getattr(fom_obj, "pfa", 0.0)),
+        )
+        step_rew = float(rew_dict.get("total", rew_dict.get("reward", 1.0 if frame.hit else -0.1)))
+        if hasattr(fom_obj, "record_reward_components"):
+            fom_obj.record_reward_components({
+                "hit_term": float(rew_dict.get("hit_term", 0.0)),
+                "miss_penalty": float(rew_dict.get("miss_penalty", 0.0)),
+                "false_alarm_penalty": float(rew_dict.get("false_alarm_penalty", 0.0)),
+                "dwell_cost": float(rew_dict.get("dwell_cost", 0.0)),
+                "dwell_time_us": float(frame.dwell_duration_us),
+                "retune_latency_us": float(frame.retune_latency_us),
+                "physical_step_time_us": float(frame.dwell_duration_us + frame.retune_latency_us),
+            })
+    except Exception as exc:
+        logger.debug("Reward component evaluation fallback: %s", exc)
+        step_rew = 1.0 if frame.hit else -0.1
+
+    fom_obj.update(
+        band_chosen=int(frame.selected_band),
+        ground_truth_active=gt_active,
+        pred_active=bool(frame.hit),
+        intercept_time_error_us=time_err,
+        reward=step_rew,
+    )
+    return fom_obj.summary() if hasattr(fom_obj, "summary") else {}
+
+
 @app.post("/mission/step", dependencies=[Depends(require_api_key)], response_model=MissionStepResponse, tags=["mission"])
 @rate_limit("120/minute")
 def mission_step(req: MissionStepRequest, request: Request = None) -> MissionStepResponse:
@@ -2234,6 +2303,9 @@ def mission_step(req: MissionStepRequest, request: Request = None) -> MissionSte
         )
         if frame.detections:
             record_intercepted_pdws(frame.detections)
+        # Update authoritative Figures of Merit accumulator
+        fom_sum = _update_fom_for_dwell(frame, req.pdws or [])
+
         # Stream live frame to telemetry publisher for dashboard and primary frontend
         frame_dict = frame.to_dict()
         band_priors = getattr(controller.state_builder, "ema_activity", np.zeros(CANONICAL_N_BANDS)).tolist()
@@ -2245,6 +2317,7 @@ def mission_step(req: MissionStepRequest, request: Request = None) -> MissionSte
                 mode=frame.selected_mode,
                 mode_name=frame.mode_name,
                 band_priorities=frame_dict.get("band_priorities") or band_priors,
+                observation=frame.observation,
                 hit=frame.hit,
                 dwell_time_us=frame.dwell_duration_us,
                 retune_latency_us=frame.retune_latency_us,
@@ -2254,6 +2327,8 @@ def mission_step(req: MissionStepRequest, request: Request = None) -> MissionSte
                 cognitive_explanation=frame_dict.get("cognitive_explanation", {}),
                 system_metrics=frame_dict.get("system_metrics", {}),
                 clock_us=frame.dwell_end_us,
+                fom_metrics=fom_sum,
+                **fom_sum,
             )
         except Exception as tel_err:
             logger.debug("Failed to update telemetry publisher: %s", tel_err)
@@ -2278,8 +2353,6 @@ def mission_step(req: MissionStepRequest, request: Request = None) -> MissionSte
             except Exception:
                 pass
 
-        fom_obj = STATE.get("fom")
-        fom_sum = fom_obj.summary() if fom_obj and hasattr(fom_obj, "summary") else {}
         active_emitter_bands = sorted(list({
             int(float(p.get("frequency_mhz", 0.0)) // 500)
             for p in (req.pdws or [])
@@ -2300,6 +2373,7 @@ def mission_step(req: MissionStepRequest, request: Request = None) -> MissionSte
             "last_mode": int(frame.selected_mode),
             "decision_reason": str(frame.mode_name),
             "active_bands": active_emitter_bands,
+            "observation": frame.observation,
             "step": int(frame.step),
             "ts": time.time(),
         })
@@ -2617,6 +2691,9 @@ def _telemetry_payload() -> dict[str, Any]:
         cur_band = latest.get("band", 0)
         antenna_azimuth = round(float((cur_band * 10.0 + (cur_band * 3)) % 360.0), 1)
 
+        fom_obj = STATE.get("fom")
+        fom_sum = fom_obj.summary() if fom_obj and hasattr(fom_obj, "summary") else {}
+
         fom_metrics = {
             "mean_detection_latency_us": mean_lat,
             "median_detection_latency_us": med_lat,
@@ -2630,6 +2707,7 @@ def _telemetry_payload() -> dict[str, Any]:
             "scheduler_omniscience_leak_pct": 0.000,
             "antenna_azimuth_deg": antenna_azimuth,
             "hop_trajectory": hop_traj,
+            **fom_sum,
         }
 
         band_priors = latest.get("band_priorities", [])
@@ -2934,6 +3012,13 @@ def _telemetry_payload() -> dict[str, Any]:
             "dwell_count": tot_dwells,
             "total_dwells": tot_dwells,
             "total_hits": tot_hits,
+            "observation": latest.get("observation", []),
+            "Pfa": float(fom_sum.get("Pfa", latest.get("Pfa", 0.0))),
+            "pfa": float(fom_sum.get("Pfa", latest.get("pfa", 0.0))),
+            "avg_intercept_rate": float(fom_sum.get("avg_intercept_rate", latest.get("avg_intercept_rate", (tot_hits / max(1, tot_dwells)) if tot_dwells > 0 else 0.0))),
+            "avg_reward": float(fom_sum.get("avg_reward", latest.get("avg_reward", 0.0))),
+            "pct_correct_predictions": float(fom_sum.get("pct_correct_predictions", latest.get("pct_correct_predictions", 0.0))),
+            "avg_intercept_time_error_us": float(fom_sum.get("avg_intercept_time_error_us", latest.get("avg_intercept_time_error_us", lat_val))),
             "band": latest.get("band", 0),
             "center_frequency_mhz": float(latest.get("center_frequency_mhz", 500.0 * latest.get("band", 0) + 250.0)),
             "mode": latest.get("mode", 1),
@@ -3339,6 +3424,9 @@ async def _run_live_mission_stream(scenario_name: str, speed_hz: float, max_dwel
 
     # Initialize mission fresh on controller
     controller.start_mission(initial_time_us=0.0)
+    fom_obj = STATE.get("fom")
+    if fom_obj is not None and hasattr(fom_obj, "reset"):
+        fom_obj.reset()
     delay_s = 1.0 / max(1.0, speed_hz)
     dwell_idx = 0
 
@@ -3376,6 +3464,9 @@ async def _run_live_mission_stream(scenario_name: str, speed_hz: float, max_dwel
             if frame.detections:
                 record_intercepted_pdws(frame.detections)
 
+            # Update authoritative Figures of Merit accumulator
+            fom_sum = _update_fom_for_dwell(frame, feed_window)
+
             frame_dict = frame.to_dict()
             band_priors = getattr(controller.state_builder, "ema_activity", np.zeros(CANONICAL_N_BANDS)).tolist()
             telemetry.update(
@@ -3389,12 +3480,40 @@ async def _run_live_mission_stream(scenario_name: str, speed_hz: float, max_dwel
                 retune_latency_us=frame.retune_latency_us,
                 rolling_pd=frame.rolling_pd,
                 rolling_median_latency_us=frame.rolling_median_latency_us,
-                band_priorities=band_priors,
+                band_priorities=frame_dict.get("band_priorities") or band_priors,
+                observation=frame.observation,
                 detections=frame.detections,
                 cognitive_explanation=frame_dict.get("cognitive_explanation", {}),
                 system_metrics=frame_dict.get("system_metrics", {}),
                 clock_us=frame.dwell_end_us,
+                fom_metrics=fom_sum,
+                **fom_sum,
             )
+
+            active_emitter_bands = sorted(list({
+                int(float(p.get("frequency_mhz", 0.0)) // 500)
+                for p in (feed_window or [])
+                if 0 <= int(float(p.get("frequency_mhz", 0.0)) // 500) < CANONICAL_N_BANDS
+            }))
+            if frame.hit:
+                active_emitter_bands = sorted(list(set(active_emitter_bands + [int(frame.selected_band)])))
+
+            broadcast_metrics_sync({
+                "pd": float(fom_sum.get("Pd", frame.rolling_pd)),
+                "pfa": float(fom_sum.get("Pfa", 0.0)),
+                "avg_intercept_rate": float(fom_sum.get("avg_intercept_rate", frame.rolling_pd)),
+                "avg_reward": float(fom_sum.get("avg_reward", 1.0 if frame.hit else -0.1)),
+                "pct_correct_predictions": float(fom_sum.get("pct_correct_predictions", 100.0 if frame.hit else 0.0)),
+                "avg_intercept_time_error_us": float(fom_sum.get("avg_intercept_time_error_us", 0.0)),
+                "last_action": int(frame.selected_band * CANONICAL_N_MODES + frame.selected_mode),
+                "last_band": int(frame.selected_band),
+                "last_mode": int(frame.selected_mode),
+                "decision_reason": str(frame.mode_name),
+                "active_bands": active_emitter_bands,
+                "observation": frame.observation,
+                "step": int(frame.step),
+                "ts": time.time(),
+            })
 
             _stream_info.update({
                 "dwells": controller.total_dwells,

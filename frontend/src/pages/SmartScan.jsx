@@ -133,6 +133,24 @@ export default function SmartScan() {
     }
   }, []);
 
+  /**
+   * Extract authoritative 360-D observation vector from backend telemetry.
+   * Rejects client-side synthesized vectors: only the real backend OperationalStateBuilder
+   * vector is consumed.
+   */
+  function deriveObservationVector(t) {
+    if (!t) return null;
+    const direct = t.observation || t.raw?.observation || t.metrics?.observation;
+    if (
+      Array.isArray(direct) &&
+      direct.length === 360 &&
+      direct.every((v) => Number.isFinite(Number(v)))
+    ) {
+      return direct.map((v) => Math.max(0.0, Math.min(1.0, Number(v))));
+    }
+    return null;
+  }
+
   // Check backend health & listen to telemetry stream with authoritative frame deduplication
   useEffect(() => {
     let active = true;
@@ -157,8 +175,8 @@ export default function SmartScan() {
 
           if (t.band != null) setSelectedBand(t.band);
 
-          // Extract observation vector from live telemetry
-          const obs = t.observation || t.raw?.observation || t.metrics?.observation;
+          // Extract canonical 360-D observation vector from backend live telemetry
+          const obs = deriveObservationVector(t);
           const isValid360 =
             Array.isArray(obs) &&
             obs.length === 360 &&

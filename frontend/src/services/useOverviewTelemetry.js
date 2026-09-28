@@ -486,13 +486,14 @@ export function useOverviewTelemetry(options = {}) {
     const rawTel = latestTelRef.current || {};
     const rawMet = rawTel.metrics || {};
 
-    // Defect 1: Never fabricate live metric fallbacks!
-    const pfaVal = met.Pfa ?? met.pfa ?? rawMet.Pfa ?? rawMet.pfa ?? rawTel.Pfa ?? rawTel.pfa ?? null;
-    const irVal = met.avg_intercept_rate ?? met.intercept_rate ?? met.mean_ir ?? (resolved.totalDwells > 0 ? (resolved.totalHits / resolved.totalDwells) : null);
-    const rewardVal = met.avg_reward ?? met.reward_per_dwell ?? rawMet.avg_reward ?? rawTel.avg_reward ?? null;
-    const correctPredVal = met.pct_correct_predictions ?? met.correct_pct ?? rawMet.pct_correct_predictions ?? rawTel.pct_correct_predictions ?? null;
+    // Authoritative Figures of Merit from backend
+    const fom = resolved.fomMetrics || {};
+    const pfaVal = met.Pfa ?? met.pfa ?? fom.Pfa ?? fom.pfa ?? rawMet.Pfa ?? rawMet.pfa ?? rawTel.Pfa ?? rawTel.pfa ?? null;
+    const irVal = met.avg_intercept_rate ?? fom.avg_intercept_rate ?? rawMet.avg_intercept_rate ?? rawTel.avg_intercept_rate ?? (resolved.totalDwells > 0 ? (resolved.totalHits / resolved.totalDwells) : null);
+    const rewardVal = met.avg_reward ?? fom.avg_reward ?? rawMet.avg_reward ?? rawTel.avg_reward ?? null;
+    const correctPredVal = met.pct_correct_predictions ?? fom.pct_correct_predictions ?? rawMet.pct_correct_predictions ?? rawTel.pct_correct_predictions ?? null;
 
-    let timeErrorVal = met.avg_intercept_time_error_us ?? met.avg_time_error ?? rawMet.avg_intercept_time_error_us ?? rawTel.avg_intercept_time_error_us ?? null;
+    let timeErrorVal = met.avg_intercept_time_error_us ?? fom.avg_intercept_time_error_us ?? met.avg_time_error ?? rawMet.avg_intercept_time_error_us ?? rawTel.avg_intercept_time_error_us ?? null;
     if (timeErrorVal === null && recentDwellsWindowRef.current.length > 0) {
       const errs = recentDwellsWindowRef.current.map((d) => d.error_us).filter((e) => e != null && !isNaN(e));
       if (errs.length > 0) {
