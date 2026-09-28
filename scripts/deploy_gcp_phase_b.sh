@@ -130,14 +130,13 @@ echo "  [OK] Cloud Run deployed at: ${SERVICE_URL}"
 echo "[PHASE B7] Validating Cloud Run deployment..."
 curl -s "${SERVICE_URL}/health" | grep -q "Gate-27 Operational Baseline" && echo "  [OK] Health check verified Gate-27"
 
-# PHASE B8: Deploy React Frontend to Firebase Hosting
-echo "[PHASE B8] Building and deploying frontend to Firebase Hosting..."
+# PHASE B8: Build React Frontend for Vercel
+echo "[PHASE B8] Building frontend with Cloud Run backend URL..."
 echo "VITE_API_BASE_URL=${SERVICE_URL}" > frontend/.env.production
 (cd frontend && npm run build)
-npx --yes firebase-tools deploy --only hosting --project "${PROJECT_ID}"
 
 echo "====================================================================="
-echo " GCP DEPLOYMENT COMPLETED SUCCESSFULLY!"
-echo " Backend: ${SERVICE_URL}"
-echo " Frontend: https://${PROJECT_ID}.web.app"
+echo " GCP + VERCEL DEPLOYMENT STATUS"
+echo " Backend:  ${SERVICE_URL}"
+echo " Frontend: Ready for Vercel deployment (dist/ built)"
 echo "====================================================================="

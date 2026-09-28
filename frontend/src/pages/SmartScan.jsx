@@ -272,14 +272,14 @@ export default function SmartScan() {
         <PanelHead
           icon="neurology"
           title="SMART SCAN DECISION ENGINE & 360-DIMENSIONAL OBSERVATION INTERFACE"
-          badge={isModelOperational ? "DRQN + MoE OPERATIONAL (RENDER)" : "CONNECTING / VERIFYING"}
+          badge={isModelOperational ? "DRQN + MoE OPERATIONAL (CLOUD RUN)" : "CONNECTING / VERIFYING"}
           badgeColor={isModelOperational ? "#49df9d" : "#f59e0b"}
         />
         <div className="st-body" style={{ color: "#c6c5d5" }}>
           The Smart Scan Scheduler converts receiver-derived spectrum state into time-frequency intercept decisions.
           Inference requests to <code>/predict_bands</code> require a strict 360-dimensional vector (36 bands × 10 features).
           {isModelOperational ? (
-            <span style={{ color: "#49df9d", fontWeight: 700 }}> Real model inference is ACTIVE on Render.</span>
+            <span style={{ color: "#49df9d", fontWeight: 700 }}> Real model inference is ACTIVE on Cloud Run.</span>
           ) : (
             <span style={{ color: "#f59e0b" }}> Waiting for verified backend confirmation before operational deployment.</span>
           )}

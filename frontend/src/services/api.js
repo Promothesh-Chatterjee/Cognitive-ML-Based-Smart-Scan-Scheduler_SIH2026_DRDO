@@ -55,7 +55,7 @@ async function request(path, options = {}) {
     }
     const isNetwork = netErr.message?.includes("Failed to fetch") || netErr.message?.includes("NetworkError");
     const errMsg = isNetwork
-      ? `Render backend may be spinning up from cold start or unreachable (${netErr.message}).`
+      ? `Cloud Run backend may be spinning up from cold start or unreachable (${netErr.message}).`
       : `Network request to backend failed: ${netErr.message}`;
     const err = new Error(errMsg);
     err.name = "NetworkError";

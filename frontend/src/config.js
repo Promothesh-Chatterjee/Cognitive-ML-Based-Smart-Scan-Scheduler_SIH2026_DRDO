@@ -1,7 +1,7 @@
 /**
  * Configuration module for SmartScan Frontend.
  * Automatically resolves API and WebSocket URLs from environment variables
- * or current window location for seamless deployment on Azure Static Web Apps.
+ * or defaults for seamless deployment on Vercel connecting to Cloud Run.
  */
 
 export function getApiBaseUrl() {

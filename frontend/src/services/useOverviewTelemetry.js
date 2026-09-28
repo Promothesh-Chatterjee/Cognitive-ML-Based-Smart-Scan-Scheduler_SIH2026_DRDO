@@ -5,7 +5,7 @@
  * Powered by verified HTTP polling against the deployed FastAPI backend (/telemetry/latest,
  * /mission/status, /mission/stream/status, and /metrics).
  * Automatically stops polling when stopped or unmounted, with AbortController cancellation
- * and exponential backoff retry for Render cold starts.
+ * and exponential backoff retry for cold starts.
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";

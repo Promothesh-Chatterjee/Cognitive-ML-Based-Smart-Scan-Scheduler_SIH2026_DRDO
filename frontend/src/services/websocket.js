@@ -50,7 +50,7 @@ const WS_BASE_URL = getWsBaseUrl();
 
 /**
  * Backend WebSocket status:
- * The deployed FastAPI backend on Render does not expose a documented /ws/state endpoint in OpenAPI.
+ * The deployed FastAPI backend does not expose a documented /ws/state endpoint in OpenAPI.
  * Live data transmission is reliably handled via HTTP polling (GET /telemetry/latest, /mission/status, etc.).
  * WEBSOCKET_ENABLED is set to false to safely disable socket attempts and prevent connection errors.
  */

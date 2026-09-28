@@ -89,10 +89,10 @@ export default function SystemConfig() {
       </div>
 
       <div className="st-panel" style={{ border: "1px solid rgba(59, 130, 246, 0.4)" }}>
-        <PanelHead icon="cloud_sync" title="00 // LIVE BACKEND CLOUD CONNECTION (RENDER / VERCEL)" badge="API" />
+        <PanelHead icon="cloud_sync" title="00 // LIVE BACKEND CLOUD CONNECTION (CLOUD RUN / VERCEL)" badge="API" />
         <div className="st-body" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ fontSize: "0.85rem", color: "#a5a3b7" }}>
-            Active Backend URL for REST endpoints and secure WebSockets (<code>wss://</code>). Connects this Vercel deployment directly to your Render backend service:
+            Active Backend URL for REST endpoints and secure WebSockets (<code>wss://</code>). Connects this Vercel deployment directly to your Cloud Run backend service:
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
             <input

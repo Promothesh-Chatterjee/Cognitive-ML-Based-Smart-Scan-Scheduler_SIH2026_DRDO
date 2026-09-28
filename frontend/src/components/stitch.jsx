@@ -375,7 +375,7 @@ export function DataSourceBadge({ connected }) {
           display: "inline-block",
         }}
       />
-      {connected ? "LIVE BACKEND (RENDER)" : "SYNTHETIC DEMO / TSRD REPLAY"}
+      {connected ? "LIVE BACKEND (CLOUD RUN)" : "SYNTHETIC DEMO / TSRD REPLAY"}
     </span>
   );
 }

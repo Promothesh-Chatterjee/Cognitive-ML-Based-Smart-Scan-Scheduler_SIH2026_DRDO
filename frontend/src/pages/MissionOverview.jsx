@@ -526,7 +526,7 @@ function MissionControls({
           </span>
           <span>
             {controlError ||
-              `Backend connection notice: ${lastError}. (Render free-tier instances may sleep after inactivity; retrying with exponential backoff).`}
+              `Backend connection notice: ${lastError}. (Backend instances may take a moment to respond; retrying with exponential backoff).`}
           </span>
         </div>
       )}

@@ -182,9 +182,9 @@ $scenarios = Invoke-RestMethod -Uri "$serviceUrl/mission/scenarios"
 Write-Host "  Scenarios returned: $($scenarios.Count) (Benchmarks: $($($scenarios | Where-Object { $_.benchmark }).Count))"
 
 # -----------------------------------------------------------------------------
-# PHASE B8: Deploy React Frontend to Firebase Hosting
+# PHASE B8: Build React Frontend for Vercel
 # -----------------------------------------------------------------------------
-Write-Host "`n[PHASE B8] Building and deploying frontend to Firebase Hosting..." -ForegroundColor Yellow
+Write-Host "`n[PHASE B8] Building frontend with Cloud Run backend URL..." -ForegroundColor Yellow
 
 # Set production API URL for Vite build
 Set-Content -Path "frontend\.env.production" -Value "VITE_API_BASE_URL=$serviceUrl"
@@ -193,11 +193,8 @@ Push-Location "frontend"
 npm run build
 Pop-Location
 
-# Deploy via npx firebase-tools
-npx --yes firebase-tools deploy --only hosting --project $ProjectId
-
 Write-Host "`n=====================================================================" -ForegroundColor Green
-Write-Host " GCP DEPLOYMENT COMPLETED SUCCESSFULLY!" -ForegroundColor Green
+Write-Host " GCP + VERCEL DEPLOYMENT STATUS" -ForegroundColor Green
 Write-Host " Backend Cloud Run: $serviceUrl" -ForegroundColor Green
-Write-Host " Frontend: https://$ProjectId.web.app" -ForegroundColor Green
+Write-Host " Frontend: Ready for Vercel deployment (dist/ built)" -ForegroundColor Green
 Write-Host "=====================================================================" -ForegroundColor Green

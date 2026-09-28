@@ -306,7 +306,7 @@ def run_smoke_test(api_url: str, api_key: str) -> bool:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="SmartScan EW Smoke Test")
-    parser.add_argument("--api_url", default=os.environ.get("AKS_ENDPOINT", "http://172.198.227.59"),
+    parser.add_argument("--api_url", default=os.environ.get("CLOUD_RUN_URL", "https://cognitive-ew-backend-753709137146.asia-south1.run.app"),
                         help="Base URL of the SmartScan API")
     parser.add_argument("--api_key", default=os.environ.get("SMARTSCAN_API_KEY", ""),
                         help="API key for authentication (X-SmartScan-API-Key header)")

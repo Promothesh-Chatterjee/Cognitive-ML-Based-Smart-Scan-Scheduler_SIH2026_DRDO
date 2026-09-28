@@ -1,7 +1,8 @@
 # Cognitive Electronic Warfare Smart Scan Strategy
 
 [![CI](https://github.com/Promothesh-Chatterjee/SIH2026_Try2/actions/workflows/ci.yml/badge.svg)](https://github.com/Promothesh-Chatterjee/SIH2026_Try2/actions/workflows/ci.yml)
-[![Azure AKS](https://img.shields.io/badge/Deployed-Azure_AKS-0078D4?logo=microsoftazure)](http://172.198.227.59)
+[![Google Cloud Run](https://img.shields.io/badge/Backend-Google_Cloud_Run-4285F4?logo=googlecloud)](https://cognitive-ew-backend-753709137146.asia-south1.run.app/health)
+[![Vercel](https://img.shields.io/badge/Frontend-Vercel-000000?logo=vercel)](https://vercel.com)
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB?logo=python)](https://python.org)
 [![Coverage](https://img.shields.io/badge/Coverage-81%25-brightgreen)](https://github.com/Promothesh-Chatterjee/SIH2026_Try2)
 

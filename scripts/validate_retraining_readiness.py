@@ -74,7 +74,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 class ReadinessGateEvaluator:
     def __init__(self, api_url: str | None = None, api_key: str | None = None, skip_deployment: bool = False):
-        self.api_url = (api_url or os.environ.get("AKS_ENDPOINT", "http://172.198.227.59")).rstrip("/")
+        self.api_url = (api_url or os.environ.get("CLOUD_RUN_URL", "https://cognitive-ew-backend-753709137146.asia-south1.run.app")).rstrip("/")
         self.api_key = api_key if api_key is not None else os.environ.get("SMARTSCAN_API_KEY", "")
         self.skip_deployment = skip_deployment
         self.local_results: Dict[str, Tuple[bool, str]] = {}
@@ -524,7 +524,7 @@ class ReadinessGateEvaluator:
 
 def main():
     parser = argparse.ArgumentParser(description="Retraining Readiness Qualification Gate")
-    parser.add_argument("--api_url", type=str, default=os.environ.get("AKS_ENDPOINT", "http://172.198.227.59"), help="Live deployment API URL")
+    parser.add_argument("--api_url", type=str, default=os.environ.get("CLOUD_RUN_URL", "https://cognitive-ew-backend-753709137146.asia-south1.run.app"), help="Live deployment API URL")
     parser.add_argument("--api_key", type=str, default=os.environ.get("SMARTSCAN_API_KEY", ""), help="Live deployment API key")
     parser.add_argument("--skip_deployment", action="store_true", help="Evaluate local gates only")
     args = parser.parse_args()

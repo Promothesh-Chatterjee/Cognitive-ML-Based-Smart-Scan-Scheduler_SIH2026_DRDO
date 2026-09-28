@@ -58,7 +58,7 @@ COPY pyproject.toml .
 # Install application package in develop mode (without reinstalling deps)
 RUN pip install --no-deps -e .
 
-# Create directory for Azure Blob CSI volume mount
+# Create directory for TSRD dataset storage mount / download cache
 RUN mkdir -p /mnt/tsrd
 
 # Create a non-root system user for secure container execution
