@@ -3,7 +3,6 @@ import {
   BandMatrix,
   CmdBadge,
   DataSourceBadge,
-  DwellTimeline,
   KpiCard,
   PanelHead,
   PipelineFlow,
@@ -12,7 +11,6 @@ import { useOverviewTelemetry } from "../services/useOverviewTelemetry";
 import { useMetricsWebSocket } from "../hooks/useMetricsWebSocket";
 import { api } from "../services/api";
 import LiveMetricsDashboard from "../components/LiveMetricsDashboard";
-import SpectrumWaterfall from "../components/SpectrumWaterfall";
 
 // ── Fallback Scenario Catalog ────────────────────────────────────────────────
 const FALLBACK_BENCHMARKS = [
@@ -111,7 +109,7 @@ function ConnectionStateBadge({ state, pollingIntervalMs }) {
         color,
         fontWeight: 700,
         letterSpacing: "0.04em",
-        background: "rgba(0,0,0,0.3)",
+        background: "var(--panel-3, rgba(0,0,0,0.3))",
         border: `1px solid ${color}40`,
         padding: "2px 8px",
       }}
@@ -208,9 +206,8 @@ function MissionControls({
 
   return (
     <div
+      className="st-panel"
       style={{
-        background: "var(--panel, #121316)",
-        border: "1px solid var(--border, #2e3038)",
         padding: "10px 14px",
         display: "flex",
         flexDirection: "column",
@@ -251,9 +248,9 @@ function MissionControls({
               onChange={(e) => setSelectedScenario(e.target.value)}
               disabled={isOperating || isLiveActive}
               style={{
-                background: "#1c1d22",
-                color: "#e2e2e8",
-                border: "1px solid #454653",
+                background: "var(--panel-2, #1c1d22)",
+                color: "var(--text, #e2e2e8)",
+                border: "1px solid var(--border, #454653)",
                 fontSize: 11,
                 padding: "4px 8px",
                 cursor: isLiveActive ? "not-allowed" : "pointer",
@@ -309,7 +306,7 @@ function MissionControls({
 
             <span
               style={{
-                background: "rgba(0, 0, 0, 0.35)",
+                background: "var(--panel-3, rgba(0, 0, 0, 0.35))",
                 border: "1px solid #49df9d40",
                 color: "#49df9d",
                 fontSize: 10,
@@ -332,9 +329,9 @@ function MissionControls({
               onChange={(e) => setSelectedSpeed(Number(e.target.value))}
               disabled={isOperating || isLiveActive}
               style={{
-                background: "#1c1d22",
-                color: "#e2e2e8",
-                border: "1px solid #454653",
+                background: "var(--panel-2, #1c1d22)",
+                color: "var(--text, #e2e2e8)",
+                border: "1px solid var(--border, #454653)",
                 fontSize: 11,
                 padding: "4px 8px",
                 cursor: isLiveActive ? "not-allowed" : "pointer",
@@ -451,9 +448,9 @@ function MissionControls({
               onClick={() => handleAction(() => stepMission(), "step mission")}
               disabled={isOperating}
               style={{
-                background: "#1a1c22",
-                border: "1px solid #8e9099",
-                color: "#e2e2e8",
+                background: "var(--panel-2, #1a1c22)",
+                border: "1px solid var(--border, #8e9099)",
+                color: "var(--text, #e2e2e8)",
                 fontWeight: 600,
                 fontSize: 11,
                 padding: "4px 8px",
@@ -469,9 +466,9 @@ function MissionControls({
               onClick={() => handleAction(() => resetMission(), "reset mission")}
               disabled={isOperating}
               style={{
-                background: "#1a1c22",
-                border: "1px solid #8e9099",
-                color: "#908f9e",
+                background: "var(--panel-2, #1a1c22)",
+                border: "1px solid var(--border, #8e9099)",
+                color: "var(--muted, #908f9e)",
                 fontWeight: 600,
                 fontSize: 11,
                 padding: "4px 8px",
@@ -486,16 +483,16 @@ function MissionControls({
 
         {/* Polling Interval Config */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 11, color: "#908f9e" }}>POLL RATE:</span>
+          <span style={{ fontSize: 11, color: "var(--muted, #908f9e)" }}>POLL RATE:</span>
           {[500, 1000, 2000].map((rate) => (
             <button
               key={rate}
               type="button"
               onClick={() => setPollingInterval(rate)}
               style={{
-                background: pollingIntervalMs === rate ? "#2b3040" : "#16171b",
-                border: `1px solid ${pollingIntervalMs === rate ? "#bdc2ff" : "#3b3d48"}`,
-                color: pollingIntervalMs === rate ? "#bdc2ff" : "#908f9e",
+                background: pollingIntervalMs === rate ? "var(--accent-glow, #2b3040)" : "var(--panel-2, #16171b)",
+                border: `1px solid ${pollingIntervalMs === rate ? "var(--accent, #bdc2ff)" : "var(--border, #3b3d48)"}`,
+                color: pollingIntervalMs === rate ? "var(--accent, #bdc2ff)" : "var(--muted, #908f9e)",
                 fontWeight: pollingIntervalMs === rate ? 700 : 500,
                 fontSize: 10,
                 padding: "2px 6px",
@@ -512,10 +509,10 @@ function MissionControls({
       {(controlError || (connectionState === "BACKEND_UNAVAILABLE" && lastError)) && (
         <div
           style={{
-            background: "#260e0e",
-            border: "1px solid #ef4444",
+            background: "rgba(239, 68, 68, 0.15)",
+            border: "1px solid var(--danger, #ef4444)",
             padding: "6px 10px",
-            color: "#ffb4ab",
+            color: "var(--danger, #ffb4ab)",
             fontSize: 11,
             display: "flex",
             alignItems: "center",
@@ -570,13 +567,13 @@ function SchedulerPanel({ scheduler, live }) {
       <div className="st-body">
         {rows.map(([label, val, color, isBold], i) => (
           <div key={i} className="st-row">
-            <span className="st-tsm" style={{ color: "#908f9e" }}>
+            <span className="st-tsm" style={{ color: "var(--muted)" }}>
               {label}
             </span>
             <span
               className="st-tmd"
               style={{
-                color: color ?? "#e2e2e8",
+                color: color ?? "var(--text)",
                 fontWeight: isBold ? 700 : 500,
                 letterSpacing: "0.02em",
               }}
@@ -587,23 +584,23 @@ function SchedulerPanel({ scheduler, live }) {
         ))}
         <div style={{ marginTop: 8, borderTop: "1px solid var(--border)", paddingTop: 6 }}>
           <div className="st-row">
-            <span className="st-tsm" style={{ color: "#908f9e" }}>
+            <span className="st-tsm" style={{ color: "var(--muted)" }}>
               POLICY MODE
             </span>
-            <span className="st-tmd" style={{ color: "#bdc2ff", fontWeight: 700 }}>
+            <span className="st-tmd" style={{ color: "var(--accent, #bdc2ff)", fontWeight: 700 }}>
               OPERATIONAL CANDIDATE
             </span>
           </div>
           <div className="st-row">
-            <span className="st-tsm" style={{ color: "#908f9e" }}>
+            <span className="st-tsm" style={{ color: "var(--muted)" }}>
               DECISION REASON
             </span>
-            <span className="st-tsm" style={{ color: "#bdc2ff", fontStyle: "italic", textAlign: "right" }}>
+            <span className="st-tsm" style={{ color: "var(--accent, #bdc2ff)", fontStyle: "italic", textAlign: "right" }}>
               {scheduler.decisionReason}
             </span>
           </div>
           <div className="st-row">
-            <span className="st-tsm" style={{ color: "#908f9e" }}>
+            <span className="st-tsm" style={{ color: "var(--muted)" }}>
               EXPLORATION PRESSURE
             </span>
             <span className="st-tmd" style={{ color: "#f59e0b" }}>
@@ -611,7 +608,7 @@ function SchedulerPanel({ scheduler, live }) {
             </span>
           </div>
           <div className="st-row">
-            <span className="st-tsm" style={{ color: "#908f9e" }}>
+            <span className="st-tsm" style={{ color: "var(--muted)" }}>
               Q-MARGIN
             </span>
             <span className="st-tmd" style={{ color: "#6afcb8" }}>
@@ -619,7 +616,7 @@ function SchedulerPanel({ scheduler, live }) {
             </span>
           </div>
           <div className="st-row">
-            <span className="st-tsm" style={{ color: "#908f9e" }}>
+            <span className="st-tsm" style={{ color: "var(--muted)" }}>
               MoE GATING
             </span>
             <span className="st-tmd" style={{ color: "#96ccff" }}>
@@ -636,12 +633,12 @@ function SchedulerPanel({ scheduler, live }) {
 
 function EnvironmentSpectrum({ activeBands, quietBands, currentBand, currentFreqMHz, currentDwellUs }) {
   const rows = [
-    ["TOTAL SPECTRUM", "18.00 GHz (36 × 500 MHz)", "#e2e2e8"],
+    ["TOTAL SPECTRUM", "18.00 GHz (36 × 500 MHz)", "var(--text)"],
     ["INSTANTANEOUS BW", "1,000 MHz (IBW)", "#96ccff"],
-    ["CURRENT BAND", `B${String(Number(currentBand) + 1).padStart(2, "0")} (${currentFreqMHz.toLocaleString()} MHz)`, "#bdc2ff"],
+    ["CURRENT BAND", `B${String(Number(currentBand) + 1).padStart(2, "0")} (${currentFreqMHz.toLocaleString()} MHz)`, "var(--accent, #bdc2ff)"],
     ["ACTIVE BANDS", String(activeBands), "#49df9d"],
-    ["QUIET BANDS", String(quietBands), "#908f9e"],
-    ["RECEIVER DWELL", fmtUs(currentDwellUs), "#bdc2ff"],
+    ["QUIET BANDS", String(quietBands), "var(--muted)"],
+    ["RECEIVER DWELL", fmtUs(currentDwellUs), "var(--accent, #bdc2ff)"],
   ];
 
   return (
@@ -650,10 +647,10 @@ function EnvironmentSpectrum({ activeBands, quietBands, currentBand, currentFreq
       <div className="st-body">
         {rows.map(([label, val, color], i) => (
           <div key={i} className="st-row">
-            <span className="st-tsm" style={{ color: "#908f9e" }}>
+            <span className="st-tsm" style={{ color: "var(--muted)" }}>
               {label}
             </span>
-            <span className="st-tmd" style={{ color: color ?? "#e2e2e8" }}>
+            <span className="st-tmd" style={{ color: color ?? "var(--text)" }}>
               {val}
             </span>
           </div>
@@ -667,7 +664,7 @@ function EnvironmentSpectrum({ activeBands, quietBands, currentBand, currentFreq
 
 export default function MissionOverview() {
   const t = useOverviewTelemetry();
-  const { metrics: wsMetrics, history: wsHistory } = useMetricsWebSocket();
+  const { metrics: wsMetrics } = useMetricsWebSocket();
   const [isOperating, setIsOperating] = useState(false);
   const [controlError, setControlError] = useState("");
 
@@ -691,11 +688,9 @@ export default function MissionOverview() {
     bandHeights,
     bandStates,
     scheduler,
-    dwellHistory,
     instantaneousPd,
     sessionAvgPd: tSessionAvgPd,
     liveMetrics,
-    waterfallHistory,
   } = t;
 
   const freqLabel = `${currentFreqMHz.toLocaleString()} MHz`;
@@ -786,80 +781,7 @@ export default function MissionOverview() {
         </div>
       )}
 
-      {/* Authoritative Model Provenance & Frozen Validated Benchmark Banner */}
-      <section
-        style={{
-          background: "var(--panel-2, #1e2024)",
-          border: "1px solid var(--border, #3b4261)",
-          borderLeft: "4px solid var(--success, #49df9d)",
-          padding: "10px 14px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
-          margin: "4px 0",
-        }}
-        aria-label="Authoritative Model Provenance and Validated Benchmark"
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span className="material-symbols-outlined" style={{ fontSize: 20, color: "var(--success, #49df9d)" }}>
-              verified
-            </span>
-            <div>
-              <span style={{ fontSize: 10, color: "var(--muted, #908f9e)", letterSpacing: "0.06em", fontWeight: 700 }}>
-                ACTIVE OPERATIONAL SCHEDULER:
-              </span>{" "}
-              <strong style={{ fontSize: 13, color: "var(--text-bright, #ffffff)", letterSpacing: "0.02em" }}>
-                Gate-27 Operational Baseline
-              </strong>
-              <span style={{ marginLeft: 8, fontSize: 10, color: "var(--success, #49df9d)", background: "rgba(73, 223, 157, 0.15)", border: "1px solid rgba(73, 223, 157, 0.4)", padding: "1px 6px", fontWeight: 700 }}>
-                TRAINING STEP 27,000 · FROZEN DEMONSTRATION
-              </span>
-            </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "var(--muted, #a8a7b8)" }}>
-            <span style={{ color: "var(--muted, #908f9e)" }}>SHA-256:</span>
-            <code style={{ color: "var(--accent, #bdc2ff)", background: "var(--panel-3, #0a0c12)", padding: "2px 6px", border: "1px solid var(--border, #282d3f)", fontSize: 10 }}>
-              fac0577454fe0a89687c27ebdffa568229e2d03435eebd9e82b50fca14292094
-            </code>
-          </div>
-        </div>
 
-        {/* Frozen Benchmark Card */}
-        <div
-          style={{
-            background: "var(--panel, #1a1c20)",
-            border: "1px dashed var(--border, #3b4261)",
-            padding: "8px 12px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: 12,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span className="material-symbols-outlined" style={{ fontSize: 16, color: "#ffd700" }}>
-              workspace_premium
-            </span>
-            <span style={{ fontSize: 10.5, fontWeight: 700, color: "#ffd700", letterSpacing: "0.04em" }}>
-              VALIDATED GATE-27 TRAINING BENCHMARK (IMMUTABLE OFFLINE EVIDENCE)
-            </span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", fontSize: 11 }}>
-            <span style={{ color: "#908f9e" }}>Mean Pd: <strong style={{ color: "#49df9d" }}>85.09%</strong></span>
-            <span style={{ color: "#908f9e" }}>Agile Pd: <strong style={{ color: "#6afcb8" }}>71.92%</strong></span>
-            <span style={{ color: "#908f9e" }}>config29 Pd: <strong style={{ color: "#96ccff" }}>95.87%</strong></span>
-            <span style={{ color: "#908f9e" }}>Dense Pd: <strong style={{ color: "#bdc2ff" }}>97.33%</strong></span>
-            <span style={{ color: "#908f9e" }}>Blackouts: <strong style={{ color: "#49df9d" }}>0</strong></span>
-            <span style={{ color: "#908f9e" }}>IR(time): <strong style={{ color: "#ffd700" }}>0.9108 hits/ms</strong></span>
-            <span style={{ color: "#908f9e" }}>Qmax: <strong style={{ color: "#e2e2e8" }}>30.32</strong></span>
-          </div>
-          <span style={{ fontSize: 9.5, color: "#7a7d8c", fontStyle: "italic" }}>
-            *Reference validation evidence. Live mission telemetry is measured independently below.
-          </span>
-        </div>
-      </section>
 
       {/* KPI Strip */}
       <section className="st-kpi-grid" aria-label="Mission KPI strip">
@@ -919,28 +841,15 @@ export default function MissionOverview() {
         />
       </section>
 
-      {/* Live Cognitive EW Metrics & Spectrum Waterfall (Phase 4) */}
+      {/* Live Cognitive EW Metrics (Phase 4) */}
       <section style={{ display: "flex", flexDirection: "column", gap: 8, margin: "8px 0" }}>
         <LiveMetricsDashboard metrics={liveMetrics || wsMetrics} />
-        <SpectrumWaterfall history={wsHistory.length > 0 ? wsHistory : (waterfallHistory || [])} />
       </section>
 
       {/* Main 2-column layout */}
       <div className="st-main-cols">
-        {/* Left column: Dwell Timeline + 36-Band Matrix */}
+        {/* Left column: 36-Band Matrix */}
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          {/* Real Dwell Timeline */}
-          <div className="st-panel">
-            <PanelHead
-              icon="timeline"
-              title="DWELL EXECUTION TIMELINE"
-              badge={live ? `${dwellHistory.length} EVENTS RECORDED` : "AWAITING EXECUTION"}
-            />
-            <div className="st-body">
-              <DwellTimeline entries={dwellHistory} />
-            </div>
-          </div>
-
           {/* 36-Band Spectrum Allocation Matrix */}
           <div className="st-panel">
             <PanelHead

@@ -94,6 +94,7 @@ export function adaptTelemetryPayload(
     cognitiveExplanation: payload.metrics?.cognitive_explanation || {},
     systemMetrics: payload.metrics?.system_metrics || {},
     clockUs: payload.metrics?.clock_us ?? payload.clock_us ?? 0,
+    observation: payload.observation || payload.metrics?.observation || payload.raw?.observation || null,
 
     raw: payload,
   };

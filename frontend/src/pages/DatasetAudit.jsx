@@ -579,8 +579,8 @@ export default function DatasetAudit() {
             gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: 10,
             padding: "10px 14px",
-            background: "rgba(26, 28, 32, 0.7)",
-            border: "1px solid rgba(189, 194, 255, 0.15)",
+            background: "var(--panel-2, rgba(26, 28, 32, 0.7))",
+            border: "1px solid var(--border-subtle, rgba(189, 194, 255, 0.15))",
             borderRadius: 4,
             marginBottom: 12,
           }}

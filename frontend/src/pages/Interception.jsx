@@ -365,7 +365,7 @@ export default function Interception() {
           style={{
             display: "flex",
             gap: 16,
-            color: "#908f9e",
+            color: "var(--muted)",
             marginTop: 8,
             alignItems: "center",
             flexWrap: "wrap",
@@ -375,23 +375,23 @@ export default function Interception() {
         >
           <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <i style={{ display: "inline-block", width: 10, height: 10, background: TYPE_COLORS.HIT, borderRadius: 2 }} />
-            <strong style={{ color: "#e2e2e8" }}>HIT</strong> (Matched Revisit / Search)
+            <strong style={{ color: "var(--text)" }}>HIT</strong> (Matched Revisit / Search)
           </span>
           <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <i style={{ display: "inline-block", width: 10, height: 10, background: TYPE_COLORS.INTERCEPTION, borderRadius: 2 }} />
-            <strong style={{ color: "#e2e2e8" }}>INTERCEPTION</strong> (Preemptive Intercept)
+            <strong style={{ color: "var(--text)" }}>INTERCEPTION</strong> (Preemptive Intercept)
           </span>
           <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <i style={{ display: "inline-block", width: 10, height: 10, background: TYPE_COLORS.MISS, borderRadius: 2 }} />
-            <strong style={{ color: "#e2e2e8" }}>MISS</strong> (Zero Pulse Coincidence)
+            <strong style={{ color: "var(--text)" }}>MISS</strong> (Zero Pulse Coincidence)
           </span>
           <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <i style={{ display: "inline-block", width: 10, height: 10, background: TYPE_COLORS.FALSE_ALARM, borderRadius: 2 }} />
-            <strong style={{ color: "#e2e2e8" }}>FALSE ALARM</strong> (Spurious Detection)
+            <strong style={{ color: "var(--text)" }}>FALSE ALARM</strong> (Spurious Detection)
           </span>
           <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <i style={{ display: "inline-block", width: 10, height: 10, background: "rgba(189, 194, 255, 0.4)", borderRadius: 2 }} />
-            <strong style={{ color: "#e2e2e8" }}>RF ACTIVITY</strong> (Emitter Pulse Stream)
+            <strong style={{ color: "var(--text)" }}>RF ACTIVITY</strong> (Emitter Pulse Stream)
           </span>
         </div>
       </div>
@@ -471,10 +471,10 @@ export default function Interception() {
                 display: "grid",
                 gridTemplateColumns: "repeat(3, 1fr)",
                 gap: 4,
-                background: "#121418",
+                background: "var(--panel-3)",
                 padding: 3,
                 borderRadius: 4,
-                border: "1px solid var(--border, #454653)",
+                border: "1px solid var(--border)",
                 width: "100%",
                 boxSizing: "border-box",
               }}
@@ -496,7 +496,7 @@ export default function Interception() {
                       justifyContent: "center",
                       gap: 6,
                       background: isActive ? `${tab.color}28` : "transparent",
-                      color: isActive ? tab.color : "#908f9e",
+                      color: isActive ? tab.color : "var(--muted)",
                       border: isActive ? `1px solid ${tab.color}` : "1px solid transparent",
                       borderRadius: 3,
                       padding: "6px 4px",
@@ -515,8 +515,8 @@ export default function Interception() {
                       style={{
                         fontSize: 10,
                         fontWeight: 800,
-                        background: isActive ? tab.color : "#282a30",
-                        color: isActive ? "#0d1117" : "#c6c5d5",
+                        background: isActive ? tab.color : "var(--panel-2)",
+                        color: isActive ? "#0d1117" : "var(--muted)",
                         padding: "1px 6px",
                         borderRadius: 8,
                         flexShrink: 0,
@@ -536,23 +536,23 @@ export default function Interception() {
                 overflowY: "auto",
                 overflowX: "auto",
                 position: "relative",
-                border: "1px solid var(--border, #454653)",
+                border: "1px solid var(--border)",
                 flex: 1,
                 minWidth: 0,
               }}
             >
               <table className="st-table" style={{ width: "100%", minWidth: "550px" }}>
-                <thead style={{ position: "sticky", top: 0, zIndex: 2, background: "var(--panel-3, #282a2e)" }}>
+                <thead style={{ position: "sticky", top: 0, zIndex: 2, background: "var(--panel-3)" }}>
                   <tr>
                     {["TIME (µs)", "BAND / FREQ", "DWELL MODE", "OUTCOME", "EMITTER / TRK", "TIMING DELTA", "SNR / POWER"].map((c) => (
-                      <th key={c} style={{ background: "var(--panel-3, #282a2e)", whiteSpace: "nowrap" }}>{c}</th>
+                      <th key={c} style={{ background: "var(--panel-3)", whiteSpace: "nowrap" }}>{c}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {filteredEvents.length === 0 ? (
                     <tr>
-                      <td colSpan={7} style={{ textAlign: "center", color: "#908f9e", padding: "36px 8px" }}>
+                      <td colSpan={7} style={{ textAlign: "center", color: "var(--muted)", padding: "36px 8px" }}>
                         NO EVENTS MATCHING FILTER "{filterMode}" — RECEPTOR ACTIVE
                       </td>
                     </tr>
@@ -655,18 +655,18 @@ export default function Interception() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "5px 8px",
-                background: "rgba(26, 28, 32, 0.7)",
+                background: "var(--panel-2, #1a1c20)",
                 border: "1px solid var(--border, #454653)",
                 borderRadius: 4,
                 gap: 6,
               }}
             >
-              <div style={{ fontSize: 11, color: "#908f9e", display: "flex", alignItems: "center", gap: 6, overflow: "hidden" }}>
+              <div style={{ fontSize: 11, color: "var(--muted, #908f9e)", display: "flex", alignItems: "center", gap: 6, overflow: "hidden" }}>
                 <span style={{ whiteSpace: "nowrap" }}>EVENT:</span>
-                <strong style={{ color: "#bdc2ff", fontFamily: "monospace", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                <strong style={{ color: "var(--accent, #bdc2ff)", fontFamily: "monospace", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
                   #{selectedEvent.id}
                 </strong>
-                <span style={{ color: "#666", fontSize: 10, whiteSpace: "nowrap" }}>
+                <span style={{ color: "var(--muted, #666)", fontSize: 10, whiteSpace: "nowrap" }}>
                   ({filteredEvents.length > 0 ? (currentIndex >= 0 ? currentIndex + 1 : 1) : 0}/{filteredEvents.length})
                 </span>
               </div>
@@ -727,10 +727,10 @@ export default function Interception() {
             }}
           >
             <div>
-              <div style={{ fontSize: 10, color: "#908f9e", textTransform: "uppercase", letterSpacing: 1 }}>
+              <div style={{ fontSize: 10, color: "var(--muted, #908f9e)", textTransform: "uppercase", letterSpacing: 1 }}>
                 INTERCEPTION VERDICT
               </div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: TYPE_COLORS[selectedEvent.type] ?? "#e2e2e8" }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: TYPE_COLORS[selectedEvent.type] ?? "var(--text, #e2e2e8)" }}>
                 {selectedEvent.type === "HIT"
                   ? "● HIT — INTERCEPT CONFIRMED"
                   : selectedEvent.type === "INTERCEPTION"
@@ -751,8 +751,8 @@ export default function Interception() {
           <div
             style={{
               fontSize: 12,
-              color: "#c6c5d5",
-              background: "#16181c",
+              color: "var(--text, #c6c5d5)",
+              background: "var(--panel-2, #16181c)",
               padding: "8px 10px",
               borderRadius: 4,
               borderLeft: `3px solid ${TYPE_COLORS[selectedEvent.type]}`,

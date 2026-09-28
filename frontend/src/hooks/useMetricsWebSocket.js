@@ -5,12 +5,12 @@ const getMetricsWsUrl = () => `${getWsBaseUrl()}/ws/metrics`;
 
 export function useMetricsWebSocket() {
   const [metrics, setMetrics] = useState({
-    pd: 0,
-    pfa: 0,
-    avg_intercept_rate: 0,
-    avg_reward: 0,
-    pct_correct_predictions: 0,
-    avg_intercept_time_error_us: 0,
+    pd: null,
+    pfa: null,
+    avg_intercept_rate: null,
+    avg_reward: null,
+    pct_correct_predictions: null,
+    avg_intercept_time_error_us: null,
     last_action: null,
     last_band: null,
     last_mode: null,

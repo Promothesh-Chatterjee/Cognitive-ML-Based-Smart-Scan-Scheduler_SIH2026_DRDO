@@ -10,7 +10,7 @@ const NUM_BANDS = 36;
 const FREQ_START_MHZ = 0;
 const FREQ_END_MHZ = 18000;
 const BAND_WIDTH_MHZ = 500;
-const WATERFALL_BINS = 360; // 50 MHz per bin across 0–18 GHz
+const WATERFALL_BINS = 36; // 36 channel columns (500 MHz per band) across 0–18 GHz
 const WATERFALL_ROWS = 140; // 140 time slices history depth
 
 const SYNTHETIC_EVENTS = [
@@ -169,8 +169,8 @@ function useCanvasResize(canvasRef, containerRef) {
 }
 
 /**
- * Generate a 360-bin channel activity slice for waterfall history.
- * Intensity directly reflects backend channel occupancy/activity priority vector (36 bands × 10 bins).
+ * Generate a 36-column channel activity slice for waterfall history.
+ * Intensity directly reflects backend channel occupancy/activity priority vector (36 bands).
  */
 function createWaterfallRow({
   liveBand,
@@ -192,24 +192,18 @@ function createWaterfallRow({
   // 2. Real channel occupancy / activity priority from backend telemetry (band_priorities)
   const bandPriors = telemetry?.bandPriorities || telemetry?.metrics?.band_priorities || [];
   if (Array.isArray(bandPriors) && bandPriors.length > 0) {
-    for (let bIdx = 0; bIdx < NUM_BANDS; bIdx++) {
+    for (let bIdx = 0; bIdx < WATERFALL_BINS; bIdx++) {
       const prio = Math.max(0.0, Math.min(1.0, Number(bandPriors[bIdx]) || 0));
       if (prio > 0) {
-        const startBin = bIdx * 10;
-        for (let offset = 0; offset < 10; offset++) {
-          bins[startBin + offset] = Math.max(bins[startBin + offset], prio * 100);
-        }
+        bins[bIdx] = Math.max(bins[bIdx], prio * 100);
       }
     }
   }
 
-  // 3. Tuned receiver aperture window (500 MHz span = 10 bins)
-  if (liveBand !== undefined && liveBand !== null && liveBand >= 0 && liveBand < NUM_BANDS) {
-    const startBin = liveBand * 10;
-    const apertureLevel = isHit ? 75 : 35;
-    for (let offset = 0; offset < 10; offset++) {
-      bins[startBin + offset] = Math.max(bins[startBin + offset], apertureLevel);
-    }
+  // 3. Tuned receiver aperture window (500 MHz band)
+  if (liveBand !== undefined && liveBand !== null && liveBand >= 0 && liveBand < WATERFALL_BINS) {
+    const apertureLevel = isHit ? 85 : 40;
+    bins[liveBand] = Math.max(bins[liveBand], apertureLevel);
   }
 
   return {
@@ -805,30 +799,47 @@ function WaterfallCanvas({
     const rowH = plotH / rows;
     const cellW = plotW / WATERFALL_BINS;
 
-    // Render High-Resolution Channel Activity Matrix
+    // Render Dense Rectangular 36-Channel Activity Matrix
     for (let r = 0; r < rows; r++) {
       const rowData = waterfall[r];
       const y = marginTop + r * rowH;
-      const pixelRowH = Math.ceil(rowH) + 0.3;
+      const pixelRowH = Math.max(1, rowH - 1);
       const bins = rowData?.bins || (Array.isArray(rowData) ? rowData : null);
 
       if (bins) {
         for (let b = 0; b < WATERFALL_BINS; b++) {
           const val = bins[b] ?? 0;
           const x = marginLeft + b * cellW;
+          const isTunedCell = rowData?.band === b;
+          const isHitCell = isTunedCell && Boolean(rowData?.isHit);
+
+          // Rectangular cell background
           ctx.fillStyle = getWaterfallColor(val, palette, isDark, gain);
-          ctx.fillRect(x, y, cellW + 0.4, pixelRowH);
+          ctx.fillRect(x, y, Math.max(1, cellW - 1), pixelRowH);
+
+          // Highlighted incident activity hit: rectangular emerald highlight
+          if (isHitCell) {
+            ctx.fillStyle = "#49df9d";
+            ctx.fillRect(x, y, Math.max(1, cellW - 1), pixelRowH);
+          } else if (isTunedCell) {
+            // Highlighted tuned aperture band
+            ctx.strokeStyle = isDark ? "rgba(56,189,248,0.7)" : "rgba(37,99,235,0.7)";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x + 0.5, y + 0.5, Math.max(1, cellW - 2), Math.max(1, pixelRowH - 1));
+          }
         }
       }
+    }
 
-      // Discrete pulse intercept indicator (emerald diamond / halo) at tuned band
-      if (rowData?.isHit && rowData?.band != null) {
-        const xPip = marginLeft + ((rowData.band + 0.5) / NUM_BANDS) * plotW;
-        ctx.fillStyle = "#49df9d";
-        ctx.beginPath();
-        ctx.arc(xPip, y + rowH / 2, Math.max(1.8, rowH * 0.7), 0, Math.PI * 2);
-        ctx.fill();
-      }
+    // Subtle column gridlines between bands
+    ctx.strokeStyle = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.05)";
+    ctx.lineWidth = 0.5;
+    for (let b = 1; b < WATERFALL_BINS; b++) {
+      const x = marginLeft + b * cellW;
+      ctx.beginPath();
+      ctx.moveTo(x, marginTop);
+      ctx.lineTo(x, marginTop + plotH);
+      ctx.stroke();
     }
 
     // Vertical Tuned Receiver Aperture Guideline
@@ -958,62 +969,6 @@ function WaterfallCanvas({
       }}
     >
       <canvas ref={canvasRef} style={{ display: "block", width: "100%", height: "100%" }} />
-    </div>
-  );
-}
-
-function TelemetryInspector({ telemetry }) {
-  if (!telemetry) {
-    return (
-      <div className="st-panel">
-        <PanelHead icon="inventory_2" title="TELEMETRY INSPECTOR" badge="NO BACKEND PACKET" badgeColor="#f59e0b" />
-        <div className="st-body" style={{ color: "#c6c5d5" }}>
-          No backend telemetry packet has been received. Synthetic RF telemetry remains active.
-        </div>
-      </div>
-    );
-  }
-
-  const rows = [
-    ["SOURCE", telemetry.source ?? "—"],
-    ["LIVE", telemetry.live ? "YES" : "NO"],
-    ["SCHEMA", telemetry.schemaVersion ?? "—"],
-    ["TYPE", telemetry.type ?? "—"],
-    ["MESSAGE", telemetry.message ?? "No message"],
-    ["STEP", telemetry.step ?? "—"],
-    ["EPISODE", telemetry.episode ?? "—"],
-  ];
-
-  const valid = telemetry.valid === true && telemetry.live === true;
-
-  return (
-    <div className="st-panel">
-      <PanelHead
-        icon="inventory_2"
-        title="TELEMETRY INSPECTOR"
-        badge={valid ? "VALID" : "INVALID"}
-        badgeColor={valid ? "#49df9d" : "#f59e0b"}
-      />
-      <div className="st-grid-12" style={{ gap: 4 }}>
-        {rows.map(([label, value]) => (
-          <div
-            key={label}
-            className="st-tsm"
-            style={{
-              gridColumn: "span 3 / span 3",
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-              padding: "4px 6px",
-              background: "var(--panel)",
-              border: "1px solid var(--border)",
-            }}
-          >
-            <span style={{ color: "var(--muted)" }}>{label}</span>
-            <strong style={{ color: "var(--text)" }}>{value}</strong>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
@@ -1619,8 +1574,6 @@ export default function LiveSpectrum() {
           </div>
         </aside>
       </div>
-
-      <TelemetryInspector telemetry={liveTelemetry} />
     </div>
   );
 }

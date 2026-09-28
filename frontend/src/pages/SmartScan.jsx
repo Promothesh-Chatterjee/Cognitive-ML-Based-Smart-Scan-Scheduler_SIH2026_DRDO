@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  CmdBadge,
   PanelHead,
 } from "../components/stitch";
 import { api } from "../services/api";
@@ -29,57 +28,112 @@ const MODES = [
 ];
 
 const SHORT_FEATURES = ["OCC", "DET", "MISS", "UNC", "AGE", "CNT", "CONF", "PRI", "AGIL", "PRIO"];
-
-/**
- * Generate a synthetic demo observation vector of exactly 360 numeric values.
- * 36 frequency bands × 10 features per band = 360 values.
- * Flattened layout: [band_0_feat_0..9, band_1_feat_0..9, ..., band_35_feat_0..9]
- *
- * NOTE: Clearly labeled as SYNTHETIC DEMO DATA for live testing and UI verification.
- */
-function generateDemoObservation(scenarioType = "agile_activity") {
-  const obs = new Float32Array(360);
-  const activeBands = scenarioType === "agile_activity" 
-    ? [6, 14, 22, 31] // 4-Band Agile Hopper bands
-    : scenarioType === "dense_threat"
-    ? [4, 8, 12, 16, 20, 24, 28]
-    : [16]; // Single carrier
-
-  for (let b = 0; b < 36; b++) {
-    const isActive = activeBands.includes(b);
-    const offset = b * 10;
-    obs[offset + 0] = isActive ? 0.85 : 0.05;                          // Occupancy
-    obs[offset + 1] = isActive ? 0.78 : 0.02;                          // Detection Rate
-    obs[offset + 2] = isActive ? 0.12 : 0.01;                          // Miss Rate
-    obs[offset + 3] = isActive ? 0.20 : 0.80;                          // Uncertainty
-    obs[offset + 4] = isActive ? 0.45 : 0.95;                          // Revisit Age
-    obs[offset + 5] = isActive ? (activeBands.indexOf(b) + 1) : 0.0;   // Emitter Count
-    obs[offset + 6] = isActive ? 0.88 : 0.10;                          // Confidence
-    obs[offset + 7] = isActive ? 0.92 : 0.05;                          // PRI Stability
-    obs[offset + 8] = isActive ? 0.74 : 0.00;                          // Frequency Agility
-    obs[offset + 9] = isActive ? 0.90 : 0.05;                          // Priority
-  }
-  return Array.from(obs);
-}
+const POLICY_MODE = "operational";
 
 export default function SmartScan() {
-  const [liveTelemetry, setLiveTelemetry] = useState(null);
   const [selectedBand, setSelectedBand] = useState(16);
   const [backendHealth, setBackendHealth] = useState(null);
 
-  // 360-D Observation State
-  const [observationVector, setObservationVector] = useState(() => generateDemoObservation("agile_activity"));
-  const [obsSource, setObsSource] = useState("SYNTHETIC DEMO");
+  // 360-D Observation State: null until a valid real observation arrives from live telemetry
+  const [observationVector, setObservationVector] = useState(null);
+  const [obsSource, setObsSource] = useState("AWAITING LIVE 360-D OBSERVATION");
   const [validationError, setValidationError] = useState("");
 
   // Live Backend Inference State
   const [isInferring, setIsInferring] = useState(false);
   const [inferenceResponse, setInferenceResponse] = useState(null);
   const [inferenceError, setInferenceError] = useState("");
-  const [policyMode, setPolicyMode] = useState("operational");
   const [predictionHistory, setPredictionHistory] = useState([]);
 
-  // Check backend health & telemetry
+  // Deduplication, in-flight lock, and trailing frame buffer
+  const lastInferredFrameKeyRef = useRef(null);
+  const isInferringRef = useRef(false);
+  const pendingFrameRef = useRef(null);
+
+  // Parse flattened 360-D observation into 36 bands × 10 features for UI inspection
+  const observationGrid = useMemo(() => {
+    if (!Array.isArray(observationVector) || observationVector.length !== 360) {
+      return Array.from({ length: 36 }, (_, band) => ({
+        band,
+        values: Array(10).fill(0),
+      }));
+    }
+    return Array.from({ length: 36 }, (_, band) => ({
+      band,
+      values: observationVector.slice(band * 10, (band + 1) * 10),
+    }));
+  }, [observationVector]);
+
+  const selectedBandRow = observationGrid.find((item) => item.band === selectedBand) || {
+    band: selectedBand,
+    values: Array(10).fill(0),
+  };
+
+  // Perform Real Backend Inference via POST /predict_bands (100% stable reference: [] deps)
+  const runInference = useCallback(async (initialVector) => {
+    setValidationError("");
+    setInferenceError("");
+
+    let currentVector = initialVector;
+    setIsInferring(true);
+    isInferringRef.current = true;
+
+    try {
+      while (currentVector) {
+        if (!Array.isArray(currentVector) || currentVector.length !== 360) {
+          setValidationError(
+            `Observation rejected: Expected exactly 360 numeric values (36 bands × 10 features), got ${currentVector?.length}.`
+          );
+          break;
+        }
+
+        const t0 = performance.now();
+        const resp = await api.predictBands(currentVector, POLICY_MODE);
+        setInferenceResponse(resp);
+
+        // Add to prediction history
+        setPredictionHistory((prev) => [
+          {
+            id: Date.now(),
+            time: new Date().toLocaleTimeString(),
+            action: resp.selected_action,
+            band: resp.selected_band,
+            mode: resp.selected_mode,
+            modeName: MODES[resp.selected_mode] || `MODE_${resp.selected_mode}`,
+            dwellUs: resp.dwell_time_us,
+            prob: resp.intercept_probability,
+            etaUs: resp.predicted_intercept_time_us,
+            latencyMs: resp.latency_ms || (performance.now() - t0),
+            reason: resp.attribution?.decision_source || resp.attribution?.reason || "DRQN Cognitive Policy",
+          },
+          ...prev.slice(0, 19),
+        ]);
+
+        if (resp.selected_band != null) {
+          setSelectedBand(resp.selected_band);
+        }
+
+        // Drain trailing pending frame if one arrived during this inference
+        if (pendingFrameRef.current) {
+          const next = pendingFrameRef.current;
+          pendingFrameRef.current = null;
+          if (next.frameKey !== lastInferredFrameKeyRef.current) {
+            lastInferredFrameKeyRef.current = next.frameKey;
+            currentVector = next.obs;
+            continue;
+          }
+        }
+        currentVector = null;
+      }
+    } catch (err) {
+      setInferenceError(err.message || "Failed to execute inference on backend.");
+    } finally {
+      setIsInferring(false);
+      isInferringRef.current = false;
+    }
+  }, []);
+
+  // Check backend health & listen to telemetry stream with authoritative frame deduplication
   useEffect(() => {
     let active = true;
 
@@ -99,9 +153,45 @@ export default function SmartScan() {
     try {
       stream = startTelemetryStream({
         onTelemetry(t) {
-          if (active && t?.valid && t?.live) {
-            setLiveTelemetry(t);
-            if (t.band != null) setSelectedBand(t.band);
+          if (!active || !t?.valid || !t?.live) return;
+
+          if (t.band != null) setSelectedBand(t.band);
+
+          // Extract observation vector from live telemetry
+          const obs = t.observation || t.raw?.observation || t.metrics?.observation;
+          const isValid360 =
+            Array.isArray(obs) &&
+            obs.length === 360 &&
+            obs.every((v) => Number.isFinite(Number(v)));
+
+          if (isValid360) {
+            setObservationVector(obs);
+            setObsSource("LIVE TELEMETRY (CLOUD RUN)");
+
+            // Authoritative frame key: step, clockUs, or timestamp
+            const frameKey =
+              t.step != null
+                ? `step-${t.step}`
+                : t.clockUs != null && t.clockUs > 0
+                ? `clock-${t.clockUs}`
+                : t.raw?.timestamp
+                ? `ts-${t.raw.timestamp}`
+                : `obs-${obs[0]}-${obs[180]}-${obs[359]}`;
+
+            // If identical to last inferred frame, ignore duplicate poll
+            if (frameKey === lastInferredFrameKeyRef.current) {
+              return;
+            }
+
+            // If an inference is currently in flight, record this newest frame as pending
+            if (isInferringRef.current) {
+              pendingFrameRef.current = { frameKey, obs };
+            } else {
+              // Otherwise, fire inference immediately
+              pendingFrameRef.current = null;
+              lastInferredFrameKeyRef.current = frameKey;
+              runInference(obs);
+            }
           }
         },
       });
@@ -114,93 +204,7 @@ export default function SmartScan() {
       clearInterval(timer);
       stream?.close();
     };
-  }, []);
-
-  // Parse flattened 360-D observation into 36 bands × 10 features for UI inspection
-  const observationGrid = useMemo(() => {
-    if (!Array.isArray(observationVector) || observationVector.length !== 360) {
-      return [];
-    }
-    return Array.from({ length: 36 }, (_, band) => ({
-      band,
-      values: observationVector.slice(band * 10, (band + 1) * 10),
-    }));
-  }, [observationVector]);
-
-  const selectedBandRow = observationGrid.find((item) => item.band === selectedBand) || {
-    band: selectedBand,
-    values: Array(10).fill(0),
-  };
-
-  // Perform Real Backend Inference via POST /predict_bands
-  const runInference = async (vectorToUse = observationVector) => {
-    setValidationError("");
-    setInferenceError("");
-
-    // Strict frontend validation: Must be an array of exactly 360 numeric values
-    if (!Array.isArray(vectorToUse)) {
-      setValidationError("Observation rejected: Observation must be an array.");
-      return;
-    }
-    if (vectorToUse.length !== 360) {
-      setValidationError(
-        `Observation rejected: Expected exactly 360 numeric values (36 bands × 10 features), got ${vectorToUse.length}.`
-      );
-      return;
-    }
-
-    setIsInferring(true);
-    const t0 = performance.now();
-    try {
-      const resp = await api.predictBands(vectorToUse, policyMode);
-      setInferenceResponse(resp);
-
-      // Add to prediction history
-      setPredictionHistory((prev) => [
-        {
-          id: Date.now(),
-          time: new Date().toLocaleTimeString(),
-          action: resp.selected_action,
-          band: resp.selected_band,
-          mode: resp.selected_mode,
-          modeName: MODES[resp.selected_mode] || `MODE_${resp.selected_mode}`,
-          dwellUs: resp.dwell_time_us,
-          prob: resp.intercept_probability,
-          etaUs: resp.predicted_intercept_time_us,
-          latencyMs: resp.latency_ms || (performance.now() - t0),
-          reason: resp.attribution?.decision_source || resp.attribution?.reason || "DRQN Cognitive Policy",
-        },
-        ...prev.slice(0, 19),
-      ]);
-
-      if (resp.selected_band != null) {
-        setSelectedBand(resp.selected_band);
-      }
-    } catch (err) {
-      setInferenceError(err.message || "Failed to execute inference on backend.");
-    } finally {
-      setIsInferring(false);
-    }
-  };
-
-  // Run initial inference on mount
-  useEffect(() => {
-    let active = true;
-    const initialRun = async () => {
-      try {
-        await runInference(observationVector);
-      } catch {
-        // Handled within runInference
-      }
-    };
-    if (active) {
-      initialRun();
-    }
-    return () => {
-      active = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [runInference]);
 
   const isModelOperational = Boolean(
     backendHealth?.operational_mode_ready &&
@@ -208,6 +212,7 @@ export default function SmartScan() {
     backendHealth?.normalization_hash_match
   );
 
+  // Authoritative action: derived strictly from real inference response, null if awaiting data
   const activeAction = useMemo(() => {
     if (inferenceResponse) {
       return {
@@ -223,173 +228,58 @@ export default function SmartScan() {
         isLiveResponse: true,
       };
     }
-    if (liveTelemetry && (liveTelemetry.band != null || liveTelemetry.selected_action != null || liveTelemetry.action != null)) {
-      const act = liveTelemetry.selected_action ?? liveTelemetry.action ?? null;
-      const band = liveTelemetry.band != null ? Number(liveTelemetry.band) : (act != null ? Math.floor(Number(act) / 5) : 0);
-      const modeIdx = act != null ? (Number(act) % 5) : (liveTelemetry.modeIndex ?? 1);
-      const modeName = liveTelemetry.modeName ?? MODES[modeIdx] ?? "NORMAL_DWELL";
-      const actionId = act != null ? Number(act) : (band * 5 + modeIdx);
-      return {
-        band,
-        mode: modeName,
-        score: Number(liveTelemetry.cognitiveExplanation?.drqn_score ?? 0.0),
-        probability: Number(liveTelemetry.cognitiveExplanation?.prediction_confidence ?? 0.0),
-        timeUs: Math.max(0, Number(liveTelemetry.cognitiveExplanation?.predicted_eta_us ?? 0.0)),
-        dwellUs: liveTelemetry.dwellTimeUs || 500,
-        latencyMs: liveTelemetry.rollingMedianLatencyUs || 0,
-        attribution: liveTelemetry.cognitiveExplanation || {},
-        actionId,
-        isLiveResponse: false,
-      };
-    }
-    return {
-      band: 16,
-      mode: "REVISIT",
-      score: 0.0,
-      probability: 0.0,
-      timeUs: 0.0,
-      dwellUs: 500,
-      latencyMs: 0.0,
-      attribution: {},
-      actionId: 16 * 5 + 3,
-      isLiveResponse: false,
-    };
-  }, [inferenceResponse, liveTelemetry]);
-
-  const handleApplyPreset = (type) => {
-    const nextVec = generateDemoObservation(type);
-    setObservationVector(nextVec);
-    setObsSource(`SYNTHETIC DEMO (${type})`);
-    runInference(nextVec);
-  };
-
-  const handleCorruptLengthTest = (len) => {
-    const corrupted = Array(len).fill(0.1);
-    setObservationVector(corrupted);
-    setObsSource(`INVALID TEST (${len} values)`);
-    runInference(corrupted);
-  };
+    return null;
+  }, [inferenceResponse]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      {/* Header Panel */}
+      {/* Header Panel with Operational Inference Controls */}
       <div className="st-panel">
         <PanelHead
           icon="neurology"
           title="SMART SCAN DECISION ENGINE & 360-DIMENSIONAL OBSERVATION INTERFACE"
           badge={isModelOperational ? "DRQN + MoE OPERATIONAL (CLOUD RUN)" : "CONNECTING / VERIFYING"}
-          badgeColor={isModelOperational ? "#49df9d" : "#f59e0b"}
+          badgeColor={isModelOperational ? "var(--success, #49df9d)" : "var(--warning, #f59e0b)"}
         />
-        <div className="st-body" style={{ color: "#c6c5d5" }}>
+        <div className="st-body" style={{ color: "var(--text, #c6c5d5)" }}>
           The Smart Scan Scheduler converts receiver-derived spectrum state into time-frequency intercept decisions.
           Inference requests to <code>/predict_bands</code> require a strict 360-dimensional vector (36 bands × 10 features).
           {isModelOperational ? (
-            <span style={{ color: "#49df9d", fontWeight: 700 }}> Real model inference is ACTIVE on Cloud Run.</span>
+            <span style={{ color: "var(--success, #49df9d)", fontWeight: 700 }}> Real model inference is ACTIVE on Cloud Run.</span>
           ) : (
-            <span style={{ color: "#f59e0b" }}> Waiting for verified backend confirmation before operational deployment.</span>
+            <span style={{ color: "var(--warning, #f59e0b)" }}> Waiting for verified backend confirmation before operational deployment.</span>
           )}
           {backendHealth?.readiness_failures && backendHealth.readiness_failures.length > 0 && (
-            <div style={{ marginTop: 8, padding: "6px 10px", background: "rgba(248, 113, 113, 0.1)", border: "1px solid #f87171", fontSize: 11 }}>
-              <strong style={{ color: "#f87171" }}>Operational Readiness Blockers ({backendHealth.readiness_failures.length}): </strong>
-              <span style={{ color: "#fca5a5" }}>{backendHealth.readiness_failures.join(" | ")}</span>
+            <div style={{ marginTop: 8, padding: "6px 10px", background: "rgba(248, 113, 113, 0.1)", border: "1px solid var(--danger, #f87171)", fontSize: 11 }}>
+              <strong style={{ color: "var(--danger, #f87171)" }}>Operational Readiness Blockers ({backendHealth.readiness_failures.length}): </strong>
+              <span style={{ color: "var(--danger, #fca5a5)" }}>{backendHealth.readiness_failures.join(" | ")}</span>
             </div>
           )}
-        </div>
-      </div>
 
-      {/* Observation Vector Control & Live Test Bar */}
-      <div className="st-panel" style={{ border: "1px solid rgba(189,194,255,0.3)" }}>
-        <PanelHead icon="input" title="360-D OBSERVATION VECTOR CONTROLLER & INFERENCE RUNNER" badge={obsSource} badgeColor="#bdc2ff" />
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-            <span className="st-tsm" style={{ color: "#908f9e" }}>DEMO PRESETS (SYNTHETIC DATA):</span>
-            <button
-              onClick={() => handleApplyPreset("agile_activity")}
-              style={{
-                padding: "4px 10px",
-                background: "#2563eb",
-                color: "#fff",
-                border: "none",
-                cursor: "pointer",
-                fontWeight: 600,
-                fontSize: 11,
-              }}
-            >
-              Agile Hopper (Bands 6, 14, 22, 31)
-            </button>
-            <button
-              onClick={() => handleApplyPreset("dense_threat")}
-              style={{
-                padding: "4px 10px",
-                background: "rgba(255,255,255,0.1)",
-                color: "#e2e2e8",
-                border: "1px solid #454653",
-                cursor: "pointer",
-                fontSize: 11,
-              }}
-            >
-              Dense Multi-Emitter Environment
-            </button>
-            <button
-              onClick={() => handleApplyPreset("single_carrier")}
-              style={{
-                padding: "4px 10px",
-                background: "rgba(255,255,255,0.1)",
-                color: "#e2e2e8",
-                border: "1px solid #454653",
-                cursor: "pointer",
-                fontSize: 11,
-              }}
-            >
-              Single Carrier (Band 16)
-            </button>
-
-            <span style={{ flex: 1 }} />
-
-            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <span className="st-tsm" style={{ color: "#908f9e" }}>POLICY:</span>
-              <select
-                value={policyMode}
-                onChange={(e) => setPolicyMode(e.target.value)}
-                style={{
-                  background: "#1a1c20",
-                  color: "#e2e2e8",
-                  border: "1px solid #454653",
-                  padding: "4px 8px",
-                  fontSize: 11,
-                }}
-              >
-                <option value="operational">operational (Deterministic DRQN)</option>
-                <option value="default">default</option>
-                <option value="demo">demo</option>
-                <option value="fallback">fallback</option>
-              </select>
-              <button
-                onClick={() => runInference(observationVector)}
-                disabled={isInferring}
-                style={{
-                  padding: "4px 14px",
-                  background: isInferring ? "#454653" : "#49df9d",
-                  color: "#000",
-                  fontWeight: 700,
-                  border: "none",
-                  cursor: isInferring ? "not-allowed" : "pointer",
-                  fontSize: 11,
-                }}
-              >
-                {isInferring ? "INFERRING..." : "RUN INFERENCE (POST /predict_bands)"}
-              </button>
+          {/* Operational Action Bar: Input Source & Inference Status */}
+          <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", marginTop: 12, paddingTop: 10, borderTop: "1px solid var(--border-subtle, #333539)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span className="st-tsm" style={{ color: "var(--muted, #908f9e)" }}>INPUT SOURCE:</span>
+              <span className="st-badge" style={{ color: "var(--accent, #bdc2ff)", background: "var(--panel-3, #282a2e)", border: "1px solid var(--border, #454653)" }}>
+                {obsSource} (360-D)
+              </span>
             </div>
+            {isInferring && (
+              <span className="st-badge" style={{ color: "var(--accent, #bdc2ff)", background: "rgba(189, 194, 255, 0.15)", border: "1px solid var(--accent, #bdc2ff)" }}>
+                INFERRING (POST /predict_bands)...
+              </span>
+            )}
           </div>
 
           {/* Validation Notice & Warnings */}
           {validationError && (
             <div
               style={{
+                marginTop: 8,
                 padding: "6px 10px",
                 background: "rgba(239, 68, 68, 0.15)",
-                border: "1px solid #ef4444",
-                color: "#fca5a5",
+                border: "1px solid var(--danger, #ef4444)",
+                color: "var(--danger, #fca5a5)",
                 fontSize: 12,
                 fontWeight: 600,
               }}
@@ -401,64 +291,17 @@ export default function SmartScan() {
           {inferenceError && (
             <div
               style={{
+                marginTop: 8,
                 padding: "6px 10px",
                 background: "rgba(239, 68, 68, 0.15)",
-                border: "1px solid #ef4444",
-                color: "#fca5a5",
+                border: "1px solid var(--danger, #ef4444)",
+                color: "var(--danger, #fca5a5)",
                 fontSize: 12,
               }}
             >
               ❌ Backend Inference Error: {inferenceError}
             </div>
           )}
-
-          <div className="st-tsm" style={{ color: "#a5a3b7", lineHeight: 1.4 }}>
-            ℹ️ <strong>Observation Vector Contract:</strong> Exactly 360 numeric values representing 36 frequency bands
-            (0–18 GHz, 500 MHz IBW each) with 10 features per band:
-            <code> [Occupancy, Detection Rate, Miss Rate, Uncertainty, Revisit Age, Emitter Count, Confidence, PRI Stability, Frequency Agility, Priority]</code>.
-            Predictions below are derived directly from this vector. Demo vectors are labeled as synthetic to ensure no simulation bias.
-          </div>
-        </div>
-      </div>
-
-      {/* Architecture Pipeline Visualizer */}
-      <div className="st-panel">
-        <PanelHead
-          icon="account_tree"
-          title="ZONE B — AI INFERENCE ARCHITECTURE PIPELINE (DRQN + MoE)"
-          badge="OBSERVATION → POLICY → ACTION"
-          badgeColor="#bdc2ff"
-        />
-        <div className="st-pipe">
-          <div className="st-node">
-            <CmdBadge>INPUT</CmdBadge>
-            <span className="st-tmd">{observationVector.length}-D</span>
-            <span className="st-mark" style={{ color: "#908f9e" }}>36 bands × 10 features</span>
-          </div>
-          <span className="material-symbols-outlined st-arrow">arrow_forward</span>
-          <div className="st-node">
-            <CmdBadge color="#96ccff">NET</CmdBadge>
-            <span className="st-tmd">DRQN</span>
-            <span className="st-mark" style={{ color: "#908f9e" }}>LSTM temporal memory</span>
-          </div>
-          <span className="material-symbols-outlined st-arrow">arrow_forward</span>
-          <div className="st-node">
-            <CmdBadge color="#49df9d">POL</CmdBadge>
-            <span className="st-tmd">MoE</span>
-            <span className="st-mark" style={{ color: "#908f9e" }}>Strategy arbitration</span>
-          </div>
-          <span className="material-symbols-outlined st-arrow">arrow_forward</span>
-          <div className="st-node">
-            <CmdBadge>SPC</CmdBadge>
-            <span className="st-tmd">180</span>
-            <span className="st-mark" style={{ color: "#908f9e" }}>36 bands × 5 modes</span>
-          </div>
-          <span className="material-symbols-outlined st-arrow">arrow_forward</span>
-          <div className="st-node st-node-ai">
-            <CmdBadge color="#49df9d">ACTION</CmdBadge>
-            <span className="st-tmd" style={{ color: "#49df9d" }}>B{activeAction.band}</span>
-            <span className="st-mark" style={{ color: "#c6c5d5" }}>{activeAction.mode}</span>
-          </div>
         </div>
       </div>
 
@@ -488,7 +331,7 @@ export default function SmartScan() {
               <tbody>
                 {observationGrid.map((row) => {
                   const isSelected = selectedBand === row.band;
-                  const isPredictedBand = activeAction.band === row.band;
+                  const isPredictedBand = activeAction?.band != null && activeAction.band === row.band;
                   return (
                     <tr
                       key={row.band}
@@ -540,26 +383,26 @@ export default function SmartScan() {
           {/* Active Backend Decision Card */}
           <div className="st-panel">
             <PanelHead
-              title={`REAL BACKEND DECISION: BAND ${activeAction.band} // ${activeAction.mode}`}
-              badge={activeAction.isLiveResponse ? "LIVE POST /predict_bands" : "TELEMETRY"}
-              badgeColor="#49df9d"
+              title={activeAction ? `REAL BACKEND DECISION: BAND ${activeAction.band} // ${activeAction.mode}` : "AWAITING LIVE 360-D OBSERVATION"}
+              badge={activeAction ? "LIVE POST /predict_bands" : "AWAITING INFERENCE"}
+              badgeColor={activeAction ? "var(--success, #49df9d)" : "var(--warning, #f59e0b)"}
             />
-            <span className="st-tsm" style={{ color: "#908f9e" }}>
+            <span className="st-tsm" style={{ color: "var(--muted, #908f9e)" }}>
               DRQN LSTM RECURRENT CORE // MoE GATING & ARBITRATION
             </span>
-            <div className="st-tlg" style={{ color: "#bdc2ff", margin: "4px 0" }}>
-              ACTION ID: {activeAction.actionId} (B{activeAction.band} : {activeAction.mode})
+            <div className="st-tlg" style={{ color: activeAction ? "var(--accent, #bdc2ff)" : "var(--muted, #908f9e)", margin: "4px 0" }}>
+              {activeAction ? `ACTION ID: ${activeAction.actionId} (B${activeAction.band} : ${activeAction.mode})` : "ACTION ID: —"}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
               {[
-                ["SELECTED BAND", `B${activeAction.band} (${(activeAction.band * 500 + 250).toLocaleString()} MHz)`],
-                ["SCAN MODE", activeAction.mode],
-                ["DWELL TIME", `${Number(activeAction.dwellUs).toFixed(0)} µs`],
-                ["INTERCEPT PROBABILITY", `${(Number(activeAction.probability) * 100).toFixed(1)}%`],
-                ["PREDICTED INTERCEPT TIME", `${Number(activeAction.timeUs).toFixed(2)} µs`],
-                ["INFERENCE LATENCY", `${Number(activeAction.latencyMs).toFixed(2)} ms`],
-                ["DECISION ATTRIBUTION", activeAction.attribution?.decision_source || activeAction.attribution?.reason || "DRQN Policy"],
-                ["EAGER VS REVISIT", `${((activeAction.attribution?.eager_pct ?? 0.6) * 100).toFixed(0)}% / ${((activeAction.attribution?.revisit_pct ?? 0.4) * 100).toFixed(0)}%`],
+                ["SELECTED BAND", activeAction?.band != null ? `B${activeAction.band} (${(activeAction.band * 500 + 250).toLocaleString()} MHz)` : "—"],
+                ["SCAN MODE", activeAction?.mode ?? "—"],
+                ["DWELL TIME", activeAction?.dwellUs != null ? `${Number(activeAction.dwellUs).toFixed(0)} µs` : "—"],
+                ["INTERCEPT PROBABILITY", activeAction?.probability != null ? `${(Number(activeAction.probability) * 100).toFixed(1)}%` : "—"],
+                ["PREDICTED INTERCEPT TIME", activeAction?.timeUs != null ? `${Number(activeAction.timeUs).toFixed(2)} µs` : "—"],
+                ["INFERENCE LATENCY", activeAction?.latencyMs != null ? `${Number(activeAction.latencyMs).toFixed(2)} ms` : "—"],
+                ["DECISION ATTRIBUTION", activeAction?.attribution?.decision_source || activeAction?.attribution?.reason || (activeAction ? "DRQN Policy" : "—")],
+                ["EAGER VS REVISIT", activeAction ? `${((activeAction.attribution?.eager_pct ?? 0.6) * 100).toFixed(0)}% / ${((activeAction.attribution?.revisit_pct ?? 0.4) * 100).toFixed(0)}%` : "—"],
               ].map(([label, value]) => (
                 <div
                   key={label}
@@ -568,12 +411,12 @@ export default function SmartScan() {
                     display: "flex",
                     justifyContent: "space-between",
                     padding: "3px 6px",
-                    background: "#1a1c20",
-                    border: "1px solid #454653",
+                    background: "var(--panel-2, #1a1c20)",
+                    border: "1px solid var(--border, #454653)",
                   }}
                 >
-                  <span style={{ color: "#908f9e" }}>{label}</span>
-                  <strong style={{ color: "#e2e2e8" }}>{value}</strong>
+                  <span style={{ color: "var(--muted, #908f9e)" }}>{label}</span>
+                  <strong style={{ color: "var(--text, #e2e2e8)" }}>{value}</strong>
                 </div>
               ))}
             </div>
@@ -612,8 +455,8 @@ export default function SmartScan() {
             <PanelHead title="PREDICTION HISTORY (POST /predict_bands)" badge={`${predictionHistory.length} CALLS`} badgeColor="#96ccff" />
             <div style={{ display: "flex", flexDirection: "column", gap: 2, maxHeight: 180, overflowY: "auto" }}>
               {predictionHistory.length === 0 ? (
-                <span className="st-tsm" style={{ color: "#908f9e", padding: 6 }}>
-                  No recent predictions. Click "RUN INFERENCE" above.
+                <span className="st-tsm" style={{ color: "var(--muted, #908f9e)", padding: 6 }}>
+                  Awaiting live 360-D observation for automated inference.
                 </span>
               ) : (
                 predictionHistory.map((item, idx) => (
@@ -639,81 +482,6 @@ export default function SmartScan() {
           </div>
         </aside>
       </div>
-
-      {/* Developer Diagnostics & Contract Boundary Tests (Collapsible) */}
-      <details
-        className="st-panel"
-        style={{
-          marginTop: 6,
-          background: "var(--panel-2, #1e2024)",
-          border: "1px solid var(--border-subtle, #333539)",
-          padding: "8px 12px",
-          cursor: "pointer",
-        }}
-      >
-        <summary
-          style={{
-            fontFamily: "var(--font-mono, monospace)",
-            fontSize: 11,
-            fontWeight: 700,
-            color: "var(--muted, #908f9e)",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            userSelect: "none",
-          }}
-        >
-          <span className="material-symbols-outlined" style={{ fontSize: 16, color: "var(--accent, #bdc2ff)" }}>
-            bug_report
-          </span>
-          <span>DEVELOPER DIAGNOSTICS & CONTRACT BOUNDARY TESTS (CLICK TO EXPAND)</span>
-          <span style={{ fontSize: 10, color: "var(--muted, #908f9e)", marginLeft: "auto" }}>
-            obs_dim=360 Strict Validation Guard
-          </span>
-        </summary>
-        <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
-          <div className="st-tsm" style={{ color: "var(--text-muted, #c6c5d5)" }}>
-            These diagnostic triggers deliberately send malformed observation vector lengths to verify that both frontend input validation and the FastAPI backend return HTTP 422 Unprocessable Entity / strict dimension validation errors rather than silently executing malformed inferences.
-          </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-            <button
-              onClick={() => handleCorruptLengthTest(100)}
-              title="Send 100 values to verify strict obs_dim=360 validation"
-              style={{
-                padding: "4px 10px",
-                background: "var(--panel-3, #282a2e)",
-                color: "var(--warning, #f59e0b)",
-                border: "1px solid var(--warning, #f59e0b)",
-                cursor: "pointer",
-                fontSize: 11,
-                fontFamily: "var(--font-mono, monospace)",
-              }}
-            >
-              Test Invalid Length (100 values)
-            </button>
-            <button
-              onClick={() => handleCorruptLengthTest(2)}
-              title="Send 2 values to verify Swagger legacy rejection"
-              style={{
-                padding: "4px 10px",
-                background: "var(--panel-3, #282a2e)",
-                color: "var(--warning, #f59e0b)",
-                border: "1px solid var(--warning, #f59e0b)",
-                cursor: "pointer",
-                fontSize: 11,
-                fontFamily: "var(--font-mono, monospace)",
-              }}
-            >
-              Test Invalid Length (2 values)
-            </button>
-            {validationError && (
-              <span className="st-tsm" style={{ color: "var(--danger, #ef4444)", fontWeight: 600 }}>
-                ● {validationError}
-              </span>
-            )}
-          </div>
-        </div>
-      </details>
     </div>
   );
 }
