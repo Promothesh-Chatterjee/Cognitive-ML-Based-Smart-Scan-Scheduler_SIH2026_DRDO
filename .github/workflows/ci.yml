@@ -10,6 +10,9 @@ jobs:
   qualification:
     name: Full Qualification Suite
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -32,11 +35,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e .
-          pip install pytest pytest-cov azure-storage-blob
+          pip install pytest pytest-cov azure-storage-blob google-cloud-storage
+
+      - name: Authenticate to Google Cloud (OIDC / Workload Identity Federation)
+        if: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER != '' || secrets.WORKLOAD_IDENTITY_PROVIDER != '' }}
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER || secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT || 'sih2026-ew-runtime@sih2026-ew-demo.iam.gserviceaccount.com' }}
 
       - name: Provision baseline checkpoint (fail-closed)
         env:
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          GCS_TSRD_BUCKET: "sih2026-ew-tsrd"
         run: |
           if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
             echo "[INFO] Main branch push — strict provisioning (fail-closed)"
@@ -49,6 +60,7 @@ jobs:
       - name: Run test suite with coverage
         env:
           TSRD_ROOT: tests/fixtures/canonical_tsrd
+          GCS_TSRD_BUCKET: "sih2026-ew-tsrd"
         run: |
           pytest ew_core/tests/ --cov=ew_core --cov-report=term-missing
 
